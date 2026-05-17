@@ -1,0 +1,62 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 222 47% 11%;
+    --foreground: 226 33% 94%;
+    --card: 222 40% 18%;
+    --card-foreground: 226 33% 94%;
+    --border: 222 35% 27%;
+    --primary: 218 68% 58%;
+    --primary-foreground: 0 0% 100%;
+    --muted: 222 33% 35%;
+    --muted-foreground: 226 24% 60%;
+  }
+
+  * {
+    @apply border-lighthouse-border;
+  }
+
+  html {
+    @apply bg-lighthouse-bg text-lighthouse-text-primary;
+  }
+
+  body {
+    @apply font-sans antialiased min-h-screen;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* テキストエンジン用スタイル */
+.text-cursor::after {
+  content: "▋";
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* 問いカードの色変化ユーティリティ */
+.question-card-v1 { @apply bg-lighthouse-question-dim; }
+.question-card-v2 { @apply bg-lighthouse-question-mid; }
+.question-card-v3 { @apply bg-lighthouse-question-deep; }
+
+/* スクロールバーカスタム */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-lighthouse-bg;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-lighthouse-border rounded-full;
+}
