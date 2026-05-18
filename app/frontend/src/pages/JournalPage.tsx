@@ -19,8 +19,16 @@ interface ChatApiResponse {
   created_at: string;
 }
 
+interface LocationState {
+  initialMessage?: string;
+  sceneId?: string;
+  chapterId?: string;
+  journalPrompt?: string;
+  komaLabel?: string;
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
-// YuAvatar — 灰島遊のアイコン（テキストプレースホルダー）
+// YuAvatar
 // ─────────────────────────────────────────────────────────────────────────────
 function YuAvatar({ small = false }: { small?: boolean }) {
   const size = small ? "w-7 h-7 text-xs" : "w-10 h-10 text-sm";
@@ -40,15 +48,9 @@ function YuAvatar({ small = false }: { small?: boolean }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// ストリーミング風タイプライター表示
+// StreamingText
 // ─────────────────────────────────────────────────────────────────────────────
-function StreamingText({
-  text,
-  onDone,
-}: {
-  text: string;
-  onDone?: () => void;
-}) {
+function StreamingText({ text, onDone }: { text: string; onDone?: () => void }) {
   const [displayed, setDisplayed] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -82,13 +84,7 @@ function StreamingText({
 // ─────────────────────────────────────────────────────────────────────────────
 // ChatBubble
 // ─────────────────────────────────────────────────────────────────────────────
-function ChatBubble({
-  msg,
-  isLatestYu,
-}: {
-  msg: ChatMessage;
-  isLatestYu: boolean;
-}) {
+function ChatBubble({ msg, isLatestYu }: { msg: ChatMessage; isLatestYu: boolean }) {
   const isUser = msg.role === "user";
 
   if (isUser) {
@@ -101,11 +97,7 @@ function ChatBubble({
       >
         <div
           className="max-w-[80%] px-4 py-3 text-sm font-serif text-yoake-ink leading-relaxed"
-          style={{
-            background: "#2C2218",
-            border: "1px solid #C9B99A",
-            borderRadius: 0,
-          }}
+          style={{ background: "#2C2218", border: "1px solid #C9B99A", borderRadius: 0 }}
         >
           {msg.text}
         </div>
@@ -125,11 +117,7 @@ function ChatBubble({
         <span className="text-sky-400 text-xs font-ui tracking-wide">灰島 遊</span>
         <div
           className="max-w-[80%] px-4 py-3 text-sm font-serif text-yoake-bg leading-relaxed"
-          style={{
-            background: "#1a2233",
-            border: "1px solid #38bdf8",
-            borderRadius: 0,
-          }}
+          style={{ background: "#1a2233", border: "1px solid #38bdf8", borderRadius: 0 }}
         >
           {isLatestYu && msg.isStreaming ? (
             <StreamingText text={msg.text} />
@@ -143,37 +131,102 @@ function ChatBubble({
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// ContextBanner — コマ名 + プロンプト固定表示 + 書いた内容の折りたたみ
+// ─────────────────────────────────────────────────────────────────────────────
+function ContextBanner({ state }: { state: LocationState | null }) {
+  const [open, setOpen] = useState(false);
+
+  const prompt = state?.journalPrompt;
+  const komaLabel = state?.komaLabel;
+  const initialMsg = state?.initialMessage;
+
+  if (!prompt && !komaLabel) return null;
+
+  return (
+    <div
+      className="flex-shrink-0 mx-4 mt-3 mb-1"
+      style={{
+        border: "1px solid rgba(201,185,154,0.35)",
+        background: "rgba(201,185,154,0.05)",
+        borderRadius: 0,
+      }}
+    >
+      <div className="px-4 py-3">
+        {komaLabel && (
+          <p className="text-yoake-text-muted text-xs font-ui tracking-widest mb-1">
+            {komaLabel} の問い
+          </p>
+        )}
+        {prompt && (
+          <p className="text-yoake-text-secondary text-sm font-serif italic leading-relaxed">
+            {prompt}
+          </p>
+        )}
+      </div>
+
+      {initialMsg && (
+        <>
+          <button
+            onClick={() => setOpen((v) => !v)}
+            className="w-full flex items-center justify-between px-4 py-2 text-yoake-text-muted text-xs font-ui tracking-wide hover:text-yoake-text-secondary transition-colors"
+            style={{ borderTop: "1px solid rgba(201,185,154,0.2)", borderRadius: 0 }}
+          >
+            <span>あなたが書いた内容を見る</span>
+            <span>{open ? "▲" : "▼"}</span>
+          </button>
+          <AnimatePresence>
+            {open && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="overflow-hidden"
+              >
+                <div
+                  className="px-4 py-3 text-yoake-ink text-sm font-serif leading-relaxed whitespace-pre-wrap"
+                  style={{ borderTop: "1px solid rgba(201,185,154,0.15)" }}
+                >
+                  {initialMsg}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </>
+      )}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // JournalPage
 // ─────────────────────────────────────────────────────────────────────────────
 export default function JournalPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // PlayPageから渡される初期コンテキスト
-  const state = location.state as
-    | { initialMessage?: string; sceneId?: string; chapterId?: string }
-    | null;
+  const state = (location.state ?? null) as LocationState | null;
 
   const [activeTab, setActiveTab] = useState<"chat" | "log" | "chart">("chat");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [input, setInput] = useState(state?.initialMessage ?? "");
+  const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  // API履歴（LLMに渡すためのロールベース配列）
   const apiHistoryRef = useRef<Array<{ role: "user" | "assistant"; content: string }>>([]);
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // 初回の導入メッセージ
   useEffect(() => {
-    setMessages([
-      {
-        id: "intro",
-        role: "yu",
-        text: "何か書いてみて。どんな言葉でもいい。",
-        isStreaming: false,
-      },
-    ]);
+    const introText = state?.initialMessage
+      ? "ジャーナルを書いてくれたね。読んだよ。\n何か話してみて。どんな言葉でもいい。"
+      : "何か書いてみて。どんな言葉でもいい。";
+    setMessages([{ id: "intro", role: "yu", text: introText, isStreaming: false }]);
+    // PlayPageからのinitialMessageを入力欄に入れておく
+    if (state?.initialMessage) {
+      setInput(state.initialMessage);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // 自動スクロール
@@ -181,78 +234,69 @@ export default function JournalPage() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const sendMessage = useCallback(async () => {
-    const text = input.trim();
-    if (!text || isLoading) return;
+  const sendMessage = useCallback(
+    async () => {
+      const text = input.trim();
+      if (!text || isLoading) return;
 
-    setInput("");
-    setError(null);
+      setInput("");
+      setError(null);
 
-    const userMsgId = crypto.randomUUID();
-    const yuMsgId = crypto.randomUUID();
+      const userMsgId = `u-${Date.now()}`;
+      const yuMsgId = `y-${Date.now()}`;
 
-    // ユーザーメッセージを表示
-    setMessages((prev) => [
-      ...prev,
-      { id: userMsgId, role: "user", text },
-    ]);
+      setMessages((prev) => [...prev, { id: userMsgId, role: "user", text }]);
 
-    // API履歴に追加
-    apiHistoryRef.current = [
-      ...apiHistoryRef.current,
-      { role: "user", content: text },
-    ];
+      apiHistoryRef.current = [...apiHistoryRef.current, { role: "user", content: text }];
 
-    setIsLoading(true);
+      setIsLoading(true);
 
-    // ローディングプレースホルダー
-    setMessages((prev) => [
-      ...prev,
-      { id: yuMsgId, role: "yu", text: "　", isStreaming: true },
-    ]);
+      setMessages((prev) => [
+        ...prev,
+        { id: yuMsgId, role: "yu", text: "　", isStreaming: true },
+      ]);
 
-    try {
-      const res = await api.post<ChatApiResponse>("/api/journals/chat", {
-        message: text,
-        chapter_id: state?.chapterId ?? "1",
-        scene_id: state?.sceneId ?? "",
-        history: apiHistoryRef.current.slice(0, -1), // 末尾のuserは除く（サーバー側で追加）
-      });
+      try {
+        const res = await api.post<ChatApiResponse>("/api/journals/chat", {
+          message: text,
+          chapter_id: state?.chapterId ?? "1",
+          scene_id: state?.sceneId ?? "",
+          history: apiHistoryRef.current.slice(0, -1),
+        });
 
-      if (!res.ok) {
-        setMessages((prev) => prev.filter((m) => m.id !== yuMsgId));
-        setError(
-          res.error.includes("ANTHROPIC_API_KEY")
-            ? "APIキーが設定されていません。README の手順で設定してください。"
-            : `エラー: ${res.error}`
+        if (!res.ok) {
+          setMessages((prev) => prev.filter((m) => m.id !== yuMsgId));
+          setError(
+            res.error.includes("ANTHROPIC_API_KEY")
+              ? "APIキーが設定されていません。README の手順で設定してください。"
+              : `エラー: ${res.error}`
+          );
+          return;
+        }
+
+        const aiText = res.data.response;
+
+        apiHistoryRef.current = [
+          ...apiHistoryRef.current,
+          { role: "assistant", content: aiText },
+        ];
+
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === yuMsgId ? { ...m, text: aiText, isStreaming: true } : m
+          )
         );
-        return;
+      } catch (err) {
+        setMessages((prev) => prev.filter((m) => m.id !== yuMsgId));
+        setError("通信エラーが発生しました。");
+        console.error("[JournalPage] sendMessage error:", err);
+      } finally {
+        setIsLoading(false);
       }
+    },
+    [input, isLoading, state]
+  );
 
-      const aiText = res.data.response;
-
-      // API履歴にAI応答を追加
-      apiHistoryRef.current = [
-        ...apiHistoryRef.current,
-        { role: "assistant", content: aiText },
-      ];
-
-      // プレースホルダーを実際の応答で差し替え（ストリーミング風演出）
-      setMessages((prev) =>
-        prev.map((m) =>
-          m.id === yuMsgId ? { ...m, text: aiText, isStreaming: true } : m
-        )
-      );
-    } catch (err) {
-      setMessages((prev) => prev.filter((m) => m.id !== yuMsgId));
-      setError("通信エラーが発生しました。");
-      console.error("[JournalPage] sendMessage error:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [input, isLoading, state]);
-
-  // Enter送信 (Shift+Enterで改行)
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -260,7 +304,6 @@ export default function JournalPage() {
     }
   }
 
-  // 最後のYuメッセージのID
   const latestYuId = [...messages].reverse().find((m) => m.role === "yu")?.id;
 
   const tabs = [
@@ -270,11 +313,9 @@ export default function JournalPage() {
   ] as const;
 
   return (
-    <main className="min-h-screen bg-yoake-bg paper-texture flex flex-col">
+    <main className="h-screen bg-yoake-bg paper-texture flex flex-col overflow-hidden">
       {/* ── ヘッダー ── */}
-      <header
-        className="border-b border-yoake-border px-6 py-4 flex items-center justify-between bg-yoake-bg-card flex-shrink-0"
-      >
+      <header className="border-b border-yoake-border px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between bg-yoake-bg-card flex-shrink-0">
         <button
           onClick={() => navigate("/dashboard")}
           className="text-yoake-text-muted hover:text-yoake-text-secondary text-sm transition-colors font-serif"
@@ -289,9 +330,7 @@ export default function JournalPage() {
       </header>
 
       {/* ── タブ ── */}
-      <div
-        className="flex gap-1 bg-yoake-bg-card px-4 pt-3 pb-0 text-xs border-b border-yoake-border flex-shrink-0"
-      >
+      <div className="flex gap-1 bg-yoake-bg-card px-4 pt-3 pb-0 text-xs border-b border-yoake-border flex-shrink-0">
         {tabs.map((tab) => (
           <button
             key={tab.key}
@@ -311,19 +350,17 @@ export default function JournalPage() {
       {/* ── チャットタブ ── */}
       {activeTab === "chat" && (
         <div className="flex flex-col flex-1 overflow-hidden max-w-2xl mx-auto w-full">
+          {/* 文脈バナー（コマ名 + プロンプト + 折りたたみログ）*/}
+          <ContextBanner state={state} />
+
           {/* メッセージ一覧 */}
           <div className="flex-1 overflow-y-auto px-4 py-5 space-y-4">
             <AnimatePresence initial={false}>
               {messages.map((msg) => (
-                <ChatBubble
-                  key={msg.id}
-                  msg={msg}
-                  isLatestYu={msg.id === latestYuId}
-                />
+                <ChatBubble key={msg.id} msg={msg} isLatestYu={msg.id === latestYuId} />
               ))}
             </AnimatePresence>
 
-            {/* エラー表示 */}
             {error && (
               <motion.div
                 initial={{ opacity: 0 }}
@@ -361,11 +398,7 @@ export default function JournalPage() {
                 className="flex-shrink-0 bg-sky-600 hover:bg-sky-500 text-white text-xs px-4 py-3 transition-colors disabled:opacity-40 font-ui tracking-widest h-full"
                 style={{ borderRadius: 0 }}
               >
-                {isLoading ? (
-                  <span className="animate-pulse">…</span>
-                ) : (
-                  "送信"
-                )}
+                {isLoading ? <span className="animate-pulse">…</span> : "送信"}
               </button>
             </div>
             <p className="text-yoake-text-muted text-xs mt-2 font-serif">
@@ -375,7 +408,7 @@ export default function JournalPage() {
         </div>
       )}
 
-      {/* ── ジャーナル全文タブ（将来実装） ── */}
+      {/* ── ジャーナル全文タブ ── */}
       {activeTab === "log" && (
         <div className="max-w-3xl mx-auto px-6 py-10 w-full">
           <p className="text-center text-yoake-text-muted py-16 font-serif text-sm">
@@ -384,7 +417,7 @@ export default function JournalPage() {
         </div>
       )}
 
-      {/* ── 問いの進化ログタブ（将来実装） ── */}
+      {/* ── 問いの進化ログタブ ── */}
       {activeTab === "chart" && (
         <div className="max-w-3xl mx-auto px-6 py-10 w-full">
           <p className="text-center text-yoake-text-muted py-16 font-serif text-sm">

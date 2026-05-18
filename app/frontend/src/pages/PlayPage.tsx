@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGameStore } from "@/stores/gameStore";
 import { usePlayerStore } from "@/stores/playerStore";
@@ -106,13 +106,13 @@ function CharacterPortrait({ charId }: { charId: CharacterId | undefined }) {
         animate={{ opacity: 1, x: 0 }}
         exit={{ opacity: 0, x: -20 }}
         transition={{ duration: 0.2 }}
-        className="flex-shrink-0 w-28 sm:w-36 self-end"
+        className="flex-shrink-0 w-20 sm:w-28 md:w-36 self-end"
       >
         {imageSrc ? (
           <img
             src={imageSrc}
             alt={CHAR_NAMES[charId]}
-            className="w-full object-contain max-h-52 opacity-90"
+            className="w-full object-contain max-h-36 sm:max-h-44 md:max-h-52 opacity-90"
             style={{ filter: "sepia(0.15)" }}
           />
         ) : (
@@ -139,17 +139,26 @@ export default function PlayPage() {
     sceneId: string;
   }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const { updateStatus } = usePlayerStore();
-  void useGameStore; // suppress unused import warning
+  const { saveScene, currentSceneKey } = useGameStore();
 
-  const resolvedSceneKey =
-    chapterId && sceneId
-      ? `ch${chapterId}_s0${sceneId}_narration`
-      : CHAPTER1_START_SCENE;
+  // resume フラグ: ダッシュボードの「前回の続き」から来た場合
+  const shouldResume =
+    (location.state as { resume?: boolean } | null)?.resume === true;
 
-  const [sceneKey, setSceneKey] = useState<string>(
-    SCENE_MAP[resolvedSceneKey] ? resolvedSceneKey : CHAPTER1_START_SCENE
-  );
+  const resolvedSceneKey = (() => {
+    if (shouldResume && currentSceneKey && SCENE_MAP[currentSceneKey]) {
+      return currentSceneKey;
+    }
+    if (chapterId && sceneId) {
+      const k = `ch${chapterId}_s0${sceneId}_narration`;
+      return SCENE_MAP[k] ? k : CHAPTER1_START_SCENE;
+    }
+    return CHAPTER1_START_SCENE;
+  })();
+
+  const [sceneKey, setSceneKey] = useState<string>(resolvedSceneKey);
   const scene: SceneData | undefined = SCENE_MAP[sceneKey];
 
   const [msgIndex, setMsgIndex] = useState(0);
@@ -158,6 +167,13 @@ export default function PlayPage() {
   const [journalSaved, setJournalSaved] = useState(false);
 
   const currentMsg: SceneMessage | undefined = scene?.messages?.[msgIndex];
+
+  // ── シーンキーをストアに保存（進捗永続化）──────────────────────────────
+  useEffect(() => {
+    if (sceneKey) {
+      saveScene(sceneKey);
+    }
+  }, [sceneKey, saveScene]);
 
   useEffect(() => {
     setTypewriterDone(false);
@@ -191,7 +207,12 @@ export default function PlayPage() {
     const msgs = scene.messages ?? [];
     if (msgIndex < msgs.length - 1) {
       setMsgIndex((i) => i + 1);
-    } else if (scene.type !== "choice" && scene.type !== "journal" && scene.type !== "question_card" && scene.type !== "cork_board") {
+    } else if (
+      scene.type !== "choice" &&
+      scene.type !== "journal" &&
+      scene.type !== "question_card" &&
+      scene.type !== "cork_board"
+    ) {
       if (scene.next_scene === "CHAPTER_END") {
         navigate("/dashboard");
       } else if (scene.next_scene && SCENE_MAP[scene.next_scene]) {
@@ -253,17 +274,22 @@ export default function PlayPage() {
       }),
     }).catch(() => {});
     setJournalSaved(true);
-    // 次のシーン遷移はあえて自動実行しない — 灰島遊に話しかけるボタンを表示する
   }
 
   function handleOpenJournalChat() {
-    navigate("/journal", {
-      state: {
-        initialMessage: journalText,
-        sceneId: scene?.scene_id ?? "",
-        chapterId: chapterId ?? "1",
-      },
-    });
+    try {
+      navigate("/journal", {
+        state: {
+          initialMessage: journalText,
+          sceneId: scene?.scene_id ?? "",
+          chapterId: chapterId ?? "1",
+          journalPrompt: scene?.journal_prompt ?? "",
+          komaLabel,
+        },
+      });
+    } catch (err) {
+      console.error("[PlayPage] handleOpenJournalChat:", err);
+    }
   }
 
   function handleContinueFromJournal() {
@@ -280,7 +306,9 @@ export default function PlayPage() {
   if (!scene) {
     return (
       <main className="min-h-screen bg-yoake-bg paper-texture flex items-center justify-center">
-        <p className="text-yoake-text-muted font-serif text-sm">シーンデータが見つかりません</p>
+        <p className="text-yoake-text-muted font-serif text-sm">
+          シーンデータが見つかりません
+        </p>
       </main>
     );
   }
@@ -299,15 +327,16 @@ export default function PlayPage() {
     if (m) return `第1章 · コマ${parseInt(m[1], 10)}`;
     return "第1章";
   })();
+
   const speakerChar = currentMsg?.character as CharacterId | undefined;
   const speakerName = speakerChar ? CHAR_NAMES[speakerChar] : null;
   const speakerColor = speakerChar ? CHAR_COLORS[speakerChar] : null;
 
   return (
-    <main className="min-h-screen bg-yoake-bg flex flex-col select-none paper-texture">
+    <main className="h-screen bg-yoake-bg flex flex-col select-none paper-texture overflow-hidden">
       {/* ── ヘッダー ── */}
       <header
-        className="px-4 py-3 flex items-center justify-between flex-shrink-0 z-10 bg-yoake-bg-card"
+        className="px-3 sm:px-4 py-2 sm:py-3 flex items-center justify-between flex-shrink-0 z-10 bg-yoake-bg-card"
         style={{ borderBottom: "1px solid #C9B99A" }}
       >
         <button
@@ -316,22 +345,26 @@ export default function PlayPage() {
         >
           ← 事務所に戻る
         </button>
-        <div className="text-xs text-yoake-text-muted font-serif">
-          {komaLabel}
-        </div>
+        <div className="text-xs text-yoake-text-muted font-serif">{komaLabel}</div>
         <div className="flex items-center gap-1 text-xs text-yoake-accent">
-          <span className="w-1.5 h-1.5 bg-yoake-accent animate-pulse-soft" style={{ borderRadius: 0 }} />
+          <span
+            className="w-1.5 h-1.5 bg-yoake-accent animate-pulse-soft"
+            style={{ borderRadius: 0 }}
+          />
           <span className="font-serif">保存済み</span>
         </div>
       </header>
 
-      {/* ── 背景エリア（事務所内・夜明け）── */}
+      {/* ── 背景エリア ── */}
       <div
         className="relative flex-1 flex flex-col overflow-hidden"
-        onClick={() => !isChoice && !isInputScene && !isCorkBoard && advanceMessage()}
-        style={{ cursor: isChoice || isInputScene || isCorkBoard ? "default" : "pointer" }}
+        onClick={() =>
+          !isChoice && !isInputScene && !isCorkBoard && advanceMessage()
+        }
+        style={{
+          cursor: isChoice || isInputScene || isCorkBoard ? "default" : "pointer",
+        }}
       >
-        {/* 背景: 夜明けの事務所（温かみのある暗め） */}
         <div
           className="absolute inset-0 z-0"
           style={{
@@ -339,7 +372,6 @@ export default function PlayPage() {
               "linear-gradient(160deg, #1E1814 0%, #241C14 50%, #2C2218 100%)",
           }}
         />
-        {/* 窓光演出 — 朝の光（琥珀色） */}
         <div
           className="absolute top-0 right-0 w-64 h-64 opacity-10 blur-3xl"
           style={{ background: "#E8B4A0", borderRadius: "50%" }}
@@ -350,15 +382,18 @@ export default function PlayPage() {
         />
 
         {/* ── キャラクター & セリフエリア ── */}
-        <div className="relative z-10 flex flex-col flex-1 max-w-2xl mx-auto w-full px-4 py-6">
+        <div className="relative z-10 flex flex-col flex-1 max-w-2xl mx-auto w-full px-3 sm:px-4 py-3 sm:py-4 overflow-y-auto">
           {/* キャラクター立ち絵 */}
-          <div className="flex justify-end mb-4 min-h-[120px] sm:min-h-[160px]">
+          <div className="flex justify-end mb-3 sm:mb-4 min-h-[100px] sm:min-h-[140px] md:min-h-[160px]">
             <CharacterPortrait charId={speakerChar} />
           </div>
 
-          {/* ── セリフボックス（ドラクエ風：DotGothic16 + 二重枠） ── */}
+          {/* ── セリフボックス ── */}
           <AnimatePresence mode="wait">
-            {(currentMsg || (isChoice && scene.messages && scene.messages.length > 0)) && (
+            {(currentMsg ||
+              (isChoice &&
+                scene.messages &&
+                scene.messages.length > 0)) && (
               <motion.div
                 key={`${sceneKey}-${msgIndex}`}
                 initial={{ opacity: 0, y: 8 }}
@@ -367,7 +402,6 @@ export default function PlayPage() {
                 transition={{ duration: 0.2 }}
                 className="dialog-dq p-5 mb-4"
               >
-                {/* ナレーション */}
                 {isNarration && currentMsg && (
                   <p
                     className="text-yoake-bg text-sm leading-loose italic"
@@ -380,12 +414,13 @@ export default function PlayPage() {
                   </p>
                 )}
 
-                {/* 通常セリフ（journal/question_card の前置きセリフ含む） */}
                 {!isNarration && !isChoice && !isCorkBoard && currentMsg && (
                   <>
                     {speakerName && (
                       <p
-                        className={`text-xs mb-2 pb-1 ${speakerColor ?? "text-yoake-text-muted"}`}
+                        className={`text-xs mb-2 pb-1 ${
+                          speakerColor ?? "text-yoake-text-muted"
+                        }`}
                         style={{
                           fontFamily: "'DotGothic16', monospace",
                           borderBottom: "1px solid rgba(201,185,154,0.4)",
@@ -397,7 +432,10 @@ export default function PlayPage() {
                     )}
                     <p
                       className="text-yoake-bg text-sm leading-relaxed"
-                      style={{ fontFamily: "'DotGothic16', monospace", lineHeight: 1.9 }}
+                      style={{
+                        fontFamily: "'DotGothic16', monospace",
+                        lineHeight: 1.9,
+                      }}
                     >
                       <TypewriterText
                         text={currentMsg.text}
@@ -407,44 +445,55 @@ export default function PlayPage() {
                   </>
                 )}
 
-                {/* 選択肢前置きセリフ */}
-                {isChoice && scene.messages && scene.messages.length > 0 && currentMsg && !isInputScene && (
-                  <>
-                    {speakerName && (
+                {isChoice &&
+                  scene.messages &&
+                  scene.messages.length > 0 &&
+                  currentMsg &&
+                  !isInputScene && (
+                    <>
+                      {speakerName && (
+                        <p
+                          className={`text-xs mb-2 pb-1 ${
+                            speakerColor ?? "text-yoake-text-muted"
+                          }`}
+                          style={{
+                            fontFamily: "'DotGothic16', monospace",
+                            borderBottom: "1px solid rgba(201,185,154,0.4)",
+                            letterSpacing: "0.12em",
+                          }}
+                        >
+                          {speakerName}
+                        </p>
+                      )}
                       <p
-                        className={`text-xs mb-2 pb-1 ${speakerColor ?? "text-yoake-text-muted"}`}
+                        className="text-yoake-bg text-sm leading-relaxed"
                         style={{
                           fontFamily: "'DotGothic16', monospace",
-                          borderBottom: "1px solid rgba(201,185,154,0.4)",
-                          letterSpacing: "0.12em",
+                          lineHeight: 1.9,
                         }}
                       >
-                        {speakerName}
+                        <TypewriterText
+                          text={currentMsg.text}
+                          onComplete={() => setTypewriterDone(true)}
+                        />
                       </p>
-                    )}
-                    <p
-                      className="text-yoake-bg text-sm leading-relaxed"
-                      style={{ fontFamily: "'DotGothic16', monospace", lineHeight: 1.9 }}
-                    >
-                      <TypewriterText
-                        text={currentMsg.text}
-                        onComplete={() => setTypewriterDone(true)}
-                      />
-                    </p>
-                  </>
-                )}
+                    </>
+                  )}
 
-                {/* 次へ */}
-                {typewriterDone && !isChoice && !isInputScene && !isCorkBoard && (
-                  <div className="mt-3 flex justify-end">
-                    <span
-                      className="text-yoake-warm text-xs animate-pulse-soft"
-                      style={{ fontFamily: "'DotGothic16', monospace" }}
-                    >
-                      クリック / Enter で次へ ▶
-                    </span>
-                  </div>
-                )}
+                {typewriterDone &&
+                  !isChoice &&
+                  !isInputScene &&
+                  !isCorkBoard && (
+                    <div className="mt-3 flex justify-end">
+                      <span
+                        className="text-yoake-warm text-xs animate-pulse-soft"
+                        style={{ fontFamily: "'DotGothic16', monospace" }}
+                      >
+                        <span className="sm:hidden">タップ で次へ ▶</span>
+                        <span className="hidden sm:inline">クリック / Enter で次へ ▶</span>
+                      </span>
+                    </div>
+                  )}
               </motion.div>
             )}
           </AnimatePresence>
@@ -470,6 +519,7 @@ export default function PlayPage() {
                     outline: "1px solid #C9B99A",
                     outlineOffset: "-5px",
                     borderRadius: 0,
+                    minHeight: "44px",
                   }}
                 >
                   <span
@@ -484,7 +534,7 @@ export default function PlayPage() {
             </motion.div>
           )}
 
-          {/* ── 内省ジャーナル / 問いカード（共通入力UI） ── */}
+          {/* ── 内省ジャーナル / 問いカード ── */}
           {isInputScene && (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
@@ -498,16 +548,33 @@ export default function PlayPage() {
                   <p className="text-yoake-text-muted text-xs mb-1 tracking-wide font-ui">
                     {isQuestionCard ? "問いカード" : "内省ジャーナル"}
                   </p>
-                  <p className="text-yoake-text-secondary text-sm mb-3 leading-relaxed font-serif italic">
-                    {scene.journal_prompt}
-                  </p>
+                  {/* ── コマ見出し + プロンプト固定表示（文脈明確化）── */}
+                  <div
+                    className="mb-3 px-3 py-2"
+                    style={{
+                      background: "rgba(201,185,154,0.08)",
+                      border: "1px solid rgba(201,185,154,0.3)",
+                      borderRadius: 0,
+                    }}
+                  >
+                    <p className="text-yoake-text-muted text-xs mb-1 font-ui tracking-wider">
+                      {komaLabel} の問い
+                    </p>
+                    <p className="text-yoake-text-secondary text-sm leading-relaxed font-serif italic">
+                      {scene.journal_prompt}
+                    </p>
+                  </div>
                 </>
               )}
               <textarea
                 value={journalText}
                 onChange={(e) => setJournalText(e.target.value)}
                 rows={4}
-                placeholder={isQuestionCard ? "問いを書いてみよう" : "自分の考えを書いてみよう（何字でも大丈夫）"}
+                placeholder={
+                  isQuestionCard
+                    ? "問いを書いてみよう"
+                    : "自分の考えを書いてみよう（何字でも大丈夫）"
+                }
                 className="w-full bg-yoake-bg border-b-2 border-yoake-border px-2 py-3 text-yoake-ink placeholder-yoake-text-muted focus:outline-none focus:border-yoake-accent resize-none text-sm transition-colors font-serif"
                 style={{ borderRadius: 0 }}
               />
@@ -520,7 +587,7 @@ export default function PlayPage() {
                     disabled={journalText.trim().length === 0}
                     onClick={handleJournalSave}
                     className="bg-yoake-accent hover:bg-yoake-accent-hover text-yoake-bg text-sm px-5 py-2 transition-colors disabled:opacity-40 font-ui tracking-widest"
-                    style={{ borderRadius: 0 }}
+                    style={{ borderRadius: 0, minHeight: "44px" }}
                   >
                     {isQuestionCard ? "書く" : "記録する"}
                   </button>
@@ -530,7 +597,7 @@ export default function PlayPage() {
                       <button
                         onClick={handleOpenJournalChat}
                         className="bg-sky-700 hover:bg-sky-600 text-white text-xs px-4 py-2 transition-colors font-ui tracking-widest"
-                        style={{ borderRadius: 0 }}
+                        style={{ borderRadius: 0, minHeight: "44px" }}
                       >
                         灰島遊に話しかけてみる →
                       </button>
@@ -547,7 +614,7 @@ export default function PlayPage() {
             </motion.div>
           )}
 
-          {/* ── コルクボード（情報カード一覧 + 整理ボタン） ── */}
+          {/* ── コルクボード ── */}
           {isCorkBoard && (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
@@ -564,7 +631,10 @@ export default function PlayPage() {
                   <div
                     key={i}
                     className="bg-yoake-bg px-3 py-2 text-yoake-text-secondary text-xs font-serif leading-relaxed"
-                    style={{ border: "1px solid rgba(201,185,154,0.4)", borderRadius: 0 }}
+                    style={{
+                      border: "1px solid rgba(201,185,154,0.4)",
+                      borderRadius: 0,
+                    }}
                   >
                     · {msg.text}
                   </div>
@@ -580,7 +650,7 @@ export default function PlayPage() {
                     }
                   }}
                   className="bg-yoake-accent hover:bg-yoake-accent-hover text-yoake-bg text-sm px-5 py-2 transition-colors font-ui tracking-widest"
-                  style={{ borderRadius: 0 }}
+                  style={{ borderRadius: 0, minHeight: "44px" }}
                 >
                   情報を整理する
                 </button>
