@@ -381,7 +381,7 @@ export const scene_01_journal: SceneData = {
   journal_prompt:
     "みのりの話を聞いて、あなたはどう感じましたか。みのりが本当に答えを求めているのは、何だと思いますか",
   requires_journal: true,
-  next_scene: "ch1_s02",
+  next_scene: "ch1_s02_narration",
 };
 
 // ── エクスポート: コマ1の全シーンを順序で並べたマップ ──────────────────────────
