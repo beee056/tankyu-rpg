@@ -73,6 +73,84 @@ chore:  設定・依存関係の変更
 ```bash
 git clone https://github.com/beee056/tankyu-rpg.git
 cd tankyu-rpg
+pnpm install
 ```
 
 詳細なセットアップ手順は `docs/` を参照してください。
+
+---
+
+## 内省ジャーナル AI機能（灰島遊）のセットアップ
+
+### ANTHROPIC_API_KEY の取得
+
+1. [Anthropic Console](https://console.anthropic.com/) でアカウント作成・APIキー発行
+
+### ローカル開発時の設定（.dev.vars）
+
+```bash
+# app/backend ディレクトリで作業
+cd app/backend
+
+# テンプレートをコピー
+cp .dev.vars.example .dev.vars
+
+# .dev.vars を編集して実キーを記入
+# ANTHROPIC_API_KEY=sk-ant-xxxxxxxxxxxxxxxx
+```
+
+`wrangler dev` は `.dev.vars` を自動で読み込む。**.dev.vars は絶対にコミットしないこと**。
+
+### 本番環境（Cloudflare Workers）への設定
+
+```bash
+cd app/backend
+wrangler secret put ANTHROPIC_API_KEY
+# プロンプトに従ってキーを貼り付ける
+```
+
+---
+
+## ローカル開発の起動コマンド
+
+```bash
+# フロントエンド（http://localhost:5173）
+pnpm --filter frontend dev
+
+# バックエンド API（http://localhost:8787）
+# ※ app/backend/.dev.vars に ANTHROPIC_API_KEY を設定してから実行
+pnpm --filter backend dev
+
+# 両方同時起動
+pnpm dev:frontend &
+pnpm dev:backend
+```
+
+### APIキーなしでも起動できる
+
+`ANTHROPIC_API_KEY` が未設定でもバックエンドは起動する。
+チャットAPIを呼ぶと以下のようなエラーレスポンスが返る（フロントで表示される）:
+
+```json
+{
+  "ok": false,
+  "error": "ANTHROPIC_API_KEY is not configured. Set it via: wrangler secret put ..."
+}
+```
+
+---
+
+## ガードレール動作確認
+
+灰島遊AIの3層ガードレールは以下で確認できる:
+
+```bash
+# 層3: アプリ層チェック（正規表現）の手動テスト
+# バックエンドAPIに断定文を含む応答が返ってきた場合、フォールバックに差し替わる
+# ログで確認: [LLM] Invalid response (attempt 1): "..."
+
+# curlでのテスト例 (バックエンド起動後)
+curl -X POST http://localhost:8787/api/journals/chat \
+  -H "Content-Type: application/json" \
+  -d '{"message":"みのりが可哀想だと思った"}'
+```

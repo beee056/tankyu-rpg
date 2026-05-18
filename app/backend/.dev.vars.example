@@ -1,0 +1,7 @@
+# .dev.vars — Cloudflare Workers ローカル開発用の秘密変数
+# このファイルはコミットしないこと（.gitignore に追加済み）
+# 本番環境は: wrangler secret put ANTHROPIC_API_KEY
+
+ANTHROPIC_API_KEY=sk-ant-YOUR_KEY_HERE
+JWT_SECRET=dev-jwt-secret-change-in-production
+RESEND_API_KEY=re_YOUR_KEY_HERE

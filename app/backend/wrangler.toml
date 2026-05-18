@@ -19,7 +19,13 @@ id = "REPLACE_WITH_YOUR_KV_NAMESPACE_ID"
 FRONTEND_URL = "http://localhost:5173"
 ENVIRONMENT = "development"
 
-# Secrets (set via wrangler secret put):
-# ANTHROPIC_API_KEY
-# JWT_SECRET
-# RESEND_API_KEY
+# ── Secrets (本番: wrangler secret put で設定) ──────────────────────────────
+# ANTHROPIC_API_KEY  → wrangler secret put ANTHROPIC_API_KEY
+# JWT_SECRET         → wrangler secret put JWT_SECRET
+# RESEND_API_KEY     → wrangler secret put RESEND_API_KEY
+#
+# ── ローカル開発 (.dev.vars) ──────────────────────────────────────────────────
+# app/backend/.dev.vars.example をコピーして .dev.vars を作成し、キーを設定する:
+#   cp .dev.vars.example .dev.vars
+#   # .dev.vars を編集して実キーを記入
+# wrangler dev は .dev.vars を自動で読み込む（コミット不可）
