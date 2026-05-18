@@ -22,7 +22,7 @@ export default function ProfilePage() {
   return (
     <main className="min-h-screen bg-yoake-bg paper-texture">
       <header
-        className="border-b border-yoake-border px-6 py-4 flex items-center justify-between bg-yoake-bg-card"
+        className="border-b border-yoake-border px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between bg-yoake-bg-card"
       >
         <button
           onClick={() => navigate("/dashboard")}
@@ -34,21 +34,21 @@ export default function ProfilePage() {
         <div />
       </header>
 
-      <div className="max-w-2xl mx-auto px-6 py-10 space-y-6 animate-fade-in">
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-5 sm:space-y-6 animate-fade-in">
         {/* プレイヤー情報 */}
         <div
-          className="bg-yoake-bg-card paper-texture p-6"
+          className="bg-yoake-bg-card paper-texture p-5 sm:p-6"
           style={{ border: "2px solid #C9B99A", boxShadow: "2px 2px 0 #C9B99A", borderRadius: 0 }}
         >
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 sm:gap-4">
             <div
-              className="w-14 h-14 bg-yoake-bg-surface border-2 border-yoake-warm flex items-center justify-center text-2xl"
+              className="w-12 h-12 sm:w-14 sm:h-14 bg-yoake-bg-surface border-2 border-yoake-warm flex items-center justify-center text-xl sm:text-2xl flex-shrink-0"
               style={{ borderRadius: 0 }}
             >
               🕵
             </div>
             <div>
-              <h2 className="font-ui text-yoake-ink text-lg">
+              <h2 className="font-ui text-yoake-ink text-base sm:text-lg">
                 {player?.display_name ?? "見習い探偵"}
               </h2>
               <p className="text-yoake-text-secondary text-xs mt-1 font-serif">
@@ -60,12 +60,12 @@ export default function ProfilePage() {
 
         {/* 探究スタイル */}
         <div
-          className="bg-yoake-bg-card paper-texture p-6"
+          className="bg-yoake-bg-card paper-texture p-5 sm:p-6"
           style={{ border: "2px solid #C9B99A", boxShadow: "2px 2px 0 #C9B99A", borderRadius: 0 }}
         >
           <h3 className="font-ui text-yoake-text-muted text-xs mb-4 tracking-widest">探究スタイル</h3>
           <div
-            className="h-40 flex items-center justify-center bg-yoake-bg-surface text-yoake-text-muted text-xs mb-6 font-serif"
+            className="h-36 sm:h-40 flex items-center justify-center bg-yoake-bg-surface text-yoake-text-muted text-xs mb-5 sm:mb-6 font-serif"
             style={{ border: "1px dashed #C9B99A", borderRadius: 0 }}
           >
             [レーダーチャート — Recharts で実装予定]
@@ -94,12 +94,12 @@ export default function ProfilePage() {
 
         {/* 獲得称号 */}
         <div
-          className="bg-yoake-bg-card paper-texture p-6"
+          className="bg-yoake-bg-card paper-texture p-5 sm:p-6"
           style={{ border: "2px solid #C9B99A", boxShadow: "2px 2px 0 #C9B99A", borderRadius: 0 }}
         >
           <h3 className="font-ui text-yoake-text-muted text-xs mb-4 tracking-widest">獲得称号</h3>
           {achievements.length > 0 ? (
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {achievements.map((a) => (
                 <div
                   key={a.achievement_id}

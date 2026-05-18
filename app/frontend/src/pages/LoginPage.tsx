@@ -41,13 +41,13 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-yoake-bg paper-texture px-4 py-12">
+    <main className="min-h-screen flex items-center justify-center bg-yoake-bg paper-texture px-4 py-8 sm:py-12">
       <div className="w-full max-w-sm">
 
         {/* ── 探偵手帳風ロゴエリア ── */}
-        <div className="text-center mb-10 animate-fade-in">
+        <div className="text-center mb-8 sm:mb-10 animate-fade-in">
           {/* 押印風スタンプ */}
-          <div className="inline-block mb-6">
+          <div className="inline-block mb-5 sm:mb-6">
             <div
               className="inline-flex flex-col items-center justify-center w-20 h-20 rounded-full border-2 border-yoake-accent"
               style={{ boxShadow: "inset 0 0 0 4px #F5EDE0, inset 0 0 0 6px #C9805E" }}
@@ -71,7 +71,7 @@ export default function LoginPage() {
 
         {/* ── ポラロイド風カード ── */}
         <div
-          className="bg-yoake-bg-card paper-texture animate-fade-in p-8 pb-10"
+          className="bg-yoake-bg-card paper-texture animate-fade-in p-6 sm:p-8 pb-8 sm:pb-10"
           style={{
             boxShadow: "3px 3px 0 #C9B99A, 6px 6px 0 rgba(201,185,154,0.3)",
             border: "1px solid #C9B99A",
@@ -97,14 +97,15 @@ export default function LoginPage() {
                     onChange={(e) => setEmail(e.target.value)}
                     required
                     placeholder="your@school.jp"
-                    className="w-full bg-yoake-bg border-0 border-b-2 border-yoake-border px-2 py-2 text-yoake-ink placeholder-yoake-text-muted focus:outline-none focus:border-yoake-accent transition-colors text-sm font-serif"
+                    className="w-full bg-yoake-bg border-0 border-b-2 border-yoake-border px-2 py-2.5 text-yoake-ink placeholder-yoake-text-muted focus:outline-none focus:border-yoake-accent transition-colors text-sm font-serif"
+                    style={{ fontSize: "16px" }}
                   />
                 </div>
                 <button
                   type="submit"
                   disabled={loading}
                   className="w-full bg-yoake-accent hover:bg-yoake-accent-hover text-yoake-bg font-ui py-3 transition-colors disabled:opacity-40 text-sm tracking-widest"
-                  style={{ borderRadius: 0 }}
+                  style={{ borderRadius: 0, minHeight: "44px" }}
                 >
                   {loading ? "送信中…" : "Magic Link を送る"}
                 </button>
@@ -118,7 +119,7 @@ export default function LoginPage() {
 
               <button
                 disabled
-                className="w-full border border-yoake-border text-yoake-text-muted py-2 text-sm cursor-not-allowed opacity-50 font-serif"
+                className="w-full border border-yoake-border text-yoake-text-muted py-2.5 text-sm cursor-not-allowed opacity-50 font-serif"
                 style={{ borderRadius: 0 }}
               >
                 Google アカウントでログイン
@@ -132,16 +133,16 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={loginAsDummy}
-                  className="w-full border border-yoake-border text-yoake-text-secondary hover:border-yoake-accent hover:text-yoake-ink py-2 transition-colors text-xs font-serif mb-2"
-                  style={{ borderRadius: 0 }}
+                  className="w-full border border-yoake-border text-yoake-text-secondary hover:border-yoake-accent hover:text-yoake-ink transition-colors text-xs font-serif mb-2"
+                  style={{ borderRadius: 0, minHeight: "44px" }}
                 >
                   → ダッシュボードへ直接入る（生徒）
                 </button>
                 <button
                   type="button"
                   onClick={loginAsTeacher}
-                  className="w-full border border-yoake-border text-yoake-text-muted hover:border-yoake-accent hover:text-yoake-text-secondary py-2 transition-colors text-xs font-serif"
-                  style={{ borderRadius: 0 }}
+                  className="w-full border border-yoake-border text-yoake-text-muted hover:border-yoake-accent hover:text-yoake-text-secondary transition-colors text-xs font-serif"
+                  style={{ borderRadius: 0, minHeight: "44px" }}
                 >
                   → 教員ダッシュボードへ（teacher ロール）
                 </button>
@@ -165,7 +166,7 @@ export default function LoginPage() {
               </p>
               <button
                 onClick={loginAsDummy}
-                className="mt-8 text-yoake-text-muted text-xs underline hover:text-yoake-text-secondary transition-colors font-serif"
+                className="mt-8 text-yoake-text-muted text-xs underline hover:text-yoake-text-secondary transition-colors font-serif py-2"
               >
                 開発用：ダッシュボードへ直接移動
               </button>
