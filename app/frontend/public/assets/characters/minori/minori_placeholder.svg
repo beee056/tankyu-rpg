@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 300" width="200" height="300">
+  <rect width="200" height="300" fill="#1E1814"/>
+  <circle cx="100" cy="75" r="42" fill="#2a2420" stroke="#f4a0b0" stroke-width="1.5"/>
+  <circle cx="100" cy="72" r="36" fill="#c9b99a" opacity="0.25"/>
+  <line x1="72" y1="55" x2="72" y2="38" stroke="#f4a0b0" stroke-width="2" opacity="0.5"/>
+  <line x1="128" y1="55" x2="128" y2="38" stroke="#f4a0b0" stroke-width="2" opacity="0.5"/>
+  <rect x="60" y="125" width="80" height="120" rx="2" fill="#2a2420" stroke="#f4a0b0" stroke-width="1" opacity="0.6"/>
+  <text x="100" y="265" text-anchor="middle" fill="#f4a0b0" font-size="13" font-family="serif" opacity="0.9">高木 みのり</text>
+  <text x="100" y="283" text-anchor="middle" fill="#c9b99a" font-size="9" font-family="serif" opacity="0.5">placeholder</text>
+</svg>
