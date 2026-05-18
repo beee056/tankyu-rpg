@@ -117,7 +117,7 @@ export async function callYuJournalChat(
     model: MODEL,
     max_tokens: 80,
     temperature: 0.7,
-    stop_sequences: ["。\n", "\n\n"],
+    stop_sequences: ["。\n"],
     system: [
       {
         type: "text",
