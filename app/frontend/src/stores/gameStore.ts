@@ -54,7 +54,7 @@ export const useGameStore = create<GameState>()(
       resetProgress: () => set(initialState),
     }),
     {
-      name: "lighthouse-game-progress",
+      name: "yoake-game-progress",
     }
   )
 );

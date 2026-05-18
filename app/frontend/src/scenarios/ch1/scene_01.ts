@@ -11,7 +11,7 @@ export const scene_01_narration: SceneData = {
   type: "narration",
   messages: [
     {
-      text: "坂の中腹に、少し傾いた白い建物がある。\nかつては洋菓子屋だったらしく、\n入口のドアには古いガラスがはまっていて、\n光の角度によってはLIGHTHOUSEという文字が逆に透けて見える。",
+      text: "坂の中腹に、少し傾いた白い建物がある。\nかつては洋菓子屋だったらしく、\n入口のドアには古いガラスがはまっていて、\n光の角度によっては「ヨアケ」という文字が逆に透けて見える。",
     },
     {
       text: "コーヒーの香りがした。",
@@ -27,7 +27,7 @@ export const scene_01_chifuka_welcome: SceneData = {
   messages: [
     {
       character: "chifuka",
-      text: "いらっしゃい。LIGHTHOUSE探偵事務所です。……ここに来た理由を、少し聞いてもいいですか",
+      text: "いらっしゃい。ヨアケ探偵社です。……ここに来た理由を、少し聞いてもいいですか",
       pose: "calm",
     },
   ],
@@ -253,7 +253,7 @@ export const scene_01_inner_voice_1: SceneData = {
   type: "narration",
   messages: [
     {
-      text: "（この人が、御堂 煌。LIGHTHOUSEの所長。……聞くことが仕事の第一歩、か）",
+      text: "（この人が、御堂 煌。ヨアケ探偵社の所長。……聞くことが仕事の第一歩、か）",
     },
   ],
   next_scene: "ch1_s01_minori_enter",
@@ -266,7 +266,7 @@ export const scene_01_minori_enter: SceneData = {
   messages: [
     {
       character: "minori",
-      text: "……あの、ここ、LIGHTHOUSE、ですよね",
+      text: "……あの、ここ、ヨアケ探偵社、ですよね",
       pose: "anxious",
     },
     {

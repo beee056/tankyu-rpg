@@ -21,7 +21,7 @@ authRoutes.post("/magic-link", async (c) => {
  * OTP 検証 → JWT セッション発行
  */
 authRoutes.post("/verify", async (c) => {
-  const _body = await c.req.json<{ email: string; token: string }>();
+  await c.req.json<{ email: string; token: string }>();
   // TODO: verify OTP from KV, issue JWT
   return c.json({ ok: true, data: { token: "TODO_JWT_TOKEN" } });
 });
@@ -42,7 +42,7 @@ authRoutes.get("/session", async (c) => {
  * Google OAuth コールバック（スタブ）
  */
 authRoutes.post("/google", async (c) => {
-  const _body = await c.req.json<{ id_token: string }>();
+  await c.req.json<{ id_token: string }>();
   // TODO: verify Google ID token, create or find player
   return c.json({ ok: true, data: { token: "TODO_JWT_TOKEN" } });
 });

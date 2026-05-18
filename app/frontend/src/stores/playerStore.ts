@@ -74,7 +74,7 @@ export const usePlayerStore = create<PlayerState>()(
         }),
     }),
     {
-      name: "lighthouse-player-data",
+      name: "yoake-player-data",
     }
   )
 );

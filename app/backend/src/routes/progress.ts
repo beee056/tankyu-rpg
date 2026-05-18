@@ -32,7 +32,7 @@ progressRoutes.get("/", async (c) => {
  * 進行状態更新（オートセーブ）
  */
 progressRoutes.put("/", async (c) => {
-  const _body = await c.req.json();
+  await c.req.json();
   // TODO: validate body, upsert to DB
   return c.json({ ok: true, data: { updated_at: new Date().toISOString() } });
 });

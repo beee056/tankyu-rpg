@@ -2,35 +2,63 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Google Fonts ─────────────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Yusei+Magic&family=DotGothic16&family=Noto+Serif+JP:wght@300;400;700&display=swap');
+
 @layer base {
   :root {
-    --background: 222 47% 11%;
-    --foreground: 226 33% 94%;
-    --card: 222 40% 18%;
-    --card-foreground: 226 33% 94%;
-    --border: 222 35% 27%;
-    --primary: 218 68% 58%;
-    --primary-foreground: 0 0% 100%;
-    --muted: 222 33% 35%;
-    --muted-foreground: 226 24% 60%;
+    --background:        35 47% 92%;
+    --foreground:        15 10% 16%;
+    --card:              35 40% 88%;
+    --card-foreground:   15 10% 16%;
+    --border:            35 30% 70%;
+    --primary:           18 52% 57%;
+    --primary-foreground:0 0% 100%;
+    --muted:             35 24% 72%;
+    --muted-foreground:  210 13% 60%;
   }
 
   * {
-    @apply border-lighthouse-border;
+    @apply border-yoake-border;
   }
 
   html {
-    @apply bg-lighthouse-bg text-lighthouse-text-primary;
+    @apply bg-yoake-bg text-yoake-text-primary;
   }
 
   body {
-    @apply font-sans antialiased min-h-screen;
+    @apply font-serif antialiased min-h-screen;
   }
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+
+  /* 紙テクスチャ — CSS noise パターン（軽量） */
+  .paper-texture {
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+  }
+
+  /* 手描き風ボーダー — SVGフィルター代替として outline でメリハリ */
+  .border-handdrawn {
+    border: 2px solid theme('colors.yoake.border');
+    border-radius: 1px;
+    box-shadow: 1px 1px 0 theme('colors.yoake.border');
+  }
+
+  /* ドラクエ風ダイアログボックス — 二重枠 */
+  .dialog-dq {
+    background: theme('colors.yoake.dialog-bg');
+    color: theme('colors.yoake.bg');
+    font-family: theme('fontFamily.dialog');
+    border: 3px solid theme('colors.yoake.dialog-border');
+    outline: 1px solid theme('colors.yoake.dialog-border');
+    outline-offset: -6px;
+    border-radius: 0;
   }
 }
 
@@ -42,21 +70,21 @@
 
 @keyframes blink {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
+  50%       { opacity: 0; }
 }
 
 /* 問いカードの色変化ユーティリティ */
-.question-card-v1 { @apply bg-lighthouse-question-dim; }
-.question-card-v2 { @apply bg-lighthouse-question-mid; }
-.question-card-v3 { @apply bg-lighthouse-question-deep; }
+.question-card-v1 { @apply bg-yoake-question-dim; }
+.question-card-v2 { @apply bg-yoake-question-mid; }
+.question-card-v3 { @apply bg-yoake-question-deep; }
 
 /* スクロールバーカスタム */
 ::-webkit-scrollbar {
   width: 6px;
 }
 ::-webkit-scrollbar-track {
-  @apply bg-lighthouse-bg;
+  @apply bg-yoake-bg;
 }
 ::-webkit-scrollbar-thumb {
-  @apply bg-lighthouse-border rounded-full;
+  @apply bg-yoake-border rounded-full;
 }

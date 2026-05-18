@@ -8,7 +8,7 @@ async function request<T>(
 ): Promise<ApiResponse<T>> {
   const token =
     typeof localStorage !== "undefined"
-      ? localStorage.getItem("lighthouse_token")
+      ? localStorage.getItem("yoake_token")
       : null;
 
   const headers: HeadersInit = {

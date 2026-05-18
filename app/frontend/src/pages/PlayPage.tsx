@@ -15,20 +15,20 @@ const CHAR_NAMES: Record<CharacterId, string> = {
   ren: "蓮",
 };
 
-// ── キャラクター名ラベル色 ──────────────────────────────────────────────────
+// ── キャラクター名ラベル色（yoake tokens）──────────────────────────────────
 const CHAR_COLORS: Record<CharacterId, string> = {
-  akira: "text-lighthouse-gold",
-  yu: "text-sky-400",
-  chifuka: "text-slate-300",
-  minori: "text-rose-300",
-  ren: "text-emerald-400",
+  akira:   "text-yoake-warm",
+  yu:      "text-sky-400",
+  chifuka: "text-yoake-bg",
+  minori:  "text-rose-300",
+  ren:     "text-emerald-400",
 };
 
 // ── 文字送り速度: 30文字/秒 ───────────────────────────────────────────────
 const CHARS_PER_SEC = 30;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// TypewriterText: 1文字ずつ表示するコンポーネント
+// TypewriterText
 // ─────────────────────────────────────────────────────────────────────────────
 function TypewriterText({
   text,
@@ -75,19 +75,18 @@ function TypewriterText({
     >
       {text.slice(0, displayed)}
       {displayed < text.length && (
-        <span className="opacity-0">.</span> // reserve layout
+        <span className="opacity-0">.</span>
       )}
     </span>
   );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// CharacterPortrait: キャラクター立ち絵
+// CharacterPortrait
 // ─────────────────────────────────────────────────────────────────────────────
 function CharacterPortrait({ charId }: { charId: CharacterId | undefined }) {
   if (!charId) return null;
 
-  // 御堂のみ実在画像あり（midou_02_thinking.png）
   const imageSrc =
     charId === "akira"
       ? "/assets/characters/midou/midou_02_thinking.png"
@@ -108,11 +107,14 @@ function CharacterPortrait({ charId }: { charId: CharacterId | undefined }) {
             src={imageSrc}
             alt={CHAR_NAMES[charId]}
             className="w-full object-contain max-h-52 opacity-90"
+            style={{ filter: "sepia(0.15)" }}
           />
         ) : (
-          // CSS プレースホルダー
-          <div className="w-full aspect-[2/3] bg-lighthouse-bg-card border border-lighthouse-border rounded-xl flex items-end justify-center pb-3">
-            <span className="text-lighthouse-text-muted text-xs text-center px-1">
+          <div
+            className="w-full aspect-[2/3] bg-yoake-dialog-bg flex items-end justify-center pb-3"
+            style={{ border: "1px solid #C9B99A" }}
+          >
+            <span className="text-yoake-text-muted text-xs text-center px-1 font-serif">
               {CHAR_NAMES[charId]}
             </span>
           </div>
@@ -132,8 +134,8 @@ export default function PlayPage() {
   }>();
   const navigate = useNavigate();
   const { updateStatus } = usePlayerStore();
+  void useGameStore; // suppress unused import warning
 
-  // シーン識別子: ルートパラメータが "1" ならコマ1の先頭
   const resolvedSceneKey =
     chapterId && sceneId
       ? `ch${chapterId}_s0${sceneId}_narration`
@@ -144,27 +146,20 @@ export default function PlayPage() {
   );
   const scene: SceneData | undefined = SCENE_MAP[sceneKey];
 
-  // 複数メッセージのインデックス
   const [msgIndex, setMsgIndex] = useState(0);
   const [typewriterDone, setTypewriterDone] = useState(false);
-
-  // ジャーナル
   const [journalText, setJournalText] = useState("");
   const [journalSaved, setJournalSaved] = useState(false);
 
-  // 現在表示するメッセージ
   const currentMsg: SceneMessage | undefined = scene?.messages?.[msgIndex];
 
-  // ── メッセージ or シーンが変わったらリセット ────────────────────────────
   useEffect(() => {
     setTypewriterDone(false);
   }, [sceneKey, msgIndex]);
 
-  // ── メッセージ送り ────────────────────────────────────────────────────────
   const advanceMessage = useCallback(() => {
     if (!scene) return;
 
-    // タイプライター中: まずすべて表示
     if (!typewriterDone) {
       setTypewriterDone(true);
       return;
@@ -172,10 +167,8 @@ export default function PlayPage() {
 
     const msgs = scene.messages ?? [];
     if (msgIndex < msgs.length - 1) {
-      // 次のメッセージへ
       setMsgIndex((i) => i + 1);
     } else if (scene.type !== "choice" && scene.type !== "journal") {
-      // 次のシーンへ
       if (scene.next_scene && SCENE_MAP[scene.next_scene]) {
         setSceneKey(scene.next_scene);
         setMsgIndex(0);
@@ -185,7 +178,6 @@ export default function PlayPage() {
     }
   }, [scene, msgIndex, typewriterDone, navigate]);
 
-  // ── キーボード / クリック ─────────────────────────────────────────────────
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === "Enter" || e.key === " " || e.key === "ArrowRight") {
@@ -197,13 +189,10 @@ export default function PlayPage() {
     return () => window.removeEventListener("keydown", handler);
   }, [advanceMessage]);
 
-  // ── 選択肢選択 ───────────────────────────────────────────────────────────
   function handleChoice(choice: NonNullable<SceneData["choices"]>[number]) {
-    // ステータスデルタ反映
     if (choice.status_delta) {
       updateStatus(choice.status_delta);
     }
-    // flag_updates も statusPoints に反映（question/explore に加算するシンプルマッピング）
     if (choice.flag_updates) {
       for (const fu of choice.flag_updates) {
         if (fu.key.includes("QUESTION")) updateStatus({ question_power: fu.delta });
@@ -211,7 +200,6 @@ export default function PlayPage() {
       }
     }
 
-    // バックエンドへのログ送信（ノンブロッキング）
     fetch("/api/choices", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -219,9 +207,7 @@ export default function PlayPage() {
         scene_id: scene?.scene_id,
         choice_key: choice.key,
       }),
-    }).catch(() => {
-      // ローカル開発時は失敗しても無視
-    });
+    }).catch(() => {});
 
     const next = choice.next_scene;
     if (next && SCENE_MAP[next]) {
@@ -230,7 +216,6 @@ export default function PlayPage() {
     }
   }
 
-  // ── ジャーナル保存 ────────────────────────────────────────────────────────
   async function handleJournalSave() {
     if (!journalText.trim()) return;
     fetch("/api/journals", {
@@ -243,7 +228,6 @@ export default function PlayPage() {
       }),
     }).catch(() => {});
     setJournalSaved(true);
-    // ジャーナル保存後に次のシーンへ
     if (scene?.next_scene === "ch1_s02") {
       setTimeout(() => navigate("/dashboard"), 800);
     } else if (scene?.next_scene && SCENE_MAP[scene.next_scene]) {
@@ -256,8 +240,8 @@ export default function PlayPage() {
 
   if (!scene) {
     return (
-      <main className="min-h-screen bg-lighthouse-bg flex items-center justify-center">
-        <p className="text-lighthouse-text-muted">シーンデータが見つかりません</p>
+      <main className="min-h-screen bg-yoake-bg paper-texture flex items-center justify-center">
+        <p className="text-yoake-text-muted font-serif text-sm">シーンデータが見つかりません</p>
       </main>
     );
   }
@@ -270,42 +254,49 @@ export default function PlayPage() {
   const speakerColor = speakerChar ? CHAR_COLORS[speakerChar] : null;
 
   return (
-    <main className="min-h-screen bg-lighthouse-bg flex flex-col select-none">
+    <main className="min-h-screen bg-yoake-bg flex flex-col select-none paper-texture">
       {/* ── ヘッダー ── */}
-      <header className="border-b border-lighthouse-border px-4 py-3 flex items-center justify-between flex-shrink-0 z-10">
+      <header
+        className="px-4 py-3 flex items-center justify-between flex-shrink-0 z-10 bg-yoake-bg-card"
+        style={{ borderBottom: "1px solid #C9B99A" }}
+      >
         <button
           onClick={() => navigate("/dashboard")}
-          className="text-lighthouse-text-muted hover:text-lighthouse-text-secondary text-xs transition-colors"
+          className="text-yoake-text-muted hover:text-yoake-text-secondary text-xs transition-colors font-serif"
         >
           ← 事務所に戻る
         </button>
-        <div className="text-xs text-lighthouse-text-muted">
+        <div className="text-xs text-yoake-text-muted font-serif">
           第1章 · コマ1
         </div>
-        <div className="flex items-center gap-1 text-xs text-lighthouse-accent">
-          <span className="w-1.5 h-1.5 rounded-full bg-lighthouse-accent animate-pulse-soft" />
-          保存済み
+        <div className="flex items-center gap-1 text-xs text-yoake-accent">
+          <span className="w-1.5 h-1.5 bg-yoake-accent animate-pulse-soft" style={{ borderRadius: 0 }} />
+          <span className="font-serif">保存済み</span>
         </div>
       </header>
 
-      {/* ── 背景エリア（事務所内・夜明け） ── */}
+      {/* ── 背景エリア（事務所内・夜明け）── */}
       <div
         className="relative flex-1 flex flex-col overflow-hidden"
         onClick={() => !isChoice && !isJournal && advanceMessage()}
         style={{ cursor: isChoice || isJournal ? "default" : "pointer" }}
       >
-        {/* 背景 CSS グラデーション（夜明けの事務所） */}
+        {/* 背景: 夜明けの事務所（温かみのある暗め） */}
         <div
           className="absolute inset-0 z-0"
           style={{
             background:
-              "linear-gradient(160deg, #0d1420 0%, #111827 50%, #1a1f2e 100%)",
+              "linear-gradient(160deg, #1E1814 0%, #241C14 50%, #2C2218 100%)",
           }}
         />
-        {/* 仮の窓光演出 */}
+        {/* 窓光演出 — 朝の光（琥珀色） */}
         <div
-          className="absolute top-0 right-0 w-48 h-48 opacity-5 rounded-full blur-3xl"
-          style={{ background: "#d4a847" }}
+          className="absolute top-0 right-0 w-64 h-64 opacity-10 blur-3xl"
+          style={{ background: "#E8B4A0", borderRadius: "50%" }}
+        />
+        <div
+          className="absolute bottom-0 left-0 w-48 h-48 opacity-5 blur-3xl"
+          style={{ background: "#C9805E", borderRadius: "50%" }}
         />
 
         {/* ── キャラクター & セリフエリア ── */}
@@ -315,7 +306,7 @@ export default function PlayPage() {
             <CharacterPortrait charId={speakerChar} />
           </div>
 
-          {/* セリフボックス */}
+          {/* ── セリフボックス（ドラクエ風：DotGothic16 + 二重枠） ── */}
           <AnimatePresence mode="wait">
             {(currentMsg || (isChoice && scene.messages && scene.messages.length > 0)) && (
               <motion.div
@@ -324,11 +315,14 @@ export default function PlayPage() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.2 }}
-                className="bg-lighthouse-bg-card bg-opacity-90 border border-lighthouse-border rounded-xl p-5 mb-4 backdrop-blur-sm"
+                className="dialog-dq p-5 mb-4"
               >
-                {/* ナレーション表示 */}
+                {/* ナレーション */}
                 {isNarration && currentMsg && (
-                  <p className="text-lighthouse-text-secondary text-sm leading-loose italic">
+                  <p
+                    className="text-yoake-bg text-sm leading-loose italic"
+                    style={{ fontFamily: "'DotGothic16', monospace", lineHeight: 2 }}
+                  >
                     <TypewriterText
                       text={currentMsg.text}
                       onComplete={() => setTypewriterDone(true)}
@@ -340,11 +334,21 @@ export default function PlayPage() {
                 {!isNarration && !isChoice && currentMsg && (
                   <>
                     {speakerName && (
-                      <p className={`text-xs font-semibold mb-2 ${speakerColor ?? "text-lighthouse-text-muted"}`}>
+                      <p
+                        className={`text-xs mb-2 pb-1 ${speakerColor ?? "text-yoake-text-muted"}`}
+                        style={{
+                          fontFamily: "'DotGothic16', monospace",
+                          borderBottom: "1px solid rgba(201,185,154,0.4)",
+                          letterSpacing: "0.12em",
+                        }}
+                      >
                         {speakerName}
                       </p>
                     )}
-                    <p className="text-lighthouse-text-primary text-sm leading-relaxed">
+                    <p
+                      className="text-yoake-bg text-sm leading-relaxed"
+                      style={{ fontFamily: "'DotGothic16', monospace", lineHeight: 1.9 }}
+                    >
                       <TypewriterText
                         text={currentMsg.text}
                         onComplete={() => setTypewriterDone(true)}
@@ -353,15 +357,25 @@ export default function PlayPage() {
                   </>
                 )}
 
-                {/* 選択肢シーンの前置きセリフ */}
+                {/* 選択肢前置きセリフ */}
                 {isChoice && scene.messages && scene.messages.length > 0 && currentMsg && !isJournal && (
                   <>
                     {speakerName && (
-                      <p className={`text-xs font-semibold mb-2 ${speakerColor ?? "text-lighthouse-text-muted"}`}>
+                      <p
+                        className={`text-xs mb-2 pb-1 ${speakerColor ?? "text-yoake-text-muted"}`}
+                        style={{
+                          fontFamily: "'DotGothic16', monospace",
+                          borderBottom: "1px solid rgba(201,185,154,0.4)",
+                          letterSpacing: "0.12em",
+                        }}
+                      >
                         {speakerName}
                       </p>
                     )}
-                    <p className="text-lighthouse-text-primary text-sm leading-relaxed">
+                    <p
+                      className="text-yoake-bg text-sm leading-relaxed"
+                      style={{ fontFamily: "'DotGothic16', monospace", lineHeight: 1.9 }}
+                    >
                       <TypewriterText
                         text={currentMsg.text}
                         onComplete={() => setTypewriterDone(true)}
@@ -370,10 +384,13 @@ export default function PlayPage() {
                   </>
                 )}
 
-                {/* 次へ表示 */}
+                {/* 次へ */}
                 {typewriterDone && !isChoice && !isJournal && (
                   <div className="mt-3 flex justify-end">
-                    <span className="text-lighthouse-text-muted text-xs animate-pulse-soft">
+                    <span
+                      className="text-yoake-warm text-xs animate-pulse-soft"
+                      style={{ fontFamily: "'DotGothic16', monospace" }}
+                    >
                       クリック / Enter で次へ ▶
                     </span>
                   </div>
@@ -396,9 +413,19 @@ export default function PlayPage() {
                     e.stopPropagation();
                     handleChoice(choice);
                   }}
-                  className="w-full text-left bg-lighthouse-bg-surface border border-lighthouse-border hover:border-lighthouse-accent rounded-xl px-4 py-3 text-lighthouse-text-secondary hover:text-lighthouse-text-primary transition-all text-sm active:scale-95"
+                  className="w-full text-left bg-yoake-dialog-bg text-yoake-bg hover:bg-opacity-80 transition-all text-sm active:scale-95 px-4 py-3"
+                  style={{
+                    fontFamily: "'DotGothic16', monospace",
+                    border: "2px solid #C9B99A",
+                    outline: "1px solid #C9B99A",
+                    outlineOffset: "-5px",
+                    borderRadius: 0,
+                  }}
                 >
-                  <span className="text-lighthouse-text-muted text-xs mr-2">
+                  <span
+                    className="text-yoake-warm text-xs mr-2"
+                    style={{ fontFamily: "'DotGothic16', monospace" }}
+                  >
                     {choice.key}.
                   </span>
                   {choice.label}
@@ -412,15 +439,16 @@ export default function PlayPage() {
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-lighthouse-bg-card border border-lighthouse-border rounded-xl p-5 mt-1"
+              className="bg-yoake-bg-card paper-texture p-5 mt-1"
+              style={{ border: "2px solid #C9B99A", borderRadius: 0 }}
               onClick={(e) => e.stopPropagation()}
             >
               {scene.journal_prompt && (
                 <>
-                  <p className="text-lighthouse-text-muted text-xs mb-1 tracking-wide">
+                  <p className="text-yoake-text-muted text-xs mb-1 tracking-wide font-ui">
                     内省ジャーナル
                   </p>
-                  <p className="text-lighthouse-text-secondary text-sm mb-3 leading-relaxed">
+                  <p className="text-yoake-text-secondary text-sm mb-3 leading-relaxed font-serif italic">
                     {scene.journal_prompt}
                   </p>
                 </>
@@ -430,16 +458,18 @@ export default function PlayPage() {
                 onChange={(e) => setJournalText(e.target.value)}
                 rows={4}
                 placeholder="自分の考えを書いてみよう（何字でも大丈夫）"
-                className="w-full bg-lighthouse-bg-surface border border-lighthouse-border rounded-lg px-4 py-3 text-lighthouse-text-primary placeholder-lighthouse-text-muted focus:outline-none focus:border-lighthouse-accent resize-none text-sm transition-colors"
+                className="w-full bg-yoake-bg border-b-2 border-yoake-border px-2 py-3 text-yoake-ink placeholder-yoake-text-muted focus:outline-none focus:border-yoake-accent resize-none text-sm transition-colors font-serif"
+                style={{ borderRadius: 0 }}
               />
               <div className="mt-3 flex items-center justify-between">
-                <span className="text-lighthouse-text-muted text-xs">
+                <span className="text-yoake-text-muted text-xs font-serif">
                   {journalText.length}字
                 </span>
                 <button
                   disabled={journalText.trim().length === 0 || journalSaved}
                   onClick={handleJournalSave}
-                  className="bg-lighthouse-accent hover:bg-lighthouse-accent-hover text-white text-sm px-5 py-2 rounded-lg transition-colors disabled:opacity-40"
+                  className="bg-yoake-accent hover:bg-yoake-accent-hover text-yoake-bg text-sm px-5 py-2 transition-colors disabled:opacity-40 font-ui tracking-widest"
+                  style={{ borderRadius: 0 }}
                 >
                   {journalSaved ? "保存しました" : "記録する"}
                 </button>

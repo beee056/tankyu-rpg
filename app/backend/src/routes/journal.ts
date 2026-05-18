@@ -52,8 +52,8 @@ journalRoutes.post("/", async (c) => {
  * ジャーナル更新
  */
 journalRoutes.put("/:entry_id", async (c) => {
-  const _entryId = c.req.param("entry_id");
-  const _body = await c.req.json();
+  c.req.param("entry_id");
+  await c.req.json();
   // TODO: validate, update in DB
   return c.json({ ok: true, data: { updated_at: new Date().toISOString() } });
 });
