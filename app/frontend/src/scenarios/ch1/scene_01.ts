@@ -60,7 +60,7 @@ export const scene_01_motivation_choice: SceneData = {
     },
     {
       key: "D",
-      label: "灰島さんに、来てみたら？と言われたから",
+      label: "知り合いの先輩に、来てみたら？と誘われたから",
       flag_updates: [{ key: "JOIN_MOTIVATION_INVITED", delta: 1 }],
       next_scene: "ch1_s01_chifuka_react_d",
     },
