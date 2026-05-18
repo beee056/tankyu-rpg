@@ -228,14 +228,28 @@ export default function PlayPage() {
       }),
     }).catch(() => {});
     setJournalSaved(true);
+    // 次のシーン遷移はあえて自動実行しない — 灰島遊に話しかけるボタンを表示する
+  }
+
+  function handleOpenJournalChat() {
+    navigate("/journal", {
+      state: {
+        initialMessage: journalText,
+        sceneId: scene?.scene_id ?? "",
+        chapterId: chapterId ?? "1",
+      },
+    });
+  }
+
+  function handleContinueFromJournal() {
     if (scene?.next_scene === "ch1_s02") {
-      setTimeout(() => navigate("/dashboard"), 800);
+      navigate("/dashboard");
     } else if (scene?.next_scene && SCENE_MAP[scene.next_scene]) {
-      setTimeout(() => {
-        setSceneKey(scene.next_scene!);
-        setMsgIndex(0);
-      }, 600);
+      setSceneKey(scene.next_scene!);
+      setMsgIndex(0);
     }
+    setJournalSaved(false);
+    setJournalText("");
   }
 
   if (!scene) {
@@ -465,14 +479,32 @@ export default function PlayPage() {
                 <span className="text-yoake-text-muted text-xs font-serif">
                   {journalText.length}字
                 </span>
-                <button
-                  disabled={journalText.trim().length === 0 || journalSaved}
-                  onClick={handleJournalSave}
-                  className="bg-yoake-accent hover:bg-yoake-accent-hover text-yoake-bg text-sm px-5 py-2 transition-colors disabled:opacity-40 font-ui tracking-widest"
-                  style={{ borderRadius: 0 }}
-                >
-                  {journalSaved ? "保存しました" : "記録する"}
-                </button>
+                {!journalSaved ? (
+                  <button
+                    disabled={journalText.trim().length === 0}
+                    onClick={handleJournalSave}
+                    className="bg-yoake-accent hover:bg-yoake-accent-hover text-yoake-bg text-sm px-5 py-2 transition-colors disabled:opacity-40 font-ui tracking-widest"
+                    style={{ borderRadius: 0 }}
+                  >
+                    記録する
+                  </button>
+                ) : (
+                  <div className="flex flex-col gap-2 items-end">
+                    <button
+                      onClick={handleOpenJournalChat}
+                      className="bg-sky-700 hover:bg-sky-600 text-white text-xs px-4 py-2 transition-colors font-ui tracking-widest"
+                      style={{ borderRadius: 0 }}
+                    >
+                      灰島遊に話しかけてみる →
+                    </button>
+                    <button
+                      onClick={handleContinueFromJournal}
+                      className="text-yoake-text-muted hover:text-yoake-text-secondary text-xs font-serif transition-colors"
+                    >
+                      そのまま続ける
+                    </button>
+                  </div>
+                )}
               </div>
             </motion.div>
           )}
