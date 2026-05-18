@@ -8,13 +8,13 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["lighthouse.svg", "icons/*.png"],
+      includeAssets: ["yoake.svg", "icons/*.png"],
       manifest: {
-        name: "LIGHTHOUSE — 探究RPG",
-        short_name: "LIGHTHOUSE",
+        name: "ヨアケ探偵社 — 探究RPG",
+        short_name: "ヨアケ",
         description: "見習い探偵として、問いを追いかけるRPG",
-        theme_color: "#0f1729",
-        background_color: "#0f1729",
+        theme_color: "#F5EDE0",
+        background_color: "#F5EDE0",
         display: "standalone",
         start_url: "/play",
         icons: [
