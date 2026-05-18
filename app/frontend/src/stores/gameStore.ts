@@ -11,12 +11,18 @@ interface GameState {
   deepDigCount: number;
   questionFlagDeepTalk: boolean;
 
+  /** シーンキー文字列（例: "ch1_s01_journal"）— リロード時の再開に使用 */
+  currentSceneKey: string;
+  /** 最終更新日時 ISO string */
+  lastUpdatedAt: string;
+
   // Actions
   advanceScene: () => void;
   setPart: (part: number) => void;
   incrementEmpathy: () => void;
   incrementDeepDig: () => void;
   setDeepTalkFlag: () => void;
+  saveScene: (sceneKey: string) => void;
   resetProgress: () => void;
 }
 
@@ -29,6 +35,8 @@ const initialState = {
   empathyCount: 0,
   deepDigCount: 0,
   questionFlagDeepTalk: false,
+  currentSceneKey: "",
+  lastUpdatedAt: "",
 };
 
 export const useGameStore = create<GameState>()(
@@ -50,6 +58,18 @@ export const useGameStore = create<GameState>()(
         set((state) => ({ deepDigCount: state.deepDigCount + 1 })),
 
       setDeepTalkFlag: () => set({ questionFlagDeepTalk: true }),
+
+      saveScene: (sceneKey: string) =>
+        set((state) => {
+          // コマ番号を更新（ch1_s02... → scene 2）
+          const m = sceneKey.match(/ch\d+_s0?(\d+)/);
+          const sceneNum = m ? parseInt(m[1], 10) : state.currentScene;
+          return {
+            currentSceneKey: sceneKey,
+            currentScene: sceneNum,
+            lastUpdatedAt: new Date().toISOString(),
+          };
+        }),
 
       resetProgress: () => set(initialState),
     }),
