@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGameStore } from "@/stores/gameStore";
 import { usePlayerStore } from "@/stores/playerStore";
-import { SCENE_MAP, CHAPTER1_START_SCENE } from "@/scenarios/ch1/scene_01";
+import { CHAPTER1_SCENE_MAP as SCENE_MAP, CHAPTER1_START_SCENE } from "@/scenarios/ch1";
 import type { SceneData, SceneMessage, CharacterId } from "shared-types";
 
 // ── キャラクター表示名 ──────────────────────────────────────────────────────
@@ -12,7 +12,7 @@ const CHAR_NAMES: Record<CharacterId, string> = {
   yu: "灰島 遊",
   chifuka: "長岡 知深",
   minori: "みのり",
-  ren: "蓮",
+  ren: "明智 連",
 };
 
 // ── キャラクター名ラベル色（yoake tokens）──────────────────────────────────
@@ -87,10 +87,16 @@ function TypewriterText({
 function CharacterPortrait({ charId }: { charId: CharacterId | undefined }) {
   if (!charId) return null;
 
-  const imageSrc =
-    charId === "akira"
-      ? "/assets/characters/midou/midou_02_thinking.png"
-      : null;
+  const imageSrc: string | null = (() => {
+    switch (charId) {
+      case "akira": return "/assets/characters/midou/midou_02_thinking.png";
+      case "yu":    return "/assets/characters/yu/yu_placeholder.svg";
+      case "chifuka": return "/assets/characters/chifuka/chifuka_placeholder.svg";
+      case "minori":  return "/assets/characters/minori/minori_placeholder.svg";
+      case "ren":     return "/assets/characters/ren/ren_placeholder.svg";
+      default:        return null;
+    }
+  })();
 
   return (
     <AnimatePresence mode="wait">
@@ -155,7 +161,24 @@ export default function PlayPage() {
 
   useEffect(() => {
     setTypewriterDone(false);
-  }, [sceneKey, msgIndex]);
+    setJournalText("");
+    setJournalSaved(false);
+  }, [sceneKey]);
+
+  useEffect(() => {
+    setTypewriterDone(false);
+  }, [msgIndex]);
+
+  // choices with no pre-messages: immediately allow showing choices
+  useEffect(() => {
+    if (
+      scene &&
+      (scene.type === "choice" || scene.type === "cork_board") &&
+      (!scene.messages || scene.messages.length === 0)
+    ) {
+      setTypewriterDone(true);
+    }
+  }, [scene]);
 
   const advanceMessage = useCallback(() => {
     if (!scene) return;
@@ -168,12 +191,12 @@ export default function PlayPage() {
     const msgs = scene.messages ?? [];
     if (msgIndex < msgs.length - 1) {
       setMsgIndex((i) => i + 1);
-    } else if (scene.type !== "choice" && scene.type !== "journal") {
-      if (scene.next_scene && SCENE_MAP[scene.next_scene]) {
+    } else if (scene.type !== "choice" && scene.type !== "journal" && scene.type !== "question_card" && scene.type !== "cork_board") {
+      if (scene.next_scene === "CHAPTER_END") {
+        navigate("/dashboard");
+      } else if (scene.next_scene && SCENE_MAP[scene.next_scene]) {
         setSceneKey(scene.next_scene);
         setMsgIndex(0);
-      } else if (scene.next_scene === "ch1_s02") {
-        navigate("/dashboard");
       }
     }
   }, [scene, msgIndex, typewriterDone, navigate]);
@@ -210,7 +233,9 @@ export default function PlayPage() {
     }).catch(() => {});
 
     const next = choice.next_scene;
-    if (next && SCENE_MAP[next]) {
+    if (next === "CHAPTER_END") {
+      navigate("/dashboard");
+    } else if (next && SCENE_MAP[next]) {
       setSceneKey(next);
       setMsgIndex(0);
     }
@@ -242,7 +267,7 @@ export default function PlayPage() {
   }
 
   function handleContinueFromJournal() {
-    if (scene?.next_scene === "ch1_s02") {
+    if (scene?.next_scene === "CHAPTER_END") {
       navigate("/dashboard");
     } else if (scene?.next_scene && SCENE_MAP[scene.next_scene]) {
       setSceneKey(scene.next_scene!);
@@ -263,6 +288,17 @@ export default function PlayPage() {
   const isNarration = scene.type === "narration";
   const isChoice = scene.type === "choice";
   const isJournal = scene.type === "journal";
+  const isQuestionCard = scene.type === "question_card";
+  const isCorkBoard = scene.type === "cork_board";
+  const isInputScene = isJournal || isQuestionCard;
+
+  // Dynamic header: derive コマ number from sceneKey
+  const komaLabel = (() => {
+    if (sceneKey.includes("_s05_5")) return "第1章 · コマ5.5";
+    const m = sceneKey.match(/ch1_s0?(\d+)/);
+    if (m) return `第1章 · コマ${parseInt(m[1], 10)}`;
+    return "第1章";
+  })();
   const speakerChar = currentMsg?.character as CharacterId | undefined;
   const speakerName = speakerChar ? CHAR_NAMES[speakerChar] : null;
   const speakerColor = speakerChar ? CHAR_COLORS[speakerChar] : null;
@@ -281,7 +317,7 @@ export default function PlayPage() {
           ← 事務所に戻る
         </button>
         <div className="text-xs text-yoake-text-muted font-serif">
-          第1章 · コマ1
+          {komaLabel}
         </div>
         <div className="flex items-center gap-1 text-xs text-yoake-accent">
           <span className="w-1.5 h-1.5 bg-yoake-accent animate-pulse-soft" style={{ borderRadius: 0 }} />
@@ -292,8 +328,8 @@ export default function PlayPage() {
       {/* ── 背景エリア（事務所内・夜明け）── */}
       <div
         className="relative flex-1 flex flex-col overflow-hidden"
-        onClick={() => !isChoice && !isJournal && advanceMessage()}
-        style={{ cursor: isChoice || isJournal ? "default" : "pointer" }}
+        onClick={() => !isChoice && !isInputScene && !isCorkBoard && advanceMessage()}
+        style={{ cursor: isChoice || isInputScene || isCorkBoard ? "default" : "pointer" }}
       >
         {/* 背景: 夜明けの事務所（温かみのある暗め） */}
         <div
@@ -344,8 +380,8 @@ export default function PlayPage() {
                   </p>
                 )}
 
-                {/* 通常セリフ */}
-                {!isNarration && !isChoice && currentMsg && (
+                {/* 通常セリフ（journal/question_card の前置きセリフ含む） */}
+                {!isNarration && !isChoice && !isCorkBoard && currentMsg && (
                   <>
                     {speakerName && (
                       <p
@@ -372,7 +408,7 @@ export default function PlayPage() {
                 )}
 
                 {/* 選択肢前置きセリフ */}
-                {isChoice && scene.messages && scene.messages.length > 0 && currentMsg && !isJournal && (
+                {isChoice && scene.messages && scene.messages.length > 0 && currentMsg && !isInputScene && (
                   <>
                     {speakerName && (
                       <p
@@ -399,7 +435,7 @@ export default function PlayPage() {
                 )}
 
                 {/* 次へ */}
-                {typewriterDone && !isChoice && !isJournal && (
+                {typewriterDone && !isChoice && !isInputScene && !isCorkBoard && (
                   <div className="mt-3 flex justify-end">
                     <span
                       className="text-yoake-warm text-xs animate-pulse-soft"
@@ -448,8 +484,8 @@ export default function PlayPage() {
             </motion.div>
           )}
 
-          {/* ── 内省ジャーナル ── */}
-          {isJournal && (
+          {/* ── 内省ジャーナル / 問いカード（共通入力UI） ── */}
+          {isInputScene && (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -460,7 +496,7 @@ export default function PlayPage() {
               {scene.journal_prompt && (
                 <>
                   <p className="text-yoake-text-muted text-xs mb-1 tracking-wide font-ui">
-                    内省ジャーナル
+                    {isQuestionCard ? "問いカード" : "内省ジャーナル"}
                   </p>
                   <p className="text-yoake-text-secondary text-sm mb-3 leading-relaxed font-serif italic">
                     {scene.journal_prompt}
@@ -471,7 +507,7 @@ export default function PlayPage() {
                 value={journalText}
                 onChange={(e) => setJournalText(e.target.value)}
                 rows={4}
-                placeholder="自分の考えを書いてみよう（何字でも大丈夫）"
+                placeholder={isQuestionCard ? "問いを書いてみよう" : "自分の考えを書いてみよう（何字でも大丈夫）"}
                 className="w-full bg-yoake-bg border-b-2 border-yoake-border px-2 py-3 text-yoake-ink placeholder-yoake-text-muted focus:outline-none focus:border-yoake-accent resize-none text-sm transition-colors font-serif"
                 style={{ borderRadius: 0 }}
               />
@@ -486,25 +522,68 @@ export default function PlayPage() {
                     className="bg-yoake-accent hover:bg-yoake-accent-hover text-yoake-bg text-sm px-5 py-2 transition-colors disabled:opacity-40 font-ui tracking-widest"
                     style={{ borderRadius: 0 }}
                   >
-                    記録する
+                    {isQuestionCard ? "書く" : "記録する"}
                   </button>
                 ) : (
                   <div className="flex flex-col gap-2 items-end">
-                    <button
-                      onClick={handleOpenJournalChat}
-                      className="bg-sky-700 hover:bg-sky-600 text-white text-xs px-4 py-2 transition-colors font-ui tracking-widest"
-                      style={{ borderRadius: 0 }}
-                    >
-                      灰島遊に話しかけてみる →
-                    </button>
+                    {isJournal && (
+                      <button
+                        onClick={handleOpenJournalChat}
+                        className="bg-sky-700 hover:bg-sky-600 text-white text-xs px-4 py-2 transition-colors font-ui tracking-widest"
+                        style={{ borderRadius: 0 }}
+                      >
+                        灰島遊に話しかけてみる →
+                      </button>
+                    )}
                     <button
                       onClick={handleContinueFromJournal}
                       className="text-yoake-text-muted hover:text-yoake-text-secondary text-xs font-serif transition-colors"
                     >
-                      そのまま続ける
+                      {isQuestionCard ? "次へ" : "そのまま続ける"}
                     </button>
                   </div>
                 )}
+              </div>
+            </motion.div>
+          )}
+
+          {/* ── コルクボード（情報カード一覧 + 整理ボタン） ── */}
+          {isCorkBoard && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-yoake-bg-card paper-texture p-5 mt-1"
+              style={{ border: "2px solid #C9B99A", borderRadius: 0 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <p className="text-yoake-text-muted text-xs mb-3 tracking-wide font-ui">
+                コルクボード — 情報カード
+              </p>
+              <div className="space-y-2 mb-4">
+                {scene.messages?.map((msg, i) => (
+                  <div
+                    key={i}
+                    className="bg-yoake-bg px-3 py-2 text-yoake-text-secondary text-xs font-serif leading-relaxed"
+                    style={{ border: "1px solid rgba(201,185,154,0.4)", borderRadius: 0 }}
+                  >
+                    · {msg.text}
+                  </div>
+                ))}
+              </div>
+              <div className="flex justify-end">
+                <button
+                  onClick={() => {
+                    updateStatus({ connect_power: 3 });
+                    if (scene.next_scene && SCENE_MAP[scene.next_scene]) {
+                      setSceneKey(scene.next_scene);
+                      setMsgIndex(0);
+                    }
+                  }}
+                  className="bg-yoake-accent hover:bg-yoake-accent-hover text-yoake-bg text-sm px-5 py-2 transition-colors font-ui tracking-widest"
+                  style={{ borderRadius: 0 }}
+                >
+                  情報を整理する
+                </button>
               </div>
             </motion.div>
           )}
