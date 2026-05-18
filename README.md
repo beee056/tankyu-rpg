@@ -111,18 +111,34 @@ wrangler secret put ANTHROPIC_API_KEY
 
 ---
 
-## ローカル開発の起動コマンド
+## ローカル開発の起動
+
+### 方法A: ダブルクリックで起動（推奨）
+
+`start-dev.bat` をダブルクリックするだけで以下が自動実行されます:
+
+1. ポート 5173 / 8787 を占有しているプロセスを自動 kill（残骸プロセス対策）
+2. `pnpm dev` を別ウィンドウ（`tankyu-dev`）で起動
+3. 5秒後にブラウザで http://localhost:5173 を自動オープン
+
+### 方法B: コマンドラインで起動
 
 ```bash
-# フロントエンド（http://localhost:5173）
-pnpm --filter frontend dev
+# app/ ディレクトリで実行（フロントエンド + バックエンドを1画面で同時起動）
+cd app
+pnpm dev
+```
 
-# バックエンド API（http://localhost:8787）
+ログは `[FE]`（シアン）と `[BE]`（マゼンタ）で色分けされます。
+
+### 個別起動
+
+```bash
+# フロントエンドのみ（http://localhost:5173）
+pnpm dev:frontend
+
+# バックエンドのみ（http://localhost:8787）
 # ※ app/backend/.dev.vars に ANTHROPIC_API_KEY を設定してから実行
-pnpm --filter backend dev
-
-# 両方同時起動
-pnpm dev:frontend &
 pnpm dev:backend
 ```
 
