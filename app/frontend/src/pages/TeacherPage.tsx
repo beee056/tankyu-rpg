@@ -67,7 +67,8 @@ function StudentRow({ student, isSelected, onSelect }: StudentRowProps) {
       }}
       onClick={onSelect}
     >
-      <div className="flex items-center justify-between gap-3">
+      {/* スマホ: 縦積みレイアウト / PC: 横並び */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
         {/* 左: ID + 名前 */}
         <div className="flex items-center gap-3 min-w-0">
           <div
@@ -76,7 +77,7 @@ function StudentRow({ student, isSelected, onSelect }: StudentRowProps) {
           >
             {student.display_name?.[0] ?? "？"}
           </div>
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <p className="text-yoake-text-primary text-sm font-serif truncate">
               {student.display_name ?? "（名前なし）"}
             </p>
@@ -84,20 +85,28 @@ function StudentRow({ student, isSelected, onSelect }: StudentRowProps) {
               最終ログイン: {formatLastLogin(student.last_login_at)}
             </p>
           </div>
+          {/* 展開アイコン — スマホでは右端に */}
+          <span
+            className="text-yoake-accent text-xs font-serif flex-shrink-0 transition-transform sm:hidden"
+            style={{ transform: isSelected ? "rotate(180deg)" : "rotate(0deg)" }}
+          >
+            ▼
+          </span>
         </div>
 
-        {/* 右: 進捗 */}
-        <div className="flex-shrink-0 w-40">
-          <ProgressBar current={student.current_scene} total={student.total_scenes} />
+        {/* 下 / 右: 進捗 + 展開アイコン(PC) */}
+        <div className="flex items-center gap-3">
+          <div className="flex-1 sm:flex-none sm:w-40 min-w-0">
+            <ProgressBar current={student.current_scene} total={student.total_scenes} />
+          </div>
+          {/* 展開アイコン — PCのみ */}
+          <span
+            className="text-yoake-accent text-xs font-serif flex-shrink-0 transition-transform hidden sm:inline"
+            style={{ transform: isSelected ? "rotate(180deg)" : "rotate(0deg)" }}
+          >
+            ▼
+          </span>
         </div>
-
-        {/* 展開アイコン */}
-        <span
-          className="text-yoake-accent text-xs font-serif flex-shrink-0 transition-transform"
-          style={{ transform: isSelected ? "rotate(180deg)" : "rotate(0deg)" }}
-        >
-          ▼
-        </span>
       </div>
     </div>
   );
@@ -389,26 +398,26 @@ export default function TeacherPage() {
 
       {/* ヘッダー */}
       <header
-        className="border-b border-yoake-border px-6 py-4 flex items-center justify-between bg-yoake-bg-card"
+        className="border-b border-yoake-border px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between bg-yoake-bg-card"
         style={{ boxShadow: "0 1px 0 #C9B99A" }}
       >
-        <div className="flex items-center gap-3">
-          <span className="font-ui text-yoake-warm text-sm tracking-widest">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+          <span className="font-ui text-yoake-warm text-sm tracking-widest truncate">
             ヨアケ探偵社
           </span>
-          <span className="text-yoake-text-muted text-xs font-serif">
+          <span className="text-yoake-text-muted text-xs font-serif hidden sm:inline">
             / 教員ダッシュボード
           </span>
         </div>
         <button
           onClick={handleLogout}
-          className="text-yoake-text-muted hover:text-yoake-text-secondary text-sm transition-colors font-serif"
+          className="text-yoake-text-muted hover:text-yoake-text-secondary text-sm transition-colors font-serif flex-shrink-0"
         >
           ログアウト
         </button>
       </header>
 
-      <div className="max-w-5xl mx-auto px-6 py-10 space-y-6 animate-fade-in">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-5 sm:space-y-6 animate-fade-in">
 
         {/* クラス全体サマリー */}
         {classSummary ? (
@@ -430,20 +439,20 @@ export default function TeacherPage() {
 
         {/* 生徒一覧 */}
         <div
-          className="bg-yoake-bg-card paper-texture p-6"
+          className="bg-yoake-bg-card paper-texture p-4 sm:p-6"
           style={{ border: "2px solid #C9B99A", boxShadow: "2px 2px 0 #C9B99A", borderRadius: 0 }}
         >
-          <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center justify-between mb-4 sm:mb-5">
             <h2 className="font-ui text-yoake-text-muted text-xs tracking-widest">
               担当クラスの生徒一覧
             </h2>
-            <p className="text-yoake-text-muted text-xs font-serif">
+            <p className="text-yoake-text-muted text-xs font-serif hidden sm:block">
               クリックでジャーナルを展開
             </p>
           </div>
 
-          {/* ヘッダー行 */}
-          <div className="grid grid-cols-[1fr_160px_80px] gap-3 px-3 mb-2">
+          {/* ヘッダー行 — PCのみ表示 */}
+          <div className="hidden sm:grid grid-cols-[1fr_160px_80px] gap-3 px-3 mb-2">
             <span className="text-yoake-text-muted text-xs font-serif">氏名 / 最終ログイン</span>
             <span className="text-yoake-text-muted text-xs font-serif">進捗（章単位）</span>
             <span />
