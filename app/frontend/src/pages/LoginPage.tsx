@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { usePlayerStore } from "@/stores/playerStore";
+import { useTeacherStore } from "@/stores/teacherStore";
 
 const DUMMY_PLAYER = {
   player_id: "dev-player-001",
@@ -15,6 +16,7 @@ const DUMMY_PLAYER = {
 export default function LoginPage() {
   const navigate = useNavigate();
   const { setPlayer } = usePlayerStore();
+  const { setTeacherAuth } = useTeacherStore();
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -22,6 +24,12 @@ export default function LoginPage() {
   function loginAsDummy() {
     setPlayer(DUMMY_PLAYER);
     navigate("/dashboard");
+  }
+
+  function loginAsTeacher() {
+    // 教員ロール切替: teacher-dev-001 トークンをセットして /teacher へ遷移
+    setTeacherAuth("teacher-dev-001");
+    navigate("/teacher");
   }
 
   async function handleMagicLink(e: React.FormEvent) {
@@ -124,10 +132,18 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={loginAsDummy}
-                  className="w-full border border-yoake-border text-yoake-text-secondary hover:border-yoake-accent hover:text-yoake-ink py-2 transition-colors text-xs font-serif"
+                  className="w-full border border-yoake-border text-yoake-text-secondary hover:border-yoake-accent hover:text-yoake-ink py-2 transition-colors text-xs font-serif mb-2"
                   style={{ borderRadius: 0 }}
                 >
-                  → ダッシュボードへ直接入る
+                  → ダッシュボードへ直接入る（生徒）
+                </button>
+                <button
+                  type="button"
+                  onClick={loginAsTeacher}
+                  className="w-full border border-yoake-border text-yoake-text-muted hover:border-yoake-accent hover:text-yoake-text-secondary py-2 transition-colors text-xs font-serif"
+                  style={{ borderRadius: 0 }}
+                >
+                  → 教員ダッシュボードへ（teacher ロール）
                 </button>
               </div>
             </>
