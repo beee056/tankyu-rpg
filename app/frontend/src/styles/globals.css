@@ -19,11 +19,12 @@
   }
 
   * {
-    @apply border-yoake-border;
+    border-color: theme('colors.yoake.border');
   }
 
   html {
-    @apply bg-yoake-bg text-yoake-text-primary;
+    background-color: theme('colors.yoake.bg');
+    color: theme('colors.yoake.text-primary');
   }
 
   body {
@@ -74,17 +75,18 @@
 }
 
 /* 問いカードの色変化ユーティリティ */
-.question-card-v1 { @apply bg-yoake-question-dim; }
-.question-card-v2 { @apply bg-yoake-question-mid; }
-.question-card-v3 { @apply bg-yoake-question-deep; }
+.question-card-v1 { background-color: theme('colors.yoake.question-dim'); }
+.question-card-v2 { background-color: theme('colors.yoake.question-mid'); }
+.question-card-v3 { background-color: theme('colors.yoake.question-deep'); }
 
 /* スクロールバーカスタム */
 ::-webkit-scrollbar {
   width: 6px;
 }
 ::-webkit-scrollbar-track {
-  @apply bg-yoake-bg;
+  background-color: theme('colors.yoake.bg');
 }
 ::-webkit-scrollbar-thumb {
-  @apply bg-yoake-border rounded-full;
+  background-color: theme('colors.yoake.border');
+  border-radius: 9999px;
 }
