@@ -10,7 +10,7 @@ import type { SceneData, SceneMessage, CharacterId } from "shared-types";
 const CHAR_NAMES: Record<CharacterId, string> = {
   akira: "御堂 煌",
   yu: "灰島 遊",
-  chifuka: "長岡 知深",
+  chifuka: "時坂 知深",
   minori: "みのり",
   ren: "明智 連",
 };
