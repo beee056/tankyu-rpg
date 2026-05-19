@@ -170,14 +170,78 @@ export type SceneType =
   | "question_card"
   | "cork_board"
   | "radar_chart"
-  | "title_reveal";
+  | "title_reveal"
+  | "deduction_mini";
 
 export type CharacterId = "akira" | "yu" | "chifuka" | "minori" | "ren";
+
+// ============================================================
+// v2: Evidence system
+// ============================================================
+export type EvidenceType = "dialogue" | "observation" | "item" | "hidden";
+
+export interface Evidence {
+  id: string;
+  sceneId: string;
+  type: EvidenceType;
+  title: string;
+  snippet: string;
+  icon?: string;
+  obtainedAt?: number;
+  tags: string[];
+  source: {
+    speaker?: string;
+    line?: number;
+  };
+}
+
+// ============================================================
+// v2: Hypothesis system
+// ============================================================
+export interface Hypothesis {
+  id: string;
+  requiredEvidence: string[];
+  optionalEvidence?: string[];
+  title: string;
+  description: string;
+  leadsTo: string;
+  truthScore: number;
+  hint?: string;
+}
+
+// ============================================================
+// v2: Ending system
+// ============================================================
+export interface EndingDialogue {
+  character?: CharacterId | "inner_voice";
+  text: string;
+}
+
+export interface EndingData {
+  id: string;
+  title: string;
+  dialogues: EndingDialogue[];
+  innerVoice: string;
+  endingCard: string;
+  achievement?: string;
+  retryEnabled: boolean;
+  hint?: string;
+}
+
+// ============================================================
+// v2: Highlight (keyword tap to collect evidence)
+// ============================================================
+export interface HighlightDef {
+  word: string;
+  evidenceId: string;
+  tooltip?: string;
+}
 
 export interface SceneMessage {
   character?: CharacterId;
   text: string;
   pose?: string;
+  highlights?: HighlightDef[];
 }
 
 export interface SceneChoice {
@@ -186,6 +250,9 @@ export interface SceneChoice {
   status_delta?: Partial<Pick<StatusPoint, "question_power" | "explore_power" | "connect_power" | "express_power">>;
   flag_updates?: Array<{ key: FlagKey | string; delta: number }>;
   next_scene?: string;
+  evidence_grants?: string[];
+  requiredEvidence?: string[];
+  hint?: string;
 }
 
 export interface SceneData {
@@ -197,6 +264,7 @@ export interface SceneData {
   requires_journal?: boolean;
   requires_question_card?: boolean;
   next_scene?: string;
+  auto_evidence?: string[];
 }
 
 export interface Chapter {

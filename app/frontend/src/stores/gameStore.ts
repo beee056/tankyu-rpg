@@ -16,6 +16,9 @@ interface GameState {
   /** 最終更新日時 ISO string */
   lastUpdatedAt: string;
 
+  /** v2: 収集済み証拠IDリスト（シーン遷移ロジック用） */
+  collectedEvidenceIds: string[];
+
   // Actions
   advanceScene: () => void;
   setPart: (part: number) => void;
@@ -24,6 +27,7 @@ interface GameState {
   setDeepTalkFlag: () => void;
   saveScene: (sceneKey: string) => void;
   resetProgress: () => void;
+  addCollectedEvidenceId: (id: string) => void;
 }
 
 const initialState = {
@@ -37,6 +41,7 @@ const initialState = {
   questionFlagDeepTalk: false,
   currentSceneKey: "",
   lastUpdatedAt: "",
+  collectedEvidenceIds: [],
 };
 
 export const useGameStore = create<GameState>()(
@@ -72,6 +77,12 @@ export const useGameStore = create<GameState>()(
         }),
 
       resetProgress: () => set(initialState),
+
+      addCollectedEvidenceId: (id: string) =>
+        set((state) => {
+          if (state.collectedEvidenceIds.includes(id)) return state;
+          return { collectedEvidenceIds: [...state.collectedEvidenceIds, id] };
+        }),
     }),
     {
       name: "yoake-game-progress",
