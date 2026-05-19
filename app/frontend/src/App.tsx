@@ -5,6 +5,8 @@ import PlayPage from "@/pages/PlayPage";
 import JournalPage from "@/pages/JournalPage";
 import ProfilePage from "@/pages/ProfilePage";
 import TeacherPage from "@/pages/TeacherPage";
+import DeductionPage from "@/pages/DeductionPage";
+import EndingPage from "@/pages/EndingPage";
 
 export default function App() {
   return (
@@ -21,6 +23,8 @@ export default function App() {
         <Route path="/teacher" element={<TeacherPage />} />
         <Route path="/teacher/class/:classId" element={<TeacherPage />} />
         <Route path="/teacher/student/:studentId" element={<TeacherPage />} />
+        <Route path="/deduction/ch1" element={<DeductionPage />} />
+        <Route path="/ending/ch1/:endingId" element={<EndingPage />} />
       </Routes>
     </BrowserRouter>
   );
