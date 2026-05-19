@@ -11,6 +11,11 @@ import type { SceneData, SceneMessage, CharacterId } from "shared-types";
 import { EvidenceBadge } from "@/components/EvidenceBadge";
 import EvidenceBoardModal from "@/components/EvidenceBoardModal";
 import { renderWithHighlights } from "@/components/HighlightSpan";
+import { SceneBackground } from "@/components/SceneBackground";
+import { CharacterSprite } from "@/components/CharacterSprite";
+import type { SpriteEntry } from "@/components/CharacterSprite";
+import { ChapterTitle } from "@/components/ChapterTitle";
+import { useAudio } from "@/hooks/useAudio";
 
 // ── キャラクター表示名 ──────────────────────────────────────────────────────
 const CHAR_NAMES: Record<CharacterId, string> = {
@@ -30,48 +35,78 @@ const CHAR_COLORS: Record<CharacterId, string> = {
   ren:     "text-emerald-400",
 };
 
-// ── 文字送り速度: 30文字/秒 ───────────────────────────────────────────────
-const CHARS_PER_SEC = 30;
+// ── 句読点ウェイト ────────────────────────────────────────────────────────────
+const DEFAULT_COMMA_WAIT_MS  = 120;
+const DEFAULT_PERIOD_WAIT_MS = 240;
+const CHARS_PER_SEC          = 30;
+const BASE_INTERVAL_MS       = Math.floor(1000 / CHARS_PER_SEC); // ~33ms
 
 // ─────────────────────────────────────────────────────────────────────────────
-// TypewriterText
+// TypewriterText — with punctuation wait support
 // ─────────────────────────────────────────────────────────────────────────────
 function TypewriterText({
   text,
   highlights,
   onComplete,
+  commaWaitMs = DEFAULT_COMMA_WAIT_MS,
+  periodWaitMs = DEFAULT_PERIOD_WAIT_MS,
 }: {
   text: string;
   highlights?: SceneMessage["highlights"];
   onComplete: () => void;
+  commaWaitMs?: number;
+  periodWaitMs?: number;
 }) {
   const [displayed, setDisplayed] = useState(0);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const timerRef    = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const displayedRef = useRef(0);
+  const completeRef  = useRef(onComplete);
+  completeRef.current = onComplete;
+
+  const scheduleNext = useCallback(
+    (current: number, fullText: string) => {
+      if (current >= fullText.length) {
+        completeRef.current();
+        return;
+      }
+      const nextChar = fullText[current - 1] ?? "";
+      let delay = BASE_INTERVAL_MS;
+      if (nextChar === "。" || nextChar === "！" || nextChar === "？" || nextChar === "…") {
+        delay += periodWaitMs;
+      } else if (nextChar === "、" || nextChar === "，") {
+        delay += commaWaitMs;
+      }
+      timerRef.current = setTimeout(() => {
+        const next = current + 1;
+        displayedRef.current = next;
+        setDisplayed(next);
+        scheduleNext(next, fullText);
+      }, delay);
+    },
+    [commaWaitMs, periodWaitMs]
+  );
 
   useEffect(() => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    displayedRef.current = 0;
     setDisplayed(0);
-    const interval = Math.floor(1000 / CHARS_PER_SEC);
-    timerRef.current = setInterval(() => {
-      setDisplayed((prev) => {
-        if (prev >= text.length) {
-          clearInterval(timerRef.current!);
-          onComplete();
-          return prev;
-        }
-        return prev + 1;
-      });
-    }, interval);
+    // Start at 1 to show the first char immediately
+    const first = 1;
+    displayedRef.current = first;
+    setDisplayed(first);
+    scheduleNext(first, text);
     return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
+      if (timerRef.current) clearTimeout(timerRef.current);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [text]);
 
   const showAll = useCallback(() => {
-    if (timerRef.current) clearInterval(timerRef.current);
+    if (timerRef.current) clearTimeout(timerRef.current);
+    displayedRef.current = text.length;
     setDisplayed(text.length);
-    onComplete();
-  }, [text, onComplete]);
+    completeRef.current();
+  }, [text]);
 
   const nodes = renderWithHighlights(text, highlights, displayed);
 
@@ -97,21 +132,21 @@ function TypewriterText({
 function EvidenceToast({ title }: { title: string }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: -16 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -8 }}
-      transition={{ duration: 0.3 }}
-      className="fixed top-16 left-1/2 z-50 flex flex-col items-center pointer-events-none"
-      style={{ transform: "translateX(-50%)" }}
+      initial={{ opacity: 0, x: 60 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: 40 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      className="fixed top-16 right-4 z-[60] flex flex-col pointer-events-none"
+      style={{ maxWidth: 192 }}
     >
       <div
-        className="px-4 py-2 text-xs font-ui tracking-widest text-center"
+        className="px-3 py-2 text-xs font-ui tracking-widest text-center"
         style={{
           background: "#EDE3CF",
           border: "1px solid #C9805E",
           color: "#C9805E",
           borderRadius: 0,
-          boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.25)",
         }}
       >
         <span className="block font-serif text-yoake-text-muted text-xs mb-0.5">証拠を記録した!</span>
@@ -122,51 +157,51 @@ function EvidenceToast({ title }: { title: string }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// CharacterPortrait
+// VolumeControl — small BGM/SE mute toggles in bottom-right
 // ─────────────────────────────────────────────────────────────────────────────
-function CharacterPortrait({ charId }: { charId: CharacterId | undefined }) {
-  if (!charId) return null;
-
-  const imageSrc: string | null = (() => {
-    switch (charId) {
-      case "akira": return "/assets/characters/midou/midou_02_thinking.png";
-      case "yu":    return "/assets/characters/yu/yu_01_neutral.png";
-      case "chifuka": return "/assets/characters/chifuka/chifuka_01_neutral.png";
-      case "minori":  return "/assets/characters/minori/minori_01_neutral.png";
-      case "ren":     return "/assets/characters/ren/ren_01_neutral.png";
-      default:        return null;
-    }
-  })();
-
+function VolumeControl({
+  bgmMuted, onBgmToggle,
+  seMuted, onSeToggle,
+}: {
+  bgmMuted: boolean; onBgmToggle: () => void;
+  seMuted: boolean; onSeToggle: () => void;
+}) {
   return (
-    <AnimatePresence mode="wait">
-      <motion.div
-        key={charId}
-        initial={{ opacity: 0, x: 20 }}
-        animate={{ opacity: 1, x: 0 }}
-        exit={{ opacity: 0, x: -20 }}
-        transition={{ duration: 0.2 }}
-        className="flex-shrink-0 w-20 sm:w-28 md:w-36 self-end"
+    <div
+      className="fixed bottom-3 right-3 z-[55] flex gap-1"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <button
+        onClick={onBgmToggle}
+        title={bgmMuted ? "BGM ON" : "BGM OFF"}
+        className="flex items-center justify-center w-8 h-8 text-xs font-ui transition-opacity"
+        style={{
+          background: bgmMuted ? "rgba(40,30,20,0.7)" : "rgba(60,45,30,0.8)",
+          border: "1px solid #C9B99A",
+          borderRadius: 0,
+          color: bgmMuted ? "#8B9DAE" : "#EDE3CF",
+          opacity: 0.85,
+          minWidth: 0,
+        }}
       >
-        {imageSrc ? (
-          <img
-            src={imageSrc}
-            alt={CHAR_NAMES[charId]}
-            className="w-full object-contain max-h-36 sm:max-h-44 md:max-h-52 opacity-90"
-            style={{ filter: "sepia(0.15)" }}
-          />
-        ) : (
-          <div
-            className="w-full aspect-[2/3] bg-yoake-dialog-bg flex items-end justify-center pb-3"
-            style={{ border: "1px solid #C9B99A" }}
-          >
-            <span className="text-yoake-text-muted text-xs text-center px-1 font-serif">
-              {CHAR_NAMES[charId]}
-            </span>
-          </div>
-        )}
-      </motion.div>
-    </AnimatePresence>
+        {bgmMuted ? "♪✕" : "♪"}
+      </button>
+      <button
+        onClick={onSeToggle}
+        title={seMuted ? "SE ON" : "SE OFF"}
+        className="flex items-center justify-center w-8 h-8 text-xs font-ui transition-opacity"
+        style={{
+          background: seMuted ? "rgba(40,30,20,0.7)" : "rgba(60,45,30,0.8)",
+          border: "1px solid #C9B99A",
+          borderRadius: 0,
+          color: seMuted ? "#8B9DAE" : "#EDE3CF",
+          opacity: 0.85,
+          minWidth: 0,
+        }}
+      >
+        {seMuted ? "SE✕" : "SE"}
+      </button>
+    </div>
   );
 }
 
@@ -184,6 +219,13 @@ export default function PlayPage() {
   const { saveScene, currentSceneKey, addCollectedEvidenceId } = useGameStore();
   const { addEntry: addJournalEntry } = useJournalStore();
   const { addEvidence, collectedEvidences } = useEvidenceStore();
+
+  // ── Audio ──────────────────────────────────────────────────────────────────
+  const {
+    setBgm, playSe,
+    bgmMuted, setBgmMuted,
+    seMuted, setSeMuted,
+  } = useAudio();
 
   // resume フラグ: ダッシュボードの「前回の続き」から来た場合
   const shouldResume =
@@ -216,6 +258,12 @@ export default function PlayPage() {
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const prevEvidenceCountRef = useRef(collectedEvidences.length);
 
+  // ── v2.5: direction layer state ────────────────────────────────────────────
+  const [currentBg, setCurrentBg] = useState<string | null>(null);
+  const [bgTint, setBgTint] = useState<string | undefined>(undefined);
+  const [sprites, setSprites] = useState<SpriteEntry[]>([]);
+  const [chapterTitleText, setChapterTitleText] = useState<string | null>(null);
+
   const currentMsg: SceneMessage | undefined = scene?.messages?.[msgIndex];
 
   // ── シーンキーをストアに保存（進捗永続化）──────────────────────────────
@@ -245,10 +293,12 @@ export default function PlayPage() {
         if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
         setToastTitle(newest.title);
         toastTimerRef.current = setTimeout(() => setToastTitle(null), 2500);
+        // Play SE on evidence collect
+        playSe("/assets/audio/se_evidence.mp3");
       }
     }
     prevEvidenceCountRef.current = current;
-  }, [collectedEvidences]);
+  }, [collectedEvidences, playSe]);
 
   useEffect(() => {
     setTypewriterDone(false);
@@ -270,6 +320,57 @@ export default function PlayPage() {
       setTypewriterDone(true);
     }
   }, [scene]);
+
+  // ── v2.5: fire direction effects on message change ────────────────────
+  useEffect(() => {
+    if (!currentMsg) return;
+
+    // Background
+    if (currentMsg.background !== undefined) {
+      setCurrentBg(currentMsg.background || null);
+      // "research room" tint detection via path
+      if (currentMsg.background && currentMsg.background.includes("office_research")) {
+        setBgTint("brightness(0.85) saturate(0.9)");
+      } else {
+        setBgTint(undefined);
+      }
+    }
+
+    // BGM
+    if (currentMsg.bgm !== undefined) {
+      setBgm(currentMsg.bgm || null);
+    }
+
+    // SE
+    if (currentMsg.se) {
+      playSe(currentMsg.se);
+    }
+
+    // Character action
+    if (currentMsg.character_action) {
+      const ca = currentMsg.character_action;
+      setSprites((prev) => {
+        if (ca.action === "fadeOut") {
+          // Remove the actor from sprites
+          return prev.filter((s) => s.actor !== ca.actor);
+        }
+        // Remove existing entry for this actor, then add new one
+        const without = prev.filter((s) => s.actor !== ca.actor);
+        const newEntry: SpriteEntry = {
+          actor: ca.actor,
+          position: ca.position ?? "center",
+          action: ca.action,
+        };
+        return [...without, newEntry];
+      });
+    }
+
+    // Chapter title
+    if (currentMsg.chapter_title) {
+      setChapterTitleText(currentMsg.chapter_title);
+    }
+
+  }, [currentMsg, setBgm, playSe]);
 
   // ── v2: special next_scene routing helper ─────────────────────────────
   const navigateToNextScene = useCallback(
@@ -295,6 +396,9 @@ export default function PlayPage() {
       return;
     }
 
+    // SE on advance (click sound)
+    playSe("/assets/audio/se_click.mp3");
+
     const msgs = scene.messages ?? [];
     if (msgIndex < msgs.length - 1) {
       setMsgIndex((i) => i + 1);
@@ -306,7 +410,7 @@ export default function PlayPage() {
     ) {
       navigateToNextScene(scene.next_scene);
     }
-  }, [scene, msgIndex, typewriterDone, navigateToNextScene]);
+  }, [scene, msgIndex, typewriterDone, navigateToNextScene, playSe]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -339,6 +443,8 @@ export default function PlayPage() {
       }
     }
 
+    playSe("/assets/audio/se_click.mp3");
+
     api.post("/api/choices", {
       scene_id: scene?.scene_id,
       choice_key: choice.key,
@@ -350,7 +456,6 @@ export default function PlayPage() {
   async function handleJournalSave() {
     if (!journalText.trim()) return;
 
-    // ローカルstoreに保存（FB3対応: ジャーナル全文・問いの進化ログ表示用）
     addJournalEntry({
       entry_id: `local-${Date.now()}`,
       player_id: "local",
@@ -365,7 +470,6 @@ export default function PlayPage() {
       updated_at: new Date().toISOString(),
     });
 
-    // バックエンドへの保存（fire and forget、失敗してもUI継続）
     api.post("/api/journals", {
       scene_id: scene?.scene_id,
       content: journalText,
@@ -435,11 +539,15 @@ export default function PlayPage() {
   const speakerName = speakerChar ? CHAR_NAMES[speakerChar] : null;
   const speakerColor = speakerChar ? CHAR_COLORS[speakerChar] : null;
 
+  // v2.5: text pacing from currentMsg
+  const commaWait  = currentMsg?.text_pace?.punctuation_wait_ms ?? DEFAULT_COMMA_WAIT_MS;
+  const periodWait = currentMsg?.text_pace?.line_pause_ms       ?? DEFAULT_PERIOD_WAIT_MS;
+
   return (
     <main className="h-screen bg-yoake-bg flex flex-col select-none paper-texture overflow-hidden">
       {/* ── ヘッダー ── */}
       <header
-        className="px-3 sm:px-4 py-2 sm:py-3 flex items-center justify-between flex-shrink-0 z-10 bg-yoake-bg-card"
+        className="px-3 sm:px-4 py-2 sm:py-3 flex items-center justify-between flex-shrink-0 z-20 bg-yoake-bg-card"
         style={{ borderBottom: "1px solid #C9B99A" }}
       >
         <button
@@ -477,28 +585,22 @@ export default function PlayPage() {
           cursor: isChoice || isInputScene || isCorkBoard || evidenceBoardOpen ? "default" : "pointer",
         }}
       >
-        <div
-          className="absolute inset-0 z-0"
-          style={{
-            background:
-              "linear-gradient(160deg, #1E1814 0%, #241C14 50%, #2C2218 100%)",
-          }}
-        />
-        <div
-          className="absolute top-0 right-0 w-64 h-64 opacity-10 blur-3xl"
-          style={{ background: "#E8B4A0", borderRadius: "50%" }}
-        />
-        <div
-          className="absolute bottom-0 left-0 w-48 h-48 opacity-5 blur-3xl"
-          style={{ background: "#C9805E", borderRadius: "50%" }}
+        {/* ── v2.5: 背景レイヤー (z-0 ~ z-[1]) ── */}
+        <SceneBackground src={currentBg} tint={bgTint} />
+
+        {/* ── v2.5: 立ち絵レイヤー (z-[5]) ── */}
+        <CharacterSprite sprites={sprites} />
+
+        {/* ── v2.5: 章タイトルオーバーレイ (z-[50]) ── */}
+        <ChapterTitle
+          title={chapterTitleText}
+          onComplete={() => setChapterTitleText(null)}
         />
 
-        {/* ── キャラクター & セリフエリア ── */}
+        {/* ── キャラクター & セリフエリア (z-10) ── */}
         <div className="relative z-10 flex flex-col flex-1 max-w-2xl mx-auto w-full px-3 sm:px-4 py-3 sm:py-4 overflow-y-auto">
-          {/* キャラクター立ち絵 */}
-          <div className="flex justify-end mb-3 sm:mb-4 min-h-[100px] sm:min-h-[140px] md:min-h-[160px]">
-            <CharacterPortrait charId={speakerChar} />
-          </div>
+          {/* キャラクター立ち絵スペース（既存の上端空白を維持しつつ新レイヤーに委譲） */}
+          <div className="flex justify-end mb-3 sm:mb-4 min-h-[100px] sm:min-h-[140px] md:min-h-[160px]" />
 
           {/* ── セリフボックス ── */}
           <AnimatePresence mode="wait">
@@ -523,6 +625,8 @@ export default function PlayPage() {
                       text={currentMsg.text}
                       highlights={currentMsg.highlights}
                       onComplete={() => setTypewriterDone(true)}
+                      commaWaitMs={commaWait}
+                      periodWaitMs={periodWait}
                     />
                   </p>
                 )}
@@ -554,6 +658,8 @@ export default function PlayPage() {
                         text={currentMsg.text}
                         highlights={currentMsg.highlights}
                         onComplete={() => setTypewriterDone(true)}
+                        commaWaitMs={commaWait}
+                        periodWaitMs={periodWait}
                       />
                     </p>
                   </>
@@ -590,6 +696,8 @@ export default function PlayPage() {
                           text={currentMsg.text}
                           highlights={currentMsg.highlights}
                           onComplete={() => setTypewriterDone(true)}
+                          commaWaitMs={commaWait}
+                          periodWaitMs={periodWait}
                         />
                       </p>
                     </>
@@ -807,6 +915,14 @@ export default function PlayPage() {
           )}
         </div>
       </div>
+
+      {/* ── v2.5: ボリュームコントロール（右下、小さめ）── */}
+      <VolumeControl
+        bgmMuted={bgmMuted}
+        onBgmToggle={() => setBgmMuted(!bgmMuted)}
+        seMuted={seMuted}
+        onSeToggle={() => setSeMuted(!seMuted)}
+      />
 
       {/* ── v2: 証拠ボードモーダル ── */}
       <EvidenceBoardModal
