@@ -1,275 +1,240 @@
 import type { SceneData } from "shared-types";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// コマ6「根本の問いへ」
+// コマ6「問いの地図を描く」— v2完全版
 // 依拠: design/05-chapter1-script.md コマ6 全文
+// v2追加: requires_journal: false（全ノード）
+//   （コマ6は証拠付与なし。収集済み証拠を整理する認知的まとめパートのため）
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const scene_06_narration: SceneData = {
   scene_id: "ch1_s06_narration",
   type: "narration",
+  requires_journal: false,
   messages: [
     {
-      text: "調査室のコルクボードに並んでいた情報カード。\n遊がそれを一枚ずつ外しながら、\n「このカードたちの行き先、考えてみようか」と言った。",
+      text: "コルクボードが少し賑やかになった。\nカードが増えて、矢印が増えた。\n\n知深が横に立って、静かに眺めている。",
     },
     {
-      text: "港の灯台が、窓の向こうでゆっくり光り始めていた。",
+      text: "「……問いが増えましたね」",
     },
   ],
-  next_scene: "ch1_s06_minori_returns",
+  next_scene: "ch1_s06_chifuka_map",
 };
 
-export const scene_06_minori_returns: SceneData = {
-  scene_id: "ch1_s06_minori_returns",
+export const scene_06_chifuka_map: SceneData = {
+  scene_id: "ch1_s06_chifuka_map",
   type: "dialogue",
+  requires_journal: false,
   messages: [
     {
-      character: "minori",
-      text: "……桐嶋に、話しかけてみました",
+      character: "chifuka",
+      text: "問いの地図、という考え方があります",
       pose: "calm",
     },
     {
-      character: "minori",
-      text: "直接聞く、っていうよりは……なんか声かけた感じで。\"最近なんか大変そうだけど、大丈夫？\"みたいな",
-      pose: "soft_smile",
-    },
-    {
-      character: "minori",
-      text: "そしたら泣き出して",
-      pose: "surprised",
-    },
-    {
-      character: "minori",
-      text: "いろいろ話してくれました。家のこととか。投稿のこと、私のことじゃなかったみたいで。でもそれより、なんか……桐嶋が一人でしんどかったんだな、って",
-      pose: "calm",
-    },
-  ],
-  next_scene: "ch1_s06_minori_resolve",
-};
-
-export const scene_06_minori_resolve: SceneData = {
-  scene_id: "ch1_s06_minori_resolve",
-  type: "dialogue",
-  messages: [
-    {
-      character: "minori",
-      text: "最初は、私のことが嫌いなのかって聞こうとしてた。でもそんなこと、どうでも良くなった",
+      character: "chifuka",
+      text: "一つの問いの下に、別の問いがある。その下にまた別の問いがある。\n地図みたいに広がっていく",
       pose: "calm",
     },
     {
-      character: "minori",
-      text: "……最初の問い、変わったと思います",
-      pose: "soft_smile",
-    },
-  ],
-  next_scene: "ch1_s06_inner_voice_1",
-};
-
-export const scene_06_inner_voice_1: SceneData = {
-  scene_id: "ch1_s06_inner_voice_1",
-  type: "narration",
-  messages: [
-    {
-      text: "（みのりの問いが変わった。最初の「友達は私のことが嫌いなの？」から——）",
-    },
-  ],
-  next_scene: "ch1_s06_akira_question",
-};
-
-export const scene_06_akira_question: SceneData = {
-  scene_id: "ch1_s06_akira_question",
-  type: "dialogue",
-  messages: [
-    {
-      character: "akira",
-      text: "で、本当の問いは何？",
-      pose: "quiet",
-    },
-    {
-      character: "minori",
-      text: "……私は、なぜあんなに怖かったのか。それと……桐嶋はなぜ言えなかったのか",
+      character: "chifuka",
+      text: "この依頼は……みのりの問いと、桐嶋の問いが、ある意味で絡み合っていた",
       pose: "calm",
     },
-    {
-      character: "minori",
-      text: "その二つの問いが、たぶん……本当の問い",
-      pose: "soft_smile",
-    },
   ],
-  next_scene: "ch1_s06_akira_respond",
+  next_scene: "ch1_s06_yu_question",
 };
 
-export const scene_06_akira_respond: SceneData = {
-  scene_id: "ch1_s06_akira_respond",
+export const scene_06_yu_question: SceneData = {
+  scene_id: "ch1_s06_yu_question",
   type: "dialogue",
-  messages: [
-    {
-      character: "akira",
-      text: "……それを持って帰れ",
-      pose: "quiet",
-    },
-    {
-      character: "akira",
-      text: "答えを出すな、とは言わない。でも……その問いを持ったまま、しばらく歩いてみろ",
-      pose: "expressionless",
-    },
-    {
-      character: "minori",
-      text: "……はい",
-      pose: "soft_smile",
-    },
-  ],
-  next_scene: "ch1_s06_yu_reflect_choice",
-};
-
-export const scene_06_yu_reflect_choice: SceneData = {
-  scene_id: "ch1_s06_yu_reflect_choice",
-  type: "choice",
+  requires_journal: false,
   messages: [
     {
       character: "yu",
-      text: "……最初の依頼と、かなり変わったね。問いが",
+      text: "……俺、最初はこの依頼って「みのりの友達がSNSで悪口書いたかどうか」ってだけだと思ってたんだよね",
+      pose: "thinking",
+    },
+    {
+      character: "yu",
+      text: "でも掘ってくうちに……なんか全然違うものが出てきた",
+      pose: "thinking",
+    },
+    {
+      character: "yu",
+      text: "みのりが傷ついていた理由、桐嶋が書いた理由、全部違う層にあって",
+      pose: "thinking",
+    },
+  ],
+  next_scene: "ch1_s06_radar",
+};
+
+export const scene_06_radar: SceneData = {
+  scene_id: "ch1_s06_radar",
+  type: "radar_chart",
+  requires_journal: false,
+  messages: [
+    {
+      character: "chifuka",
+      text: "これまでの調査であなたが使ったのはどの力でしょう。レーダーチャートを確認してみましょう",
+      pose: "calm",
+    },
+  ],
+  next_scene: "ch1_s06_akira_comment",
+};
+
+export const scene_06_akira_comment: SceneData = {
+  scene_id: "ch1_s06_akira_comment",
+  type: "dialogue",
+  requires_journal: false,
+  messages: [
+    {
+      character: "akira",
+      text: "……問いの地図を描くのは、答えを出すためじゃない",
+      pose: "expressionless",
+    },
+    {
+      character: "akira",
+      text: "どこに問いがあるかを知るためだ",
+      pose: "expressionless",
+    },
+    {
+      character: "akira",
+      text: "答えが出ていない問いがあっても、それは失敗じゃない。答えを出せない問いをちゃんと持てることが、探偵の仕事だ",
+      pose: "expressionless",
+    },
+  ],
+  next_scene: "ch1_s06_yu_add",
+};
+
+export const scene_06_yu_add: SceneData = {
+  scene_id: "ch1_s06_yu_add",
+  type: "dialogue",
+  requires_journal: false,
+  messages: [
+    {
+      character: "yu",
+      text: "……御堂は口が悪いけど、言ってることはそういうことだよ",
       pose: "casual",
     },
     {
       character: "yu",
-      text: "どう感じてる？",
+      text: "でさ、次コマで……この依頼のまとめに入る前に一回、自分に問いを立ててみてほしいんだよね",
+      pose: "casual",
+    },
+    {
+      character: "yu",
+      text: "探偵は依頼人の問いを解くんじゃなくて、問いと一緒に歩く、みたいな感じ？うまく言えないけど",
+      pose: "thinking",
+    },
+  ],
+  next_scene: "ch1_s06_choice_q",
+};
+
+export const scene_06_choice_q: SceneData = {
+  scene_id: "ch1_s06_choice_q",
+  type: "choice",
+  requires_journal: false,
+  messages: [
+    {
+      character: "yu",
+      text: "この依頼を通じて、あなたが「問いたい」と思ったことは何？",
       pose: "listening",
     },
   ],
   choices: [
     {
       key: "A",
-      label: "なんか、すっきりしない",
-      next_scene: "ch1_s06a_react",
+      label: "人はなぜ、直接聞けないのか",
+      status_delta: { question_power: 3 },
+      next_scene: "ch1_s06_react_a",
     },
     {
       key: "B",
-      label: "面白かった",
-      next_scene: "ch1_s06b_react",
+      label: "傷つくことを恐れるのはなぜか",
+      status_delta: { connect_power: 3 },
+      next_scene: "ch1_s06_react_b",
     },
     {
       key: "C",
-      label: "……わからない",
-      next_scene: "ch1_s06c_react",
+      label: "相手の問いを知ることはできるのか",
+      status_delta: { explore_power: 3 },
+      next_scene: "ch1_s06_react_c",
     },
   ],
 };
 
-export const scene_06a_react: SceneData = {
-  scene_id: "ch1_s06a_react",
+export const scene_06_react_a: SceneData = {
+  scene_id: "ch1_s06_react_a",
   type: "dialogue",
-  messages: [
-    {
-      character: "yu",
-      text: "そうだよね。解決したかどうか、曖昧だし",
-      pose: "casual",
-    },
-    {
-      character: "yu",
-      text: "でも……その『すっきりしない』が大事なんだよ、たぶん。御堂もよく言うんだよね。答えが出たとき、すっきりしすぎたら疑えって",
-      pose: "thinking",
-    },
-  ],
-  next_scene: "ch1_s06_akira_lighthouse",
-};
-
-export const scene_06b_react: SceneData = {
-  scene_id: "ch1_s06b_react",
-  type: "dialogue",
-  messages: [
-    {
-      character: "yu",
-      text: "……面白かったか！そっか",
-      pose: "surprised_happy",
-    },
-    {
-      character: "yu",
-      text: "俺もそうなんだよね。みんなに言うと引かれるんだけど、依頼人の問いが変わっていくのが、なんか……好きなんだよな",
-      pose: "casual",
-    },
-  ],
-  next_scene: "ch1_s06_akira_lighthouse",
-};
-
-export const scene_06c_react: SceneData = {
-  scene_id: "ch1_s06c_react",
-  type: "dialogue",
-  messages: [
-    {
-      character: "yu",
-      text: "うん。わからないで正解だと思う",
-      pose: "casual",
-    },
-    {
-      character: "yu",
-      text: "わかった気がするとき、俺は逆に不安になる。本当にわかったのかな、って",
-      pose: "thinking",
-    },
-  ],
-  next_scene: "ch1_s06_akira_lighthouse",
-};
-
-export const scene_06_akira_lighthouse: SceneData = {
-  scene_id: "ch1_s06_akira_lighthouse",
-  type: "dialogue",
-  messages: [
-    {
-      character: "akira",
-      text: "灯台は答えを教えない。方向だけを教える",
-      pose: "distant_gaze",
-    },
-    {
-      character: "akira",
-      text: "みのりが持って帰った問いが、彼女の灯台になる",
-      pose: "quiet",
-    },
-  ],
-  next_scene: "ch1_s06_inner_voice",
-};
-
-export const scene_06_inner_voice: SceneData = {
-  scene_id: "ch1_s06_inner_voice",
-  type: "narration",
-  messages: [
-    {
-      text: "（御堂は「答えを教えない」と言う。最初はそれが不親切に思えた。でも……みのりが自分で問いを立てて帰っていく様子を見たとき、御堂の言ってることが少しだけわかった気がした。答えを渡されなかったから、みのりは自分で考えたんだ）",
-    },
-  ],
-  next_scene: "ch1_s06_chifuka_transition",
-};
-
-export const scene_06_chifuka_transition: SceneData = {
-  scene_id: "ch1_s06_chifuka_transition",
-  type: "dialogue",
+  requires_journal: false,
   messages: [
     {
       character: "chifuka",
-      text: "……今日の調査、おつかれさまでした",
-      pose: "calm",
-    },
-    {
-      character: "chifuka",
-      text: "明日、ジャーナルを書く時間を取っています。また来てください",
+      text: "……それは、探偵が生涯かけて持つ問いかもしれません",
       pose: "gentle",
     },
   ],
+  next_scene: "ch1_s06_journal",
+};
+
+export const scene_06_react_b: SceneData = {
+  scene_id: "ch1_s06_react_b",
+  type: "dialogue",
+  requires_journal: false,
+  messages: [
+    {
+      character: "chifuka",
+      text: "……傷つくことを知っているから、人は誰かを好きになれる",
+      pose: "gentle",
+    },
+  ],
+  next_scene: "ch1_s06_journal",
+};
+
+export const scene_06_react_c: SceneData = {
+  scene_id: "ch1_s06_react_c",
+  type: "dialogue",
+  requires_journal: false,
+  messages: [
+    {
+      character: "chifuka",
+      text: "……完全には知れないかもしれない。でも近づくことはできる",
+      pose: "gentle",
+    },
+  ],
+  next_scene: "ch1_s06_journal",
+};
+
+/** コマ6末・内省⑥ — v2: requires_journal: false（任意化） */
+export const scene_06_journal: SceneData = {
+  scene_id: "ch1_s06_journal",
+  type: "journal",
+  messages: [
+    {
+      character: "chifuka",
+      text: "「問いの地図」を自分でも描いてみましょう。気になったことがあれば、ジャーナルに書いてもいい",
+      pose: "gentle",
+    },
+  ],
+  journal_prompt:
+    "この依頼を通じて、あなたが気になった問いを書いてみましょう（スキップ可）",
+  requires_journal: false,
   next_scene: "ch1_s07_narration",
 };
 
 // ── シーンマップ ──────────────────────────────────────────────────────────────
 export const SCENE_MAP_06: Record<string, SceneData> = {
   ch1_s06_narration: scene_06_narration,
-  ch1_s06_minori_returns: scene_06_minori_returns,
-  ch1_s06_minori_resolve: scene_06_minori_resolve,
-  ch1_s06_inner_voice_1: scene_06_inner_voice_1,
-  ch1_s06_akira_question: scene_06_akira_question,
-  ch1_s06_akira_respond: scene_06_akira_respond,
-  ch1_s06_yu_reflect_choice: scene_06_yu_reflect_choice,
-  ch1_s06a_react: scene_06a_react,
-  ch1_s06b_react: scene_06b_react,
-  ch1_s06c_react: scene_06c_react,
-  ch1_s06_akira_lighthouse: scene_06_akira_lighthouse,
-  ch1_s06_inner_voice: scene_06_inner_voice,
-  ch1_s06_chifuka_transition: scene_06_chifuka_transition,
+  ch1_s06_chifuka_map: scene_06_chifuka_map,
+  ch1_s06_yu_question: scene_06_yu_question,
+  ch1_s06_radar: scene_06_radar,
+  ch1_s06_akira_comment: scene_06_akira_comment,
+  ch1_s06_yu_add: scene_06_yu_add,
+  ch1_s06_choice_q: scene_06_choice_q,
+  ch1_s06_react_a: scene_06_react_a,
+  ch1_s06_react_b: scene_06_react_b,
+  ch1_s06_react_c: scene_06_react_c,
+  ch1_s06_journal: scene_06_journal,
 };

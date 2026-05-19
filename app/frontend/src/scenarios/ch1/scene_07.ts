@@ -1,152 +1,78 @@
 import type { SceneData } from "shared-types";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// コマ7「選択と提示」
+// コマ7「最後の問い」— v2完全版
 // 依拠: design/05-chapter1-script.md コマ7 全文
+// v2追加:
+//   ミニ推理② (ch1_s07_deduction_mini): type=deduction_mini
+//     - 仮説C: requiredEvidence [ev_ch1_06]
+//     - 仮説D(CD合体): requiredEvidence [ev_ch1_5h_01, ev_ch1_5h_02]
+//   requires_journal: false
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const scene_07_narration: SceneData = {
   scene_id: "ch1_s07_narration",
   type: "narration",
+  requires_journal: false,
   messages: [
     {
-      text: "翌朝、ヨアケ探偵社に行くと知深がいた。\nコーヒーが二つ置かれていた。",
+      text: "最後のコマ。\n\n窓から見える空は夕焼け色になっていた。\nみのりから連絡が来た。「今日、桐嶋に話せました」と。",
     },
     {
-      text: "「おはようございます」と言った知深の声は、\n昨日より少しやわらかかった気がした。",
+      text: "遊は「よかったね」と言って、小さくガッツポーズをした。",
     },
   ],
-  next_scene: "ch1_s07_chifuka_dialogue",
+  next_scene: "ch1_s07_yu_close",
 };
 
-export const scene_07_chifuka_dialogue: SceneData = {
-  scene_id: "ch1_s07_chifuka_dialogue",
+export const scene_07_yu_close: SceneData = {
+  scene_id: "ch1_s07_yu_close",
   type: "dialogue",
+  requires_journal: false,
   messages: [
     {
-      character: "chifuka",
-      text: "昨日の調査について、少し話を聞かせてもらえますか",
-      pose: "calm",
+      character: "yu",
+      text: "……このケース、一応クローズできるね",
+      pose: "relieved",
     },
     {
-      character: "chifuka",
-      text: "……みのりへの返し方、あなたはどうすると決めましたか",
-      pose: "calm",
+      character: "yu",
+      text: "でも、このケースって結局何だったと思う？",
+      pose: "listening",
     },
     {
-      character: "chifuka",
-      text: "ヨアケ探偵社のやり方は……答えを渡さない。代わりに問いを一緒に深める。でも依頼人が本当に求めているのが『答え』だったとき、私たちは何をすべきだと思いますか",
-      pose: "serious",
+      character: "yu",
+      text: "友達の悪口投稿を解決した、っていうより……なんか違う気がして",
+      pose: "thinking",
     },
   ],
-  next_scene: "ch1_s07_chifuka_choice",
+  next_scene: "ch1_s07_akira_adds",
 };
 
-export const scene_07_chifuka_choice: SceneData = {
-  scene_id: "ch1_s07_chifuka_choice",
-  type: "choice",
-  messages: [],
-  choices: [
-    {
-      key: "A",
-      label: "やっぱり問いを返すべきだと思う",
-      next_scene: "ch1_s07a_react",
-    },
-    {
-      key: "B",
-      label: "場合によっては答えを伝えることもあると思う",
-      next_scene: "ch1_s07b_react",
-    },
-    {
-      key: "C",
-      label: "……まだわからない",
-      next_scene: "ch1_s07c_react",
-    },
-  ],
-};
-
-export const scene_07a_react: SceneData = {
-  scene_id: "ch1_s07a_react",
+export const scene_07_akira_adds: SceneData = {
+  scene_id: "ch1_s07_akira_adds",
   type: "dialogue",
-  messages: [
-    {
-      character: "chifuka",
-      text: "……なぜですか？",
-      pose: "calm",
-    },
-    {
-      character: "chifuka",
-      text: "みのりは、その問いを持ってどうしましたか",
-      pose: "calm",
-    },
-    {
-      character: "chifuka",
-      text: "……あなたが問いを返さなければ、みのりはあのタイミングで桐嶋に声をかけなかったかもしれない。でも逆に、あなたが答えを返していたら——何が起きたと思いますか",
-      pose: "serious",
-    },
-  ],
-  next_scene: "ch1_s07_akira_final",
-};
-
-export const scene_07b_react: SceneData = {
-  scene_id: "ch1_s07b_react",
-  type: "dialogue",
-  messages: [
-    {
-      character: "chifuka",
-      text: "……それは、正直な答えだと思います",
-      pose: "calm",
-    },
-    {
-      character: "chifuka",
-      text: "御堂さんは『答えを教えない』と言う。でも私は……答えが必要な瞬間があると思っています",
-      pose: "thoughtful",
-    },
-    {
-      character: "chifuka",
-      text: "ただ……どちらの答えを渡すか、ではなく。渡すことで依頼人が何を失うかを、考えていますか",
-      pose: "serious",
-    },
-  ],
-  next_scene: "ch1_s07_akira_final",
-};
-
-export const scene_07c_react: SceneData = {
-  scene_id: "ch1_s07c_react",
-  type: "dialogue",
-  messages: [
-    {
-      character: "chifuka",
-      text: "わからない、というのは正確な答えです",
-      pose: "calm",
-    },
-    {
-      character: "chifuka",
-      text: "私もまだわからないことがある。御堂さんほど長くやっていても、この問いに毎回迷います",
-      pose: "thoughtful",
-    },
-    {
-      character: "chifuka",
-      text: "……でも、毎回迷うから、依頼人の顔を見られる気がしています",
-      pose: "distant_gaze",
-    },
-  ],
-  next_scene: "ch1_s07_akira_final",
-};
-
-export const scene_07_akira_final: SceneData = {
-  scene_id: "ch1_s07_akira_final",
-  type: "dialogue",
+  requires_journal: false,
   messages: [
     {
       character: "akira",
-      text: "今回の依頼、終わったな",
+      text: "……みのりと、桐嶋。二人にそれぞれ問いがあった",
+      pose: "quiet",
+    },
+    {
+      character: "akira",
+      text: "みのりの問いは「なぜ自分はこんなに傷つくのか」。桐嶋の問いは「なぜ言えないのか」",
+      pose: "quiet",
+    },
+    {
+      character: "akira",
+      text: "依頼人が最初に持ってきた問いは、「友達は私が嫌いなのか」だった。でも最後の問いは違う",
       pose: "expressionless",
     },
     {
       character: "akira",
-      text: "でも問いは終わってない",
-      pose: "expressionless",
+      text: "問いが深くなった。……それがこの依頼の成果だ",
+      pose: "quiet",
     },
   ],
   next_scene: "ch1_s07_inner_voice",
@@ -155,42 +81,115 @@ export const scene_07_akira_final: SceneData = {
 export const scene_07_inner_voice: SceneData = {
   scene_id: "ch1_s07_inner_voice",
   type: "narration",
+  requires_journal: false,
   messages: [
     {
-      text: "（御堂は「終わったな」と言った。でもすぐ「問いは終わってない」と続けた。依頼は終わった。みのりの問いは変わった。でも私の中に、何か残っている）",
+      text: "（このケースで、本当に解決されたことは何だったんだろう）",
     },
     {
-      text: "（それが何かは、まだわからない）",
+      text: "（問いが深くなったことが成果——御堂はそう言った。なんか、それが正解な気がした）",
+    },
+  ],
+  next_scene: "ch1_s07_deduction_mini",
+};
+
+/** ミニ推理② — v2: 章末DeductionPageの前哨 */
+export const scene_07_deduction_mini: SceneData = {
+  scene_id: "ch1_s07_deduction_mini",
+  type: "deduction_mini",
+  requires_journal: false,
+  messages: [
+    {
+      character: "yu",
+      text: "……この依頼の「本質」って、何だったと思う？",
+      pose: "casual",
+    },
+    {
+      character: "yu",
+      text: "3つくらい候補がある。証拠と照らし合わせながら考えてみてよ",
+      pose: "casual",
+    },
+  ],
+  choices: [
+    {
+      key: "A",
+      label: "友人関係の修復が目的だった",
+      // 常に選択可能（証拠なし）
+      next_scene: "ch1_s07_mini_result",
+    },
+    {
+      key: "B",
+      label: "みのり自身の「問い」の発見が目的だった",
+      requiredEvidence: ["ev_ch1_06"],
+      hint: "みのりの恐れの核心に関わる証拠が必要です",
+      next_scene: "ch1_s07_mini_result",
+    },
+    {
+      key: "C",
+      label: "二者それぞれの問いが絡み合っていた",
+      requiredEvidence: ["ev_ch1_5h_01", "ev_ch1_5h_02"],
+      hint: "桐嶋の事情が明らかになる証拠が必要です",
+      next_scene: "ch1_s07_mini_result",
+    },
+  ],
+};
+
+export const scene_07_mini_result: SceneData = {
+  scene_id: "ch1_s07_mini_result",
+  type: "dialogue",
+  requires_journal: false,
+  messages: [
+    {
+      character: "akira",
+      text: "……選んだ仮説を持ったまま、推理に入れ",
+      pose: "quiet",
+    },
+    {
+      character: "akira",
+      text: "最後の推理でそれが合ってるか、間違ってるかがわかる",
+      pose: "expressionless",
+    },
+  ],
+  next_scene: "ch1_s07_title_reveal",
+};
+
+export const scene_07_title_reveal: SceneData = {
+  scene_id: "ch1_s07_title_reveal",
+  type: "title_reveal",
+  requires_journal: false,
+  messages: [
+    {
+      text: "第1章 「問いの先にある問い」",
     },
   ],
   next_scene: "ch1_s07_journal",
 };
 
+/** コマ7末・最終内省 — v2: requires_journal: false（任意化） */
 export const scene_07_journal: SceneData = {
   scene_id: "ch1_s07_journal",
   type: "journal",
   messages: [
     {
       character: "chifuka",
-      text: "みのりへの返し方——あなたはどう選んで、なぜそう選んだと思いますか",
+      text: "このケースを通じて、あなた自身の「問いの地図」に何か増えましたか。気になったことがあれば、ジャーナルに書いてもいい",
       pose: "gentle",
     },
   ],
   journal_prompt:
-    "みのりへの返し方を選んだのはなぜ？（スキップ可）",
+    "この依頼で、あなた自身の問いは変わりましたか。どう変わりましたか（スキップ可）",
   requires_journal: false,
-  next_scene: "ch1_s08_narration",
+  next_scene: "ch1_s08_deduction_start",
 };
 
 // ── シーンマップ ──────────────────────────────────────────────────────────────
 export const SCENE_MAP_07: Record<string, SceneData> = {
   ch1_s07_narration: scene_07_narration,
-  ch1_s07_chifuka_dialogue: scene_07_chifuka_dialogue,
-  ch1_s07_chifuka_choice: scene_07_chifuka_choice,
-  ch1_s07a_react: scene_07a_react,
-  ch1_s07b_react: scene_07b_react,
-  ch1_s07c_react: scene_07c_react,
-  ch1_s07_akira_final: scene_07_akira_final,
+  ch1_s07_yu_close: scene_07_yu_close,
+  ch1_s07_akira_adds: scene_07_akira_adds,
   ch1_s07_inner_voice: scene_07_inner_voice,
+  ch1_s07_deduction_mini: scene_07_deduction_mini,
+  ch1_s07_mini_result: scene_07_mini_result,
+  ch1_s07_title_reveal: scene_07_title_reveal,
   ch1_s07_journal: scene_07_journal,
 };

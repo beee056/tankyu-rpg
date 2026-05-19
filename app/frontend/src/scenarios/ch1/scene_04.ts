@@ -1,13 +1,17 @@
 import type { SceneData } from "shared-types";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// コマ4「連との初対峙」
+// コマ4「連との初対峙」— v2完全版
 // 依拠: design/05-chapter1-script.md コマ4 全文
+// v2追加:
+//   ch1_s04_minori_leave: highlights で ev_ch1_07 付与（「考えてみます」タップ）
+//   requires_journal: false
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const scene_04_narration: SceneData = {
   scene_id: "ch1_s04_narration",
   type: "narration",
+  requires_journal: false,
   messages: [
     {
       text: "みのりに調査結果を報告する日。\n窓の外は薄い曇り。港の方向から\nコンテナ船の汽笛が遠く聞こえた。",
@@ -22,6 +26,7 @@ export const scene_04_narration: SceneData = {
 export const scene_04_minori_arrive: SceneData = {
   scene_id: "ch1_s04_minori_arrive",
   type: "dialogue",
+  requires_journal: false,
   messages: [
     {
       character: "minori",
@@ -35,6 +40,7 @@ export const scene_04_minori_arrive: SceneData = {
 export const scene_04_report_choice: SceneData = {
   scene_id: "ch1_s04_report_choice",
   type: "choice",
+  requires_journal: false,
   messages: [],
   choices: [
     {
@@ -65,6 +71,7 @@ export const scene_04_report_choice: SceneData = {
 export const scene_04a_report: SceneData = {
   scene_id: "ch1_s04a_report",
   type: "dialogue",
+  requires_journal: false,
   messages: [
     {
       character: "minori",
@@ -78,6 +85,7 @@ export const scene_04a_report: SceneData = {
 export const scene_04a_inner_voice: SceneData = {
   scene_id: "ch1_s04a_inner_voice",
   type: "narration",
+  requires_journal: false,
   messages: [
     { text: "（みのりはすっきりした顔をしている。でも……何かが引っかかる）" },
   ],
@@ -87,6 +95,7 @@ export const scene_04a_inner_voice: SceneData = {
 export const scene_04a_ren_enter: SceneData = {
   scene_id: "ch1_s04a_ren_enter",
   type: "dialogue",
+  requires_journal: false,
   messages: [
     { character: "ren", text: "……やっと来れた。ヨアケ探偵社、初めて入るな", pose: "cold" },
     { character: "yu", text: "あ、明智くん。どうしたの", pose: "casual" },
@@ -103,6 +112,7 @@ export const scene_04a_ren_enter: SceneData = {
 export const scene_04a_inner_voice_2: SceneData = {
   scene_id: "ch1_s04a_inner_voice_2",
   type: "narration",
+  requires_journal: false,
   messages: [
     {
       text: "（連は「よかったね」と言った。みのりも頷いた。でも、なんかこれで終わりな気がしない）",
@@ -116,6 +126,7 @@ export const scene_04a_inner_voice_2: SceneData = {
 export const scene_04b_report: SceneData = {
   scene_id: "ch1_s04b_report",
   type: "dialogue",
+  requires_journal: false,
   messages: [
     { character: "minori", text: "……どういうことですか？", pose: "confused" },
     { character: "minori", text: "でも、じゃあ、どうしたら……", pose: "anxious" },
@@ -126,6 +137,7 @@ export const scene_04b_report: SceneData = {
 export const scene_04b_ren_enter: SceneData = {
   scene_id: "ch1_s04b_ren_enter",
   type: "dialogue",
+  requires_journal: false,
   messages: [
     { character: "ren", text: "……やっと来れた。ヨアケ探偵社、初めて入るな", pose: "cold" },
     { character: "yu", text: "あ、明智くん。どうしたの", pose: "casual" },
@@ -145,6 +157,7 @@ export const scene_04b_ren_enter: SceneData = {
 export const scene_04c_report: SceneData = {
   scene_id: "ch1_s04c_report",
   type: "dialogue",
+  requires_journal: false,
   messages: [
     { character: "minori", text: "……私が、何を？", pose: "surprised" },
     { character: "minori", text: "……私が、何を求めていたか、ですか", pose: "thinking" },
@@ -155,6 +168,7 @@ export const scene_04c_report: SceneData = {
 export const scene_04c_ren_enter: SceneData = {
   scene_id: "ch1_s04c_ren_enter",
   type: "dialogue",
+  requires_journal: false,
   messages: [
     { character: "ren", text: "……やっと来れた。ヨアケ探偵社、初めて入るな", pose: "cold" },
     { character: "yu", text: "あ、明智くん。どうしたの", pose: "casual" },
@@ -166,6 +180,7 @@ export const scene_04c_ren_enter: SceneData = {
 export const scene_04c_ren_subchoice: SceneData = {
   scene_id: "ch1_s04c_ren_subchoice",
   type: "choice",
+  requires_journal: false,
   messages: [
     {
       character: "ren",
@@ -203,6 +218,7 @@ export const scene_04c_ren_subchoice: SceneData = {
 export const scene_04c_ren_c1: SceneData = {
   scene_id: "ch1_s04c_ren_c1",
   type: "dialogue",
+  requires_journal: false,
   messages: [
     { character: "ren", text: "……正直な奴だな", pose: "slightly_surprised" },
   ],
@@ -212,6 +228,7 @@ export const scene_04c_ren_c1: SceneData = {
 export const scene_04c_ren_c2: SceneData = {
   scene_id: "ch1_s04c_ren_c2",
   type: "dialogue",
+  requires_journal: false,
   messages: [
     { character: "ren", text: "……そういう綺麗事、俺は好きじゃない", pose: "cold" },
   ],
@@ -221,6 +238,7 @@ export const scene_04c_ren_c2: SceneData = {
 export const scene_04c_ren_c3: SceneData = {
   scene_id: "ch1_s04c_ren_c3",
   type: "dialogue",
+  requires_journal: false,
   messages: [
     { character: "ren", text: "……変な奴だな", pose: "thinking" },
   ],
@@ -232,6 +250,7 @@ export const scene_04c_ren_c3: SceneData = {
 export const scene_04_ren_exit: SceneData = {
   scene_id: "ch1_s04_ren_exit",
   type: "dialogue",
+  requires_journal: false,
   messages: [
     {
       character: "yu",
@@ -252,14 +271,23 @@ export const scene_04_ren_exit: SceneData = {
   next_scene: "ch1_s04_minori_leave",
 };
 
+/** みのりの退場 — v2: highlights で ev_ch1_07 付与（「考えてみます」タップ） */
 export const scene_04_minori_leave: SceneData = {
   scene_id: "ch1_s04_minori_leave",
   type: "dialogue",
+  requires_journal: false,
   messages: [
     {
       character: "minori",
       text: "……少し、考えてみます",
       pose: "thoughtful",
+      highlights: [
+        {
+          word: "考えてみます",
+          evidenceId: "ev_ch1_07",
+          tooltip: "みのりの様子を記録する",
+        },
+      ],
     },
   ],
   next_scene: "ch1_s04_inner_voice",
@@ -268,6 +296,7 @@ export const scene_04_minori_leave: SceneData = {
 export const scene_04_inner_voice: SceneData = {
   scene_id: "ch1_s04_inner_voice",
   type: "narration",
+  requires_journal: false,
   messages: [
     {
       text: "（連は「非効率だ」と言った。速く答えを出して、依頼人を納得させることが仕事だ、という言い方をした。……連は間違ってない気がした。でも、なんかそれだけじゃない気もした）",
@@ -276,13 +305,14 @@ export const scene_04_inner_voice: SceneData = {
   next_scene: "ch1_s04_journal",
 };
 
+/** コマ4末・内省④ — v2: requires_journal: false（任意化） */
 export const scene_04_journal: SceneData = {
   scene_id: "ch1_s04_journal",
   type: "journal",
   messages: [
     {
       character: "chifuka",
-      text: "明智連の言葉、聞こえていましたね。\nあの言葉のどこかに共感しましたか。もしそうなら、なぜだと思いますか",
+      text: "明智連の言葉、聞こえていましたね。\nあの言葉のどこかに共感しましたか。気になったことがあれば、ジャーナルに書いてもいい",
       pose: "gentle",
     },
   ],

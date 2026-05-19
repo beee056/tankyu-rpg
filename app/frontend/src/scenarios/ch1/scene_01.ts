@@ -1,14 +1,16 @@
 import type { SceneData } from "shared-types";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// コマ1「灯台に来た日」— 完全版
+// コマ1「灯台に来た日」— v2完全版
 // 依拠: design/05-chapter1-script.md コマ1 全文
+// v2追加: highlights(ev_ch1_01, ev_ch1_02), requires_journal: false
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** システムナレーション（背景描写） */
 export const scene_01_narration: SceneData = {
   scene_id: "ch1_s01_narration",
   type: "narration",
+  requires_journal: false,
   messages: [
     {
       text: "坂の中腹に、少し傾いた白い建物がある。\nかつては洋菓子屋だったらしく、\n入口のドアには古いガラスがはまっていて、\n光の角度によっては「ヨアケ」という文字が逆に透けて見える。",
@@ -24,6 +26,7 @@ export const scene_01_narration: SceneData = {
 export const scene_01_chifuka_welcome: SceneData = {
   scene_id: "ch1_s01_chifuka_welcome",
   type: "dialogue",
+  requires_journal: false,
   messages: [
     {
       character: "chifuka",
@@ -38,6 +41,7 @@ export const scene_01_chifuka_welcome: SceneData = {
 export const scene_01_motivation_choice: SceneData = {
   scene_id: "ch1_s01_motivation_choice",
   type: "choice",
+  requires_journal: false,
   messages: [],
   choices: [
     {
@@ -71,6 +75,7 @@ export const scene_01_motivation_choice: SceneData = {
 export const scene_01_chifuka_react_a: SceneData = {
   scene_id: "ch1_s01_chifuka_react_a",
   type: "dialogue",
+  requires_journal: false,
   messages: [
     {
       character: "chifuka",
@@ -85,6 +90,7 @@ export const scene_01_chifuka_react_a: SceneData = {
 export const scene_01_chifuka_react_b: SceneData = {
   scene_id: "ch1_s01_chifuka_react_b",
   type: "dialogue",
+  requires_journal: false,
   messages: [
     {
       character: "chifuka",
@@ -104,6 +110,7 @@ export const scene_01_chifuka_react_b: SceneData = {
 export const scene_01_chifuka_react_c: SceneData = {
   scene_id: "ch1_s01_chifuka_react_c",
   type: "dialogue",
+  requires_journal: false,
   messages: [
     {
       character: "chifuka",
@@ -123,6 +130,7 @@ export const scene_01_chifuka_react_c: SceneData = {
 export const scene_01_chifuka_react_d: SceneData = {
   scene_id: "ch1_s01_chifuka_react_d",
   type: "dialogue",
+  requires_journal: false,
   messages: [
     {
       character: "chifuka",
@@ -142,6 +150,7 @@ export const scene_01_chifuka_react_d: SceneData = {
 export const scene_01_yu_enter: SceneData = {
   scene_id: "ch1_s01_yu_enter",
   type: "dialogue",
+  requires_journal: false,
   messages: [
     {
       character: "yu",
@@ -166,6 +175,7 @@ export const scene_01_yu_enter: SceneData = {
 export const scene_01_coffee_choice: SceneData = {
   scene_id: "ch1_s01_coffee_choice",
   type: "choice",
+  requires_journal: false,
   messages: [
     {
       character: "chifuka",
@@ -190,6 +200,7 @@ export const scene_01_coffee_choice: SceneData = {
 export const scene_01_coffee_react_a: SceneData = {
   scene_id: "ch1_s01_coffee_react_a",
   type: "dialogue",
+  requires_journal: false,
   messages: [
     {
       character: "chifuka",
@@ -203,6 +214,7 @@ export const scene_01_coffee_react_a: SceneData = {
 export const scene_01_coffee_react_b: SceneData = {
   scene_id: "ch1_s01_coffee_react_b",
   type: "dialogue",
+  requires_journal: false,
   messages: [
     {
       character: "chifuka",
@@ -217,6 +229,7 @@ export const scene_01_coffee_react_b: SceneData = {
 export const scene_01_akira_enter: SceneData = {
   scene_id: "ch1_s01_akira_enter",
   type: "dialogue",
+  requires_journal: false,
   messages: [
     {
       character: "akira",
@@ -251,6 +264,7 @@ export const scene_01_akira_enter: SceneData = {
 export const scene_01_inner_voice_1: SceneData = {
   scene_id: "ch1_s01_inner_voice_1",
   type: "narration",
+  requires_journal: false,
   messages: [
     {
       text: "（この人が、御堂 煌。ヨアケ探偵社の所長。……聞くことが仕事の第一歩、か）",
@@ -259,15 +273,23 @@ export const scene_01_inner_voice_1: SceneData = {
   next_scene: "ch1_s01_minori_enter",
 };
 
-/** みのりの来訪 */
+/** みのりの来訪 — v2: highlights で ev_ch1_01 付与 */
 export const scene_01_minori_enter: SceneData = {
   scene_id: "ch1_s01_minori_enter",
   type: "dialogue",
+  requires_journal: false,
   messages: [
     {
       character: "minori",
       text: "……あの、ここ、ヨアケ探偵社、ですよね",
       pose: "anxious",
+      highlights: [
+        {
+          word: "ヨアケ探偵社",
+          evidenceId: "ev_ch1_01",
+          tooltip: "依頼人のようすを記録する",
+        },
+      ],
     },
     {
       character: "chifuka",
@@ -293,10 +315,11 @@ export const scene_01_minori_enter: SceneData = {
   next_scene: "ch1_s01_akira_listen",
 };
 
-/** みのりの話 */
+/** みのりの話 — v2: highlights で ev_ch1_02 付与 */
 export const scene_01_akira_listen: SceneData = {
   scene_id: "ch1_s01_akira_listen",
   type: "dialogue",
+  requires_journal: false,
   messages: [
     {
       character: "akira",
@@ -327,6 +350,13 @@ export const scene_01_akira_listen: SceneData = {
       character: "minori",
       text: "変ですよね。確認すればいいだけなのに",
       pose: "self_deprecating",
+      highlights: [
+        {
+          word: "変ですよね",
+          evidenceId: "ev_ch1_02",
+          tooltip: "この言葉に何かある",
+        },
+      ],
     },
     {
       character: "akira",
@@ -356,6 +386,7 @@ export const scene_01_akira_listen: SceneData = {
 export const scene_01_inner_voice_2: SceneData = {
   scene_id: "ch1_s01_inner_voice_2",
   type: "narration",
+  requires_journal: false,
   messages: [
     {
       text: "（御堂は……みのりの話を聞いて、「本当の問いは何？」と言った。みのりが持ち込んだのは、友達への疑いのはずなのに）",
@@ -367,20 +398,20 @@ export const scene_01_inner_voice_2: SceneData = {
   next_scene: "ch1_s01_journal",
 };
 
-/** コマ1末・内省① */
+/** コマ1末・内省① — v2: requires_journal: false（任意化） */
 export const scene_01_journal: SceneData = {
   scene_id: "ch1_s01_journal",
   type: "journal",
   messages: [
     {
       character: "chifuka",
-      text: "……みのりが本当に求めていたものは、何だと思いますか",
+      text: "……みのりが本当に求めていたものは、何だと思いますか（気になったことがあれば、ジャーナルに書いてもいい）",
       pose: "gentle",
     },
   ],
   journal_prompt:
     "みのりが本当に求めていたものは何だと思う？",
-  requires_journal: true,
+  requires_journal: false,
   next_scene: "ch1_s02_narration",
 };
 

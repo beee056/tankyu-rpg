@@ -1,13 +1,18 @@
 import type { SceneData } from "shared-types";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// コマ5「みのりの本音」
+// コマ5「みのりの本音」— v2完全版
 // 依拠: design/05-chapter1-script.md コマ5 全文
+// v2追加:
+//   みのりの「怖かった」セリフ: highlights で ev_ch1_06 救済付与
+//   「もっと深く調べる」: requiredEvidence [ev_ch1_05] 追加
+//   journal_close / journal_dig: requires_journal: false（任意化）
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const scene_05_narration: SceneData = {
   scene_id: "ch1_s05_narration",
   type: "narration",
+  requires_journal: false,
   messages: [
     {
       text: "みのりが、もう一度来た。\n呼ばれたわけじゃなく、自分から。\n知深がコーヒーを二つ置いた。",
@@ -22,6 +27,7 @@ export const scene_05_narration: SceneData = {
 export const scene_05_minori_speaks: SceneData = {
   scene_id: "ch1_s05_minori_speaks",
   type: "dialogue",
+  requires_journal: false,
   messages: [
     {
       character: "minori",
@@ -40,8 +46,16 @@ export const scene_05_minori_speaks: SceneData = {
     },
     {
       character: "minori",
+      // v2: ev_ch1_06 未取得の場合の救済ハイライト
       text: "……私、何が怖かったんだろう、って",
       pose: "looking_down",
+      highlights: [
+        {
+          word: "怖かった",
+          evidenceId: "ev_ch1_06",
+          tooltip: "みのりの恐れの核心",
+        },
+      ],
     },
     {
       character: "minori",
@@ -70,6 +84,7 @@ export const scene_05_minori_speaks: SceneData = {
 export const scene_05_response_choice: SceneData = {
   scene_id: "ch1_s05_response_choice",
   type: "choice",
+  requires_journal: false,
   messages: [],
   choices: [
     {
@@ -93,6 +108,7 @@ export const scene_05_response_choice: SceneData = {
 export const scene_05a_react: SceneData = {
   scene_id: "ch1_s05a_react",
   type: "dialogue",
+  requires_journal: false,
   messages: [
     {
       character: "minori",
@@ -106,6 +122,7 @@ export const scene_05a_react: SceneData = {
 export const scene_05b_react: SceneData = {
   scene_id: "ch1_s05b_react",
   type: "dialogue",
+  requires_journal: false,
   messages: [
     {
       character: "minori",
@@ -119,6 +136,7 @@ export const scene_05b_react: SceneData = {
 export const scene_05c_react: SceneData = {
   scene_id: "ch1_s05c_react",
   type: "dialogue",
+  requires_journal: false,
   messages: [
     {
       character: "minori",
@@ -132,6 +150,7 @@ export const scene_05c_react: SceneData = {
 export const scene_05_minori_resolve: SceneData = {
   scene_id: "ch1_s05_minori_resolve",
   type: "dialogue",
+  requires_journal: false,
   messages: [
     {
       character: "minori",
@@ -150,6 +169,7 @@ export const scene_05_minori_resolve: SceneData = {
 export const scene_05_inner_voice_1: SceneData = {
   scene_id: "ch1_s05_inner_voice_1",
   type: "narration",
+  requires_journal: false,
   messages: [
     {
       text: "（みのりの「本当の問い」は……最初に考えていたものと、変わった気がする）",
@@ -163,6 +183,7 @@ export const scene_05_inner_voice_1: SceneData = {
 export const scene_05_qcard_choice: SceneData = {
   scene_id: "ch1_s05_qcard_choice",
   type: "choice",
+  requires_journal: false,
   messages: [],
   choices: [
     {
@@ -182,6 +203,7 @@ export const scene_05_qcard_choice: SceneData = {
 export const scene_05_rewrite: SceneData = {
   scene_id: "ch1_s05_rewrite",
   type: "question_card",
+  requires_journal: false,
   messages: [
     {
       character: "yu",
@@ -197,6 +219,7 @@ export const scene_05_rewrite: SceneData = {
 export const scene_05_akira_changed: SceneData = {
   scene_id: "ch1_s05_akira_changed",
   type: "dialogue",
+  requires_journal: false,
   messages: [
     {
       character: "akira",
@@ -210,6 +233,7 @@ export const scene_05_akira_changed: SceneData = {
 export const scene_05_akira_challenge: SceneData = {
   scene_id: "ch1_s05_akira_challenge",
   type: "dialogue",
+  requires_journal: false,
   messages: [
     {
       character: "akira",
@@ -225,11 +249,12 @@ export const scene_05_akira_challenge: SceneData = {
   next_scene: "ch1_s05_case_choice",
 };
 
-// ケースの選択（コア分岐）
+// ケースの選択（コア分岐）— v2: 「もっと深く調べる」に requiredEvidence 追加
 
 export const scene_05_case_choice: SceneData = {
   scene_id: "ch1_s05_case_choice",
   type: "choice",
+  requires_journal: false,
   messages: [
     {
       character: "yu",
@@ -253,12 +278,15 @@ export const scene_05_case_choice: SceneData = {
       label: "もっと深く調べる",
       status_delta: { question_power: 5 },
       flag_updates: [{ key: "ROOT_DIGGER_FLAG", delta: 1 }],
+      // v2: 桐嶋側の証言（ev_ch1_05）が必要
+      requiredEvidence: ["ev_ch1_05"],
+      hint: "桐嶋側の証言がもっと必要かもしれない",
       next_scene: "ch1_s05_journal_dig",
     },
   ],
 };
 
-// 標準ルート（閉じる）
+// 標準ルート（閉じる）— v2: requires_journal: false（任意化）
 
 export const scene_05_journal_close: SceneData = {
   scene_id: "ch1_s05_journal_close",
@@ -266,16 +294,16 @@ export const scene_05_journal_close: SceneData = {
   messages: [
     {
       character: "chifuka",
-      text: "この依頼は、『解決した』と思いますか。\nあなたの言葉で、教えてください",
+      text: "この依頼は、『解決した』と思いますか。\n気になったことがあれば、ジャーナルに書いてもいい",
       pose: "gentle",
     },
   ],
   journal_prompt: "この依頼は、「解決した」と思いますか。あなたの言葉で、教えてください",
-  requires_journal: true,
+  requires_journal: false,
   next_scene: "ch1_s06_narration",
 };
 
-// 深掘りルート（隠しコマ5.5へ）
+// 深掘りルート（隠しコマ5.5へ）— v2: requires_journal: false（任意化）
 
 export const scene_05_journal_dig: SceneData = {
   scene_id: "ch1_s05_journal_dig",
@@ -283,12 +311,12 @@ export const scene_05_journal_dig: SceneData = {
   messages: [
     {
       character: "chifuka",
-      text: "この依頼は、『解決した』と思いますか。\nあなたの言葉で、教えてください",
+      text: "この依頼は、『解決した』と思いますか。\n気になったことがあれば、ジャーナルに書いてもいい",
       pose: "gentle",
     },
   ],
   journal_prompt: "この依頼は、「解決した」と思いますか。あなたの言葉で、教えてください",
-  requires_journal: true,
+  requires_journal: false,
   next_scene: "ch1_s05_5_narration",
 };
 

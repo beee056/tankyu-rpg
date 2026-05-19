@@ -1,13 +1,19 @@
 import type { SceneData } from "shared-types";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// コマ2「情報を集める」
+// コマ2「情報を集める」— v2完全版
 // 依拠: design/05-chapter1-script.md コマ2 全文
+// v2追加:
+//   ルートA: ev_ch1_04a highlights（みのりの「空気が変わった気はしてた」）
+//   ルートB: evidence_grants [ev_ch1_03]
+//   ルートC: evidence_grants [ev_ch1_04, ev_ch1_05]
+//   requires_journal: false
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const scene_02_narration: SceneData = {
   scene_id: "ch1_s02_narration",
   type: "narration",
+  requires_journal: false,
   messages: [
     {
       text: "調査室のコルクボードは大きくて、今は何もない。\n遊が手帳サイズのカードを一枚、主人公に渡した。",
@@ -22,6 +28,7 @@ export const scene_02_narration: SceneData = {
 export const scene_02_yu_intro: SceneData = {
   scene_id: "ch1_s02_yu_intro",
   type: "dialogue",
+  requires_journal: false,
   messages: [
     {
       character: "yu",
@@ -45,6 +52,7 @@ export const scene_02_yu_intro: SceneData = {
 export const scene_02_collect_choice: SceneData = {
   scene_id: "ch1_s02_collect_choice",
   type: "choice",
+  requires_journal: false,
   messages: [],
   choices: [
     {
@@ -57,12 +65,14 @@ export const scene_02_collect_choice: SceneData = {
       key: "B",
       label: "SNS投稿を調べる",
       status_delta: { explore_power: 3 },
+      evidence_grants: ["ev_ch1_03"],
       next_scene: "ch1_s02b_sns_start",
     },
     {
       key: "C",
       label: "親友の側に話を聞く（遊が代行）",
       status_delta: { explore_power: 2, connect_power: 2 },
+      evidence_grants: ["ev_ch1_04", "ev_ch1_05"],
       next_scene: "ch1_s02c_friend_start",
     },
   ],
@@ -73,6 +83,7 @@ export const scene_02_collect_choice: SceneData = {
 export const scene_02a_minori_start: SceneData = {
   scene_id: "ch1_s02a_minori_start",
   type: "dialogue",
+  requires_journal: false,
   messages: [
     {
       character: "yu",
@@ -91,6 +102,7 @@ export const scene_02a_minori_start: SceneData = {
 export const scene_02a_question_choice: SceneData = {
   scene_id: "ch1_s02a_question_choice",
   type: "choice",
+  requires_journal: false,
   messages: [],
   choices: [
     {
@@ -109,6 +121,7 @@ export const scene_02a_question_choice: SceneData = {
 export const scene_02a_react_a1: SceneData = {
   scene_id: "ch1_s02a_react_a1",
   type: "dialogue",
+  requires_journal: false,
   messages: [
     {
       character: "minori",
@@ -119,6 +132,14 @@ export const scene_02a_react_a1: SceneData = {
       character: "minori",
       text: "でも、そのあとから……なんか空気が変わった気はしてた",
       pose: "tense",
+      // v2: ev_ch1_04a のハイライト（ルートA専用証拠）
+      highlights: [
+        {
+          word: "空気が変わった気はしてた",
+          evidenceId: "ev_ch1_04a",
+          tooltip: "文化祭後の変化を記録する",
+        },
+      ],
     },
   ],
   next_scene: "ch1_s02a_minori_more",
@@ -127,6 +148,7 @@ export const scene_02a_react_a1: SceneData = {
 export const scene_02a_react_a2: SceneData = {
   scene_id: "ch1_s02a_react_a2",
   type: "dialogue",
+  requires_journal: false,
   messages: [
     {
       character: "minori",
@@ -145,6 +167,7 @@ export const scene_02a_react_a2: SceneData = {
 export const scene_02a_minori_more: SceneData = {
   scene_id: "ch1_s02a_minori_more",
   type: "dialogue",
+  requires_journal: false,
   messages: [
     {
       character: "minori",
@@ -166,10 +189,12 @@ export const scene_02a_minori_more: SceneData = {
 };
 
 // ── ルートB ──────────────────────────────────────────────────────────────────
+// evidence_grants: ["ev_ch1_03"] は scene_02_collect_choice の選択肢B側で付与済み
 
 export const scene_02b_sns_start: SceneData = {
   scene_id: "ch1_s02b_sns_start",
   type: "dialogue",
+  requires_journal: false,
   messages: [
     {
       character: "yu",
@@ -183,6 +208,7 @@ export const scene_02b_sns_start: SceneData = {
 export const scene_02b_post_display: SceneData = {
   scene_id: "ch1_s02b_post_display",
   type: "narration",
+  requires_journal: false,
   messages: [
     {
       text: "【投稿】\n「いつも自分のことしか考えてない人ってたまにいるよね。一緒にいて疲れるときがある。でもなかなか言えないんだよなあ。難しい。」\n─ 3日前 / いいね12件 / コメント0",
@@ -194,6 +220,7 @@ export const scene_02b_post_display: SceneData = {
 export const scene_02b_yu_analysis: SceneData = {
   scene_id: "ch1_s02b_yu_analysis",
   type: "dialogue",
+  requires_journal: false,
   messages: [
     {
       character: "yu",
@@ -220,10 +247,12 @@ export const scene_02b_yu_analysis: SceneData = {
 };
 
 // ── ルートC ──────────────────────────────────────────────────────────────────
+// evidence_grants: ["ev_ch1_04", "ev_ch1_05"] は scene_02_collect_choice の選択肢C側で付与済み
 
 export const scene_02c_friend_start: SceneData = {
   scene_id: "ch1_s02c_friend_start",
   type: "dialogue",
+  requires_journal: false,
   messages: [
     {
       character: "yu",
@@ -237,6 +266,7 @@ export const scene_02c_friend_start: SceneData = {
 export const scene_02c_yu_returns: SceneData = {
   scene_id: "ch1_s02c_yu_returns",
   type: "dialogue",
+  requires_journal: false,
   messages: [
     {
       character: "yu",
@@ -272,6 +302,7 @@ export const scene_02c_yu_returns: SceneData = {
 export const scene_02_end_common: SceneData = {
   scene_id: "ch1_s02_end_common",
   type: "dialogue",
+  requires_journal: false,
   messages: [
     {
       character: "yu",
@@ -285,6 +316,7 @@ export const scene_02_end_common: SceneData = {
 export const scene_02_inner_voice: SceneData = {
   scene_id: "ch1_s02_inner_voice",
   type: "narration",
+  requires_journal: false,
   messages: [
     {
       text: "（情報カードが何枚かある。でもこれで何がわかったんだろう。みのりの友達は本当に、みのりのことが嫌いなのか。それとも——）",
@@ -293,19 +325,20 @@ export const scene_02_inner_voice: SceneData = {
   next_scene: "ch1_s02_journal",
 };
 
+/** コマ2末・内省② — v2: requires_journal: false（任意化） */
 export const scene_02_journal: SceneData = {
   scene_id: "ch1_s02_journal",
   type: "journal",
   messages: [
     {
       character: "chifuka",
-      text: "集めた情報の中で、一番気になったのはどれですか。なぜそれが気になりましたか",
+      text: "集めた情報の中で、一番気になったのはどれですか。気になったことがあれば、ジャーナルに書いてもいい",
       pose: "gentle",
     },
   ],
   journal_prompt:
     "集めた情報で一番気になったのはどれ？なぜそれが気になった？",
-  requires_journal: true,
+  requires_journal: false,
   next_scene: "ch1_s03_narration",
 };
 
