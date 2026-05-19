@@ -271,6 +271,22 @@ export default function PlayPage() {
     }
   }, [scene]);
 
+  // ── v2: special next_scene routing helper ─────────────────────────────
+  const navigateToNextScene = useCallback(
+    (nextScene: string | undefined) => {
+      if (!nextScene) return;
+      if (nextScene === "CHAPTER_END") {
+        navigate("/dashboard");
+      } else if (nextScene === "deduction_ch1") {
+        navigate("/deduction/ch1");
+      } else if (SCENE_MAP[nextScene]) {
+        setSceneKey(nextScene);
+        setMsgIndex(0);
+      }
+    },
+    [navigate]
+  );
+
   const advanceMessage = useCallback(() => {
     if (!scene) return;
 
@@ -288,14 +304,9 @@ export default function PlayPage() {
       scene.type !== "question_card" &&
       scene.type !== "cork_board"
     ) {
-      if (scene.next_scene === "CHAPTER_END") {
-        navigate("/dashboard");
-      } else if (scene.next_scene && SCENE_MAP[scene.next_scene]) {
-        setSceneKey(scene.next_scene);
-        setMsgIndex(0);
-      }
+      navigateToNextScene(scene.next_scene);
     }
-  }, [scene, msgIndex, typewriterDone, navigate]);
+  }, [scene, msgIndex, typewriterDone, navigateToNextScene]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -333,13 +344,7 @@ export default function PlayPage() {
       choice_key: choice.key,
     }).catch(() => {});
 
-    const next = choice.next_scene;
-    if (next === "CHAPTER_END") {
-      navigate("/dashboard");
-    } else if (next && SCENE_MAP[next]) {
-      setSceneKey(next);
-      setMsgIndex(0);
-    }
+    navigateToNextScene(choice.next_scene);
   }
 
   async function handleJournalSave() {
@@ -387,12 +392,7 @@ export default function PlayPage() {
   }
 
   function handleContinueFromJournal() {
-    if (scene?.next_scene === "CHAPTER_END") {
-      navigate("/dashboard");
-    } else if (scene?.next_scene && SCENE_MAP[scene.next_scene]) {
-      setSceneKey(scene.next_scene!);
-      setMsgIndex(0);
-    }
+    navigateToNextScene(scene?.next_scene);
     setJournalSaved(false);
     setJournalText("");
   }
@@ -400,12 +400,7 @@ export default function PlayPage() {
   function handleSkipJournal() {
     setJournalSaved(false);
     setJournalText("");
-    if (scene?.next_scene === "CHAPTER_END") {
-      navigate("/dashboard");
-    } else if (scene?.next_scene && SCENE_MAP[scene.next_scene]) {
-      setSceneKey(scene.next_scene!);
-      setMsgIndex(0);
-    }
+    navigateToNextScene(scene?.next_scene);
   }
 
   if (!scene) {
@@ -800,10 +795,7 @@ export default function PlayPage() {
                 <button
                   onClick={() => {
                     updateStatus({ connect_power: 3 });
-                    if (scene.next_scene && SCENE_MAP[scene.next_scene]) {
-                      setSceneKey(scene.next_scene);
-                      setMsgIndex(0);
-                    }
+                    navigateToNextScene(scene.next_scene);
                   }}
                   className="bg-yoake-accent hover:bg-yoake-accent-hover text-yoake-bg text-sm px-5 py-2 transition-colors font-ui tracking-widest"
                   style={{ borderRadius: 0, minHeight: "44px" }}
