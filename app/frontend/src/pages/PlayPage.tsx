@@ -4,9 +4,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useGameStore } from "@/stores/gameStore";
 import { usePlayerStore } from "@/stores/playerStore";
 import { useJournalStore } from "@/stores/journalStore";
+import { useEvidenceStore } from "@/stores/evidenceStore";
 import { api } from "@/lib/api";
 import { CHAPTER1_SCENE_MAP as SCENE_MAP, CHAPTER1_START_SCENE } from "@/scenarios/ch1";
 import type { SceneData, SceneMessage, CharacterId } from "shared-types";
+import { EvidenceBadge } from "@/components/EvidenceBadge";
+import EvidenceBoardModal from "@/components/EvidenceBoardModal";
+import { renderWithHighlights } from "@/components/HighlightSpan";
 
 // ── キャラクター表示名 ──────────────────────────────────────────────────────
 const CHAR_NAMES: Record<CharacterId, string> = {
@@ -34,9 +38,11 @@ const CHARS_PER_SEC = 30;
 // ─────────────────────────────────────────────────────────────────────────────
 function TypewriterText({
   text,
+  highlights,
   onComplete,
 }: {
   text: string;
+  highlights?: SceneMessage["highlights"];
   onComplete: () => void;
 }) {
   const [displayed, setDisplayed] = useState(0);
@@ -67,6 +73,8 @@ function TypewriterText({
     onComplete();
   }, [text, onComplete]);
 
+  const nodes = renderWithHighlights(text, highlights, displayed);
+
   return (
     <span
       className="whitespace-pre-wrap"
@@ -75,11 +83,41 @@ function TypewriterText({
       tabIndex={0}
       onKeyDown={(e) => e.key === " " && showAll()}
     >
-      {text.slice(0, displayed)}
+      {nodes}
       {displayed < text.length && (
         <span className="opacity-0">.</span>
       )}
     </span>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// EvidenceToast — brief animation when evidence is collected
+// ─────────────────────────────────────────────────────────────────────────────
+function EvidenceToast({ title }: { title: string }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -16 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -8 }}
+      transition={{ duration: 0.3 }}
+      className="fixed top-16 left-1/2 z-50 flex flex-col items-center pointer-events-none"
+      style={{ transform: "translateX(-50%)" }}
+    >
+      <div
+        className="px-4 py-2 text-xs font-ui tracking-widest text-center"
+        style={{
+          background: "#EDE3CF",
+          border: "1px solid #C9805E",
+          color: "#C9805E",
+          borderRadius: 0,
+          boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+        }}
+      >
+        <span className="block font-serif text-yoake-text-muted text-xs mb-0.5">証拠を記録した!</span>
+        「{title}」
+      </div>
+    </motion.div>
   );
 }
 
@@ -92,10 +130,10 @@ function CharacterPortrait({ charId }: { charId: CharacterId | undefined }) {
   const imageSrc: string | null = (() => {
     switch (charId) {
       case "akira": return "/assets/characters/midou/midou_02_thinking.png";
-      case "yu":    return "/assets/characters/yu/yu_placeholder.svg";
-      case "chifuka": return "/assets/characters/chifuka/chifuka_placeholder.svg";
-      case "minori":  return "/assets/characters/minori/minori_placeholder.svg";
-      case "ren":     return "/assets/characters/ren/ren_placeholder.svg";
+      case "yu":    return "/assets/characters/yu/yu_01_neutral.png";
+      case "chifuka": return "/assets/characters/chifuka/chifuka_01_neutral.png";
+      case "minori":  return "/assets/characters/minori/minori_01_neutral.png";
+      case "ren":     return "/assets/characters/ren/ren_01_neutral.png";
       default:        return null;
     }
   })();
@@ -143,8 +181,9 @@ export default function PlayPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { updateStatus } = usePlayerStore();
-  const { saveScene, currentSceneKey } = useGameStore();
+  const { saveScene, currentSceneKey, addCollectedEvidenceId } = useGameStore();
   const { addEntry: addJournalEntry } = useJournalStore();
+  const { addEvidence, collectedEvidences } = useEvidenceStore();
 
   // resume フラグ: ダッシュボードの「前回の続き」から来た場合
   const shouldResume =
@@ -169,6 +208,14 @@ export default function PlayPage() {
   const [journalText, setJournalText] = useState("");
   const [journalSaved, setJournalSaved] = useState(false);
 
+  // v2: evidence board open state
+  const [evidenceBoardOpen, setEvidenceBoardOpen] = useState(false);
+
+  // v2: toast for newly collected evidence
+  const [toastTitle, setToastTitle] = useState<string | null>(null);
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const prevEvidenceCountRef = useRef(collectedEvidences.length);
+
   const currentMsg: SceneMessage | undefined = scene?.messages?.[msgIndex];
 
   // ── シーンキーをストアに保存（進捗永続化）──────────────────────────────
@@ -177,6 +224,31 @@ export default function PlayPage() {
       saveScene(sceneKey);
     }
   }, [sceneKey, saveScene]);
+
+  // ── v2: auto_evidence — シーン入場時に自動付与 ────────────────────────
+  useEffect(() => {
+    if (scene?.auto_evidence && scene.auto_evidence.length > 0) {
+      for (const id of scene.auto_evidence) {
+        addEvidence(id);
+        addCollectedEvidenceId(id);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sceneKey]);
+
+  // ── v2: watch for newly collected evidences → show toast ─────────────
+  useEffect(() => {
+    const current = collectedEvidences.length;
+    if (current > prevEvidenceCountRef.current) {
+      const newest = collectedEvidences[current - 1];
+      if (newest) {
+        if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+        setToastTitle(newest.title);
+        toastTimerRef.current = setTimeout(() => setToastTitle(null), 2500);
+      }
+    }
+    prevEvidenceCountRef.current = current;
+  }, [collectedEvidences]);
 
   useEffect(() => {
     setTypewriterDone(false);
@@ -227,6 +299,7 @@ export default function PlayPage() {
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
+      if (evidenceBoardOpen) return;
       if (e.key === "Enter" || e.key === " " || e.key === "ArrowRight") {
         e.preventDefault();
         advanceMessage();
@@ -234,7 +307,7 @@ export default function PlayPage() {
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [advanceMessage]);
+  }, [advanceMessage, evidenceBoardOpen]);
 
   function handleChoice(choice: NonNullable<SceneData["choices"]>[number]) {
     if (choice.status_delta) {
@@ -244,6 +317,14 @@ export default function PlayPage() {
       for (const fu of choice.flag_updates) {
         if (fu.key.includes("QUESTION")) updateStatus({ question_power: fu.delta });
         else if (fu.key.includes("EXPLORE")) updateStatus({ explore_power: fu.delta });
+      }
+    }
+
+    // v2: evidence_grants — add evidence when choice is made
+    if (choice.evidence_grants && choice.evidence_grants.length > 0) {
+      for (const id of choice.evidence_grants) {
+        addEvidence(id);
+        addCollectedEvidenceId(id);
       }
     }
 
@@ -316,6 +397,17 @@ export default function PlayPage() {
     setJournalText("");
   }
 
+  function handleSkipJournal() {
+    setJournalSaved(false);
+    setJournalText("");
+    if (scene?.next_scene === "CHAPTER_END") {
+      navigate("/dashboard");
+    } else if (scene?.next_scene && SCENE_MAP[scene.next_scene]) {
+      setSceneKey(scene.next_scene!);
+      setMsgIndex(0);
+    }
+  }
+
   if (!scene) {
     return (
       <main className="min-h-screen bg-yoake-bg paper-texture flex items-center justify-center">
@@ -332,6 +424,9 @@ export default function PlayPage() {
   const isQuestionCard = scene.type === "question_card";
   const isCorkBoard = scene.type === "cork_board";
   const isInputScene = isJournal || isQuestionCard;
+
+  // v2: requires_journal defaults to true for backward compat
+  const requiresJournal = scene.requires_journal !== false;
 
   // Dynamic header: derive コマ number from sceneKey
   const komaLabel = (() => {
@@ -359,23 +454,32 @@ export default function PlayPage() {
           ← 事務所に戻る
         </button>
         <div className="text-xs text-yoake-text-muted font-serif">{komaLabel}</div>
-        <div className="flex items-center gap-1 text-xs text-yoake-accent">
-          <span
-            className="w-1.5 h-1.5 bg-yoake-accent animate-pulse-soft"
-            style={{ borderRadius: 0 }}
-          />
-          <span className="font-serif">保存済み</span>
+        <div className="flex items-center gap-2">
+          {/* v2: evidence badge */}
+          <EvidenceBadge onOpen={() => setEvidenceBoardOpen(true)} />
+          <div className="flex items-center gap-1 text-xs text-yoake-accent">
+            <span
+              className="w-1.5 h-1.5 bg-yoake-accent animate-pulse-soft"
+              style={{ borderRadius: 0 }}
+            />
+            <span className="font-serif hidden sm:inline">保存済み</span>
+          </div>
         </div>
       </header>
+
+      {/* ── 証拠取得トースト ── */}
+      <AnimatePresence>
+        {toastTitle && <EvidenceToast key="evidence-toast" title={toastTitle} />}
+      </AnimatePresence>
 
       {/* ── 背景エリア ── */}
       <div
         className="relative flex-1 flex flex-col overflow-hidden"
         onClick={() =>
-          !isChoice && !isInputScene && !isCorkBoard && advanceMessage()
+          !isChoice && !isInputScene && !isCorkBoard && !evidenceBoardOpen && advanceMessage()
         }
         style={{
-          cursor: isChoice || isInputScene || isCorkBoard ? "default" : "pointer",
+          cursor: isChoice || isInputScene || isCorkBoard || evidenceBoardOpen ? "default" : "pointer",
         }}
       >
         <div
@@ -422,6 +526,7 @@ export default function PlayPage() {
                   >
                     <TypewriterText
                       text={currentMsg.text}
+                      highlights={currentMsg.highlights}
                       onComplete={() => setTypewriterDone(true)}
                     />
                   </p>
@@ -452,6 +557,7 @@ export default function PlayPage() {
                     >
                       <TypewriterText
                         text={currentMsg.text}
+                        highlights={currentMsg.highlights}
                         onComplete={() => setTypewriterDone(true)}
                       />
                     </p>
@@ -487,6 +593,7 @@ export default function PlayPage() {
                       >
                         <TypewriterText
                           text={currentMsg.text}
+                          highlights={currentMsg.highlights}
                           onComplete={() => setTypewriterDone(true)}
                         />
                       </p>
@@ -518,32 +625,51 @@ export default function PlayPage() {
               animate={{ opacity: 1, y: 0 }}
               className="space-y-2 mt-1"
             >
-              {scene.choices?.map((choice) => (
-                <button
-                  key={choice.key}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleChoice(choice);
-                  }}
-                  className="w-full text-left bg-yoake-dialog-bg text-yoake-bg hover:bg-opacity-80 transition-all text-sm active:scale-95 px-4 py-3"
-                  style={{
-                    fontFamily: "'DotGothic16', monospace",
-                    border: "2px solid #C9B99A",
-                    outline: "1px solid #C9B99A",
-                    outlineOffset: "-5px",
-                    borderRadius: 0,
-                    minHeight: "44px",
-                  }}
-                >
-                  <span
-                    className="text-yoake-warm text-xs mr-2"
-                    style={{ fontFamily: "'DotGothic16', monospace" }}
+              {scene.choices?.map((choice) => {
+                // v2: requiredEvidence check — disable button if evidence is missing
+                const missingRequired =
+                  choice.requiredEvidence && choice.requiredEvidence.length > 0
+                    ? choice.requiredEvidence.some(
+                        (id) => !collectedEvidences.some((e) => e.id === id)
+                      )
+                    : false;
+
+                return (
+                  <button
+                    key={choice.key}
+                    disabled={missingRequired}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (!missingRequired) handleChoice(choice);
+                    }}
+                    className="w-full text-left bg-yoake-dialog-bg text-yoake-bg hover:bg-opacity-80 transition-all text-sm active:scale-95 px-4 py-3 disabled:opacity-40 disabled:cursor-not-allowed"
+                    style={{
+                      fontFamily: "'DotGothic16', monospace",
+                      border: "2px solid #C9B99A",
+                      outline: "1px solid #C9B99A",
+                      outlineOffset: "-5px",
+                      borderRadius: 0,
+                      minHeight: "44px",
+                    }}
                   >
-                    {choice.key}.
-                  </span>
-                  {choice.label}
-                </button>
-              ))}
+                    <span
+                      className="text-yoake-warm text-xs mr-2"
+                      style={{ fontFamily: "'DotGothic16', monospace" }}
+                    >
+                      {choice.key}.
+                    </span>
+                    {choice.label}
+                    {missingRequired && choice.hint && (
+                      <span
+                        className="block text-xs mt-1 italic"
+                        style={{ color: "#8B9DAE" }}
+                      >
+                        {choice.hint}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
             </motion.div>
           )}
 
@@ -560,6 +686,11 @@ export default function PlayPage() {
                 <>
                   <p className="text-yoake-text-muted text-xs mb-1 tracking-wide font-ui">
                     {isQuestionCard ? "問いカード" : "内省ジャーナル"}
+                    {!requiresJournal && (
+                      <span className="ml-2 text-xs" style={{ color: "#8B9DAE" }}>
+                        （任意）
+                      </span>
+                    )}
                   </p>
                   {/* ── コマ見出し + プロンプト固定表示（文脈明確化）── */}
                   <div
@@ -596,14 +727,26 @@ export default function PlayPage() {
                   {journalText.length}字
                 </span>
                 {!journalSaved ? (
-                  <button
-                    disabled={journalText.trim().length === 0}
-                    onClick={handleJournalSave}
-                    className="bg-yoake-accent hover:bg-yoake-accent-hover text-yoake-bg text-sm px-5 py-2 transition-colors disabled:opacity-40 font-ui tracking-widest"
-                    style={{ borderRadius: 0, minHeight: "44px" }}
-                  >
-                    {isQuestionCard ? "書く" : "記録する"}
-                  </button>
+                  <div className="flex items-center gap-2">
+                    {/* v2: スキップボタン — requires_journal: false のシーンは常に表示 */}
+                    {(!requiresJournal || isJournal) && (
+                      <button
+                        onClick={handleSkipJournal}
+                        className="text-yoake-text-muted hover:text-yoake-text-secondary text-xs font-serif transition-colors"
+                        style={{ minHeight: "44px", padding: "0 8px" }}
+                      >
+                        スキップ
+                      </button>
+                    )}
+                    <button
+                      disabled={journalText.trim().length === 0}
+                      onClick={handleJournalSave}
+                      className="bg-yoake-accent hover:bg-yoake-accent-hover text-yoake-bg text-sm px-5 py-2 transition-colors disabled:opacity-40 font-ui tracking-widest"
+                      style={{ borderRadius: 0, minHeight: "44px" }}
+                    >
+                      {isQuestionCard ? "書く" : "記録する"}
+                    </button>
+                  </div>
                 ) : (
                   <div className="flex flex-col gap-2 items-end">
                     {isJournal && (
@@ -672,6 +815,12 @@ export default function PlayPage() {
           )}
         </div>
       </div>
+
+      {/* ── v2: 証拠ボードモーダル ── */}
+      <EvidenceBoardModal
+        isOpen={evidenceBoardOpen}
+        onClose={() => setEvidenceBoardOpen(false)}
+      />
     </main>
   );
 }
