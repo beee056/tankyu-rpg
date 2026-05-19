@@ -250,12 +250,12 @@ export const scene_03_journal: SceneData = {
   messages: [
     {
       character: "chifuka",
-      text: "あなた自身も、誰かとのすれ違いで傷ついたことはありますか。\nそのとき、あなたの『本当の問い』は何だったと思いますか",
+      text: "自分自身のすれ違い体験を思い浮かべて。そのとき、あなたの「本当の問い」は何だったと思いますか",
       pose: "gentle",
     },
   ],
   journal_prompt:
-    "あなた自身も、誰かとのすれ違いで傷ついたことはありますか。そのとき、あなたの「本当の問い」は何だったと思いますか",
+    "自分のすれ違い体験で、本当の問いは何だったと思う？",
   requires_journal: true,
   next_scene: "ch1_s04_narration",
 };

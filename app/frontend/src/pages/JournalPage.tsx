@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { api } from "@/lib/api";
+import { useJournalStore } from "@/stores/journalStore";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -206,6 +207,7 @@ export default function JournalPage() {
   const location = useLocation();
 
   const state = (location.state ?? null) as LocationState | null;
+  const { entries, questionCards } = useJournalStore();
 
   const [activeTab, setActiveTab] = useState<"chat" | "log" | "chart">("chat");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -410,19 +412,113 @@ export default function JournalPage() {
 
       {/* ── ジャーナル全文タブ ── */}
       {activeTab === "log" && (
-        <div className="max-w-3xl mx-auto px-6 py-10 w-full">
-          <p className="text-center text-yoake-text-muted py-16 font-serif text-sm">
-            ゲームを進めると記録が残ります。
-          </p>
+        <div className="flex-1 overflow-y-auto max-w-3xl mx-auto px-4 sm:px-6 py-6 w-full">
+          {entries.length === 0 ? (
+            <p className="text-center text-yoake-text-muted py-16 font-serif text-sm">
+              ゲームを進めると記録が残ります。（保存件数: 0件）
+            </p>
+          ) : (
+            <div className="space-y-6">
+              <p className="text-yoake-text-muted text-xs font-ui tracking-widest mb-2">
+                保存件数: {entries.length}件
+              </p>
+              {entries.map((entry, i) => (
+                <motion.div
+                  key={entry.entry_id}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.05 }}
+                  className="bg-yoake-bg-card p-4"
+                  style={{ border: "1px solid rgba(201,185,154,0.4)", borderRadius: 0 }}
+                >
+                  {entry.prompt_text && (
+                    <p className="text-yoake-text-muted text-xs font-serif italic mb-2 pb-2"
+                      style={{ borderBottom: "1px solid rgba(201,185,154,0.2)" }}>
+                      問い: {entry.prompt_text}
+                    </p>
+                  )}
+                  <p className="text-yoake-ink text-sm font-serif leading-relaxed whitespace-pre-wrap">
+                    {entry.content}
+                  </p>
+                  <p className="text-yoake-text-muted text-xs font-ui mt-2 text-right">
+                    {entry.scene_id} · {new Date(entry.created_at).toLocaleString("ja-JP")}
+                  </p>
+                </motion.div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
       {/* ── 問いの進化ログタブ ── */}
       {activeTab === "chart" && (
-        <div className="max-w-3xl mx-auto px-6 py-10 w-full">
-          <p className="text-center text-yoake-text-muted py-16 font-serif text-sm">
-            問いカードが作られると、ここに進化の記録が残ります。
-          </p>
+        <div className="flex-1 overflow-y-auto max-w-3xl mx-auto px-4 sm:px-6 py-6 w-full">
+          {entries.length === 0 && questionCards.length === 0 ? (
+            <p className="text-center text-yoake-text-muted py-16 font-serif text-sm">
+              問いカードが作られると、ここに進化の記録が残ります。
+            </p>
+          ) : (
+            <div className="space-y-4">
+              <p className="text-yoake-text-muted text-xs font-ui tracking-widest mb-4">
+                問いの進化ログ — コマ順
+              </p>
+              {/* ジャーナルの問いを時系列で表示 */}
+              {entries.filter(e => e.prompt_text).map((entry, i) => (
+                <motion.div
+                  key={entry.entry_id}
+                  initial={{ opacity: 0, x: -6 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.06 }}
+                  className="flex items-start gap-3"
+                >
+                  <div
+                    className="flex-shrink-0 w-6 h-6 flex items-center justify-center text-xs font-ui text-yoake-accent"
+                    style={{ border: "1px solid #C9B99A", borderRadius: 0 }}
+                  >
+                    {i + 1}
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-yoake-text-secondary text-xs font-serif italic leading-relaxed">
+                      {entry.prompt_text}
+                    </p>
+                    <p className="text-yoake-ink text-sm font-serif leading-relaxed mt-1 whitespace-pre-wrap line-clamp-3">
+                      → {entry.content}
+                    </p>
+                    <p className="text-yoake-text-muted text-xs font-ui mt-1">
+                      {entry.scene_id}
+                    </p>
+                  </div>
+                </motion.div>
+              ))}
+              {/* 問いカードの進化 */}
+              {questionCards.length > 0 && (
+                <div className="mt-6 pt-4" style={{ borderTop: "1px solid rgba(201,185,154,0.3)" }}>
+                  <p className="text-yoake-text-muted text-xs font-ui tracking-widest mb-3">
+                    問いカード履歴
+                  </p>
+                  {questionCards.map((card, i) => (
+                    <motion.div
+                      key={card.card_id}
+                      initial={{ opacity: 0, x: -6 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.06 }}
+                      className="flex items-start gap-3 mb-3"
+                    >
+                      <div
+                        className="flex-shrink-0 w-6 h-6 flex items-center justify-center text-xs font-ui text-sky-400"
+                        style={{ border: "1px solid #38bdf8", borderRadius: 0 }}
+                      >
+                        Q
+                      </div>
+                      <p className="text-yoake-ink text-sm font-serif leading-relaxed">
+                        {card.question_text}
+                      </p>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
     </main>

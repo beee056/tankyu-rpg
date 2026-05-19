@@ -3,6 +3,8 @@ import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGameStore } from "@/stores/gameStore";
 import { usePlayerStore } from "@/stores/playerStore";
+import { useJournalStore } from "@/stores/journalStore";
+import { api } from "@/lib/api";
 import { CHAPTER1_SCENE_MAP as SCENE_MAP, CHAPTER1_START_SCENE } from "@/scenarios/ch1";
 import type { SceneData, SceneMessage, CharacterId } from "shared-types";
 
@@ -142,6 +144,7 @@ export default function PlayPage() {
   const location = useLocation();
   const { updateStatus } = usePlayerStore();
   const { saveScene, currentSceneKey } = useGameStore();
+  const { addEntry: addJournalEntry } = useJournalStore();
 
   // resume フラグ: ダッシュボードの「前回の続き」から来た場合
   const shouldResume =
@@ -244,13 +247,9 @@ export default function PlayPage() {
       }
     }
 
-    fetch("/api/choices", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        scene_id: scene?.scene_id,
-        choice_key: choice.key,
-      }),
+    api.post("/api/choices", {
+      scene_id: scene?.scene_id,
+      choice_key: choice.key,
     }).catch(() => {});
 
     const next = choice.next_scene;
@@ -264,15 +263,29 @@ export default function PlayPage() {
 
   async function handleJournalSave() {
     if (!journalText.trim()) return;
-    fetch("/api/journals", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        scene_id: scene?.scene_id,
-        content: journalText,
-        prompt_text: scene?.journal_prompt ?? "",
-      }),
+
+    // ローカルstoreに保存（FB3対応: ジャーナル全文・問いの進化ログ表示用）
+    addJournalEntry({
+      entry_id: `local-${Date.now()}`,
+      player_id: "local",
+      scene_id: scene?.scene_id ?? "",
+      prompt_text: scene?.journal_prompt ?? "",
+      content: journalText,
+      word_count: journalText.length,
+      has_self_ref: false,
+      ai_response: null,
+      play_count: 1,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    });
+
+    // バックエンドへの保存（fire and forget、失敗してもUI継続）
+    api.post("/api/journals", {
+      scene_id: scene?.scene_id,
+      content: journalText,
+      prompt_text: scene?.journal_prompt ?? "",
     }).catch(() => {});
+
     setJournalSaved(true);
   }
 

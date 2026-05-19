@@ -299,12 +299,12 @@ export const scene_02_journal: SceneData = {
   messages: [
     {
       character: "chifuka",
-      text: "集めた情報の中で、一番気になったのはどれですか。\nそして、それはなぜですか",
+      text: "集めた情報の中で、一番気になったのはどれですか。なぜそれが気になりましたか",
       pose: "gentle",
     },
   ],
   journal_prompt:
-    "集めた情報の中で、一番気になったのはどれですか。そして、それはなぜですか",
+    "集めた情報で一番気になったのはどれ？なぜそれが気になった？",
   requires_journal: true,
   next_scene: "ch1_s03_narration",
 };

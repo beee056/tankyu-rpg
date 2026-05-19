@@ -5,3 +5,4 @@
 ANTHROPIC_API_KEY=sk-ant-YOUR_KEY_HERE
 JWT_SECRET=dev-jwt-secret-change-in-production
 RESEND_API_KEY=re_YOUR_KEY_HERE
+FRONTEND_URL=http://localhost:5173

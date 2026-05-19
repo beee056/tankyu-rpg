@@ -374,12 +374,12 @@ export const scene_01_journal: SceneData = {
   messages: [
     {
       character: "chifuka",
-      text: "……みのりの話を聞いて、あなたはどう感じましたか。\nみのりが本当に答えを求めているのは、何だと思いますか",
+      text: "……みのりが本当に求めていたものは、何だと思いますか",
       pose: "gentle",
     },
   ],
   journal_prompt:
-    "みのりの話を聞いて、あなたはどう感じましたか。みのりが本当に答えを求めているのは、何だと思いますか",
+    "みのりが本当に求めていたものは何だと思う？",
   requires_journal: true,
   next_scene: "ch1_s02_narration",
 };

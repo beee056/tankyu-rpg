@@ -282,12 +282,12 @@ export const scene_04_journal: SceneData = {
   messages: [
     {
       character: "chifuka",
-      text: "明智連の言葉、聞こえていましたね。\nあなたは、あの言葉に共感した部分がありましたか。\nあったとしたら——なぜだと思いますか",
+      text: "明智連の言葉、聞こえていましたね。\nあの言葉のどこかに共感しましたか。もしそうなら、なぜだと思いますか",
       pose: "gentle",
     },
   ],
   journal_prompt:
-    "明智連の言葉に共感した部分はありましたか。あったとしたら——なぜだと思いますか（スキップ可）",
+    "連の言葉のどこかに共感した？それはなぜ？（スキップ可）",
   requires_journal: false,
   next_scene: "ch1_s05_narration",
 };

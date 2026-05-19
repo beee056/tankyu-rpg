@@ -172,12 +172,12 @@ export const scene_07_journal: SceneData = {
   messages: [
     {
       character: "chifuka",
-      text: "みのりへの返し方について、あなたはどう選びましたか。\nそして——なぜその選択をしたと思いますか",
+      text: "みのりへの返し方——あなたはどう選んで、なぜそう選んだと思いますか",
       pose: "gentle",
     },
   ],
   journal_prompt:
-    "みのりへの返し方について、あなたはどう選びましたか。そして——なぜその選択をしたと思いますか（スキップ可）",
+    "みのりへの返し方を選んだのはなぜ？（スキップ可）",
   requires_journal: false,
   next_scene: "ch1_s08_narration",
 };
