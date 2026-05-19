@@ -1,54 +1,102 @@
 import type { SceneData } from "shared-types";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// コマ2「情報を集める」— v2完全版
+// コマ2「情報を集める」— v2.5演出版
 // 依拠: design/05-chapter1-script.md コマ2 全文
 // v2追加:
 //   ルートA: ev_ch1_04a highlights（みのりの「空気が変わった気はしてた」）
 //   ルートB: evidence_grants [ev_ch1_03]
 //   ルートC: evidence_grants [ev_ch1_04, ev_ch1_05]
 //   requires_journal: false
+// v2.5追加: B16〜B20 演出ディレクティブ
+//   - ch1_s02_collect_choice の各選択肢 next_scene を ch1_s02_to_be_continued に上書き
+//   - ch1_s02_to_be_continued（新規）でデモ終端
+//   NOTE: 後半ルートA/B/C は実装ファイルに残置（到達不可。v2.5では ch1_s02_to_be_continued が終端）
 // ─────────────────────────────────────────────────────────────────────────────
 
+// ── B16 コマタイトル ───────────────────────────────────────────────────────────
+export const scene_02_koma_title: SceneData = {
+  scene_id: "ch1_s02_koma_title",
+  type: "narration",
+  requires_journal: false,
+  messages: [
+    {
+      // B16: 黒背景 crossfade / BGM duck 15% / コマタイトル fadeIn
+      text: "",
+      background: "#0E0A08",
+      bgm: "duck 15 400ms",
+      chapter_title: "コマ 2 / 情報を集める",
+      text_pace: { punctuation_wait_ms: 0, line_pause_ms: 0 },
+    },
+  ],
+  next_scene: "ch1_s02_narration",
+};
+
+// ── B17 調査室・コルクボード ──────────────────────────────────────────────────
 export const scene_02_narration: SceneData = {
   scene_id: "ch1_s02_narration",
   type: "narration",
   requires_journal: false,
   messages: [
     {
+      // B17: bg_office_research (bg_office_interior + tint) / BGM 38% 復帰
       text: "調査室のコルクボードは大きくて、今は何もない。\n遊が手帳サイズのカードを一枚、主人公に渡した。",
+      background: "/assets/backgrounds/bg_office_interior.png",
+      bgm: "ramp 38 1000ms",
+      text_pace: { punctuation_wait_ms: 130, line_pause_ms: 480 },
     },
     {
       text: "「情報カード。気になったことを書いといて。\n何でもいいよ。感覚でも」",
+      text_pace: { punctuation_wait_ms: 110, line_pause_ms: 380 },
     },
   ],
   next_scene: "ch1_s02_yu_intro",
 };
 
+// ── B18 遊の説明 ──────────────────────────────────────────────────────────────
 export const scene_02_yu_intro: SceneData = {
   scene_id: "ch1_s02_yu_intro",
   type: "dialogue",
   requires_journal: false,
   messages: [
     {
+      // B18: yu:casual:center slideIn from-bottom
       character: "yu",
       text: "えーっと、第一弾。何から調べようか、って話なんだけど",
       pose: "casual",
+      character_action: {
+        actor: "yu",
+        action: "slideIn",
+        expression: "casual",
+        position: "center",
+      },
+      text_pace: { punctuation_wait_ms: 110, line_pause_ms: 380 },
     },
     {
       character: "yu",
       text: "選択肢3つある。①みのりにもっと直接話を聞く。②SNSの投稿を俺が引っ張ってくるから、一緒に読む。③親友の子に話を聞く——これは俺が代わりに当たってくる",
       pose: "casual",
+      text_pace: { punctuation_wait_ms: 110, line_pause_ms: 600 },
     },
     {
       character: "yu",
       text: "授業内ってことで今は2つしか選べない。どうする？",
       pose: "listening",
+      character_action: {
+        actor: "yu",
+        action: "none",
+        expression: "listening",
+        position: "center",
+      },
+      text_pace: { punctuation_wait_ms: 110, line_pause_ms: 380 },
     },
   ],
   next_scene: "ch1_s02_collect_choice",
 };
 
+// ── B19 3択提示（デモ終端） ───────────────────────────────────────────────────
+// v2.5: どの選択肢を選んでも next_scene = ch1_s02_to_be_continued
+// フラグ・evidence_grants は既存どおり実行される
 export const scene_02_collect_choice: SceneData = {
   scene_id: "ch1_s02_collect_choice",
   type: "choice",
@@ -59,26 +107,57 @@ export const scene_02_collect_choice: SceneData = {
       key: "A",
       label: "みのりにもっと話を聞く",
       status_delta: { question_power: 3 },
-      next_scene: "ch1_s02a_minori_start",
+      // v2.5: ch1_s02_to_be_continued に上書き（旧: ch1_s02a_minori_start）
+      next_scene: "ch1_s02_to_be_continued",
     },
     {
       key: "B",
       label: "SNS投稿を調べる",
       status_delta: { explore_power: 3 },
       evidence_grants: ["ev_ch1_03"],
-      next_scene: "ch1_s02b_sns_start",
+      // v2.5: ch1_s02_to_be_continued に上書き（旧: ch1_s02b_sns_start）
+      next_scene: "ch1_s02_to_be_continued",
     },
     {
       key: "C",
       label: "親友の側に話を聞く（遊が代行）",
       status_delta: { explore_power: 2, connect_power: 2 },
       evidence_grants: ["ev_ch1_04", "ev_ch1_05"],
-      next_scene: "ch1_s02c_friend_start",
+      // v2.5: ch1_s02_to_be_continued に上書き（旧: ch1_s02c_friend_start）
+      next_scene: "ch1_s02_to_be_continued",
     },
   ],
 };
 
+// ── B20 "To be continued" カード（v2.5 新規） ─────────────────────────────────
+/** B20: 黒 crossfade / 全員 fadeOut / BGM fadeOut / TBC カード表示 → ダッシュボードへ */
+export const scene_02_to_be_continued: SceneData = {
+  scene_id: "ch1_s02_to_be_continued",
+  type: "narration",
+  requires_journal: false,
+  messages: [
+    {
+      text: "",
+      background: "#0E0A08",
+      bgm: "fadeOut 2500ms",
+      chapter_title: "To be continued —\nこのデモはここまで。続きは次章で。",
+      character_action: {
+        actor: "all",
+        action: "fadeOut",
+        expression: undefined,
+        position: undefined,
+      },
+      text_pace: { punctuation_wait_ms: 0, line_pause_ms: 0 },
+    },
+  ],
+  // 遷移: next_scene は使わず、PlayPage 側でダッシュボード戻るボタンを表示する
+  // scene_id = ch1_s02_to_be_continued をチェックして /dashboard へ遷移させること
+  next_scene: undefined,
+};
+
 // ── ルートA ──────────────────────────────────────────────────────────────────
+// NOTE(v2.5): 以下のルートA/B/C は到達不可（ch1_s02_collect_choice が to_be_continued に向いているため）
+// 実装ファイルには残置。将来の v2.6+ で再開時に利用。
 
 export const scene_02a_minori_start: SceneData = {
   scene_id: "ch1_s02a_minori_start",
@@ -344,9 +423,12 @@ export const scene_02_journal: SceneData = {
 
 // ── シーンマップ ──────────────────────────────────────────────────────────────
 export const SCENE_MAP_02: Record<string, SceneData> = {
+  ch1_s02_koma_title: scene_02_koma_title,
   ch1_s02_narration: scene_02_narration,
   ch1_s02_yu_intro: scene_02_yu_intro,
   ch1_s02_collect_choice: scene_02_collect_choice,
+  ch1_s02_to_be_continued: scene_02_to_be_continued,
+  // 以下は v2.5 では到達不可（残置）
   ch1_s02a_minori_start: scene_02a_minori_start,
   ch1_s02a_question_choice: scene_02a_question_choice,
   ch1_s02a_react_a1: scene_02a_react_a1,

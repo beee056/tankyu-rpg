@@ -237,11 +237,41 @@ export interface HighlightDef {
   tooltip?: string;
 }
 
+// ============================================================
+// v2.5: Direction layer —演出ディレクティブ
+// ============================================================
+
+/** 立ち絵の入退場・表情指示 */
+export interface CharacterAction {
+  actor: string;
+  action: "fadeIn" | "slideIn" | "fadeOut" | "none";
+  expression?: string;
+  position?: "left" | "center" | "right";
+}
+
+/** テキスト送りウェイト（ms） */
+export interface TextPace {
+  punctuation_wait_ms?: number;
+  line_pause_ms?: number;
+}
+
 export interface SceneMessage {
   character?: CharacterId;
   text: string;
   pose?: string;
   highlights?: HighlightDef[];
+  /** v2.5: 表示する背景画像パス */
+  background?: string;
+  /** v2.5: BGM操作指示 */
+  bgm?: string;
+  /** v2.5: SEファイル名 */
+  se?: string;
+  /** v2.5: 立ち絵入退場・表情 */
+  character_action?: CharacterAction;
+  /** v2.5: テキスト送りウェイト */
+  text_pace?: TextPace;
+  /** v2.5: 章タイトル・コマタイトル等の特殊演出テキスト */
+  chapter_title?: string;
 }
 
 export interface SceneChoice {
