@@ -404,19 +404,17 @@ export const scene_02_inner_voice: SceneData = {
   next_scene: "ch1_s02_journal",
 };
 
-/** コマ2末・内省② — v2: requires_journal: false（任意化） */
+/** コマ2末・まとめ — requires_journal: false */
 export const scene_02_journal: SceneData = {
   scene_id: "ch1_s02_journal",
-  type: "journal",
+  type: "dialogue",
   messages: [
     {
       character: "chifuka",
-      text: "集めた情報の中で、一番気になったのはどれですか。気になったことがあれば、ジャーナルに書いてもいい",
+      text: "集めた情報の中で、気になったことはありましたか",
       pose: "gentle",
     },
   ],
-  journal_prompt:
-    "集めた情報で一番気になったのはどれ？なぜそれが気になった？",
   requires_journal: false,
   next_scene: "ch1_s03_narration",
 };

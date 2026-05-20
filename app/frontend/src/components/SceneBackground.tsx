@@ -55,6 +55,8 @@ export function SceneBackground({
               backgroundImage: `url(${src})`,
               backgroundSize: "cover",
               backgroundPosition: "center",
+              backgroundColor: "#1E1814",
+              backgroundRepeat: "no-repeat",
               filter: tint ?? undefined,
             }}
           />

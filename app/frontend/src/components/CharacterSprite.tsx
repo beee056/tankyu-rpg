@@ -3,6 +3,7 @@
  *
  * Renders up to 2 simultaneous character sprites at left/center/right positions.
  * Each sprite entry has: actor, src, position, and optional exit animation.
+ * If a 3rd sprite arrives, the oldest one is faded out automatically.
  *
  * Animations:
  *   fadeIn   → opacity 0→1
@@ -66,15 +67,20 @@ function getAnimate(action: SpriteAction) {
 }
 
 export function CharacterSprite({ sprites }: CharacterSpriteProps) {
+  // Limit to max 2 sprites: if more than 2, keep the last 2 (oldest is evicted)
+  const visibleSprites = sprites.length > 2 ? sprites.slice(-2) : sprites;
+
   return (
     // Sprite layer: sits above background, below dialogue box
     <div className="absolute inset-0 z-[5] pointer-events-none overflow-hidden">
       <AnimatePresence>
-        {sprites.map((sprite) => {
+        {visibleSprites.map((sprite, idx) => {
           const imgSrc = sprite.src ?? CHAR_IMAGE[sprite.actor];
           if (!imgSrc) return null;
           const action: SpriteAction = sprite.action ?? "fadeIn";
           const posStyle = POSITION_STYLE[sprite.position];
+          // z-index: first sprite lower, second sprite higher for natural overlap
+          const zIndex = 5 + idx;
 
           return (
             <motion.div
@@ -89,13 +95,21 @@ export function CharacterSprite({ sprites }: CharacterSpriteProps) {
                 // Height ~78% of screen for bust-up sprites
                 height: "78%",
                 maxHeight: "78vh",
+                zIndex,
               }}
             >
               <img
                 src={imgSrc}
                 alt={sprite.actor}
                 className="h-full w-auto object-contain object-bottom"
-                style={{ filter: "sepia(0.1) drop-shadow(0 4px 16px rgba(0,0,0,0.5))" }}
+                style={{
+                  filter: "sepia(0.1) drop-shadow(0 4px 16px rgba(0,0,0,0.5))",
+                  // Remove white backgrounds from non-transparent PNGs
+                  mixBlendMode: "multiply",
+                  // Additional fallback: mask out pure white edges
+                  maskImage: "linear-gradient(to bottom, black 85%, transparent 100%)",
+                  WebkitMaskImage: "linear-gradient(to bottom, black 85%, transparent 100%)",
+                }}
                 onError={(e) => {
                   // If image fails to load, hide silently
                   (e.currentTarget as HTMLImageElement).style.display = "none";

@@ -585,15 +585,15 @@ export const scene_01_inner_voice_2: SceneData = {
   next_scene: "ch1_s01_journal",
 };
 
-// ── B15 ジャーナル誘導（任意） ────────────────────────────────────────────────
+// ── B15 コマ1 終了（通常遷移） ────────────────────────────────────────────────
 /** B15: bg_office_interior 明るさ復帰 / chifuka slideIn right */
 export const scene_01_journal: SceneData = {
   scene_id: "ch1_s01_journal",
-  type: "journal",
+  type: "dialogue",
   messages: [
     {
       character: "chifuka",
-      text: "……みのりが本当に求めていたものは、何だと思いますか（気になったことがあれば、ジャーナルに書いてもいい）",
+      text: "……今日はここまで。続きは次のコマで",
       pose: "gentle",
       background: "/assets/backgrounds/bg_office_interior.png",
       character_action: {
@@ -604,8 +604,6 @@ export const scene_01_journal: SceneData = {
       },
     },
   ],
-  journal_prompt:
-    "みのりが本当に求めていたものは何だと思う？",
   requires_journal: false,
   next_scene: "ch1_s02_narration",
 };

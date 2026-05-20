@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router-dom";
-import { usePlayerStore } from "@/stores/playerStore";
 import { useGameStore } from "@/stores/gameStore";
 import { useState } from "react";
 import OfficeMapHotspot from "@/components/OfficeMapHotspot";
@@ -7,33 +6,8 @@ import EvidenceBoardModal from "@/components/EvidenceBoardModal";
 
 const TOTAL_SCENES = 8;
 
-/** 横棒4本で探究力を表示（レーダーチャート廃止） */
-function SkillBar({ label, value }: { label: string; value: number }) {
-  const MAX = 100;
-  const filled = Math.round((value / MAX) * 5);
-  return (
-    <div className="flex items-center gap-2">
-      <span className="text-yoake-text-muted text-xs font-serif w-14 shrink-0">{label}</span>
-      <div className="flex gap-0.5">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <span
-            key={i}
-            className={
-              i < filled
-                ? "w-3 h-2 bg-yoake-accent"
-                : "w-3 h-2 bg-yoake-bg-surface border border-yoake-border"
-            }
-          />
-        ))}
-      </div>
-      <span className="text-yoake-accent text-xs font-mono">{value}</span>
-    </div>
-  );
-}
-
 export default function DashboardPage() {
   const navigate = useNavigate();
-  const { statusPoints, player, achievements } = usePlayerStore();
   const { currentScene, currentSceneKey, resetProgress } = useGameStore();
   const hasSavedProgress = Boolean(currentSceneKey);
   const [evidenceOpen, setEvidenceOpen] = useState(false);
@@ -44,13 +18,8 @@ export default function DashboardPage() {
     if (hasSavedProgress) {
       navigate("/play", { state: { resume: true } });
     } else {
-      // Navigate to /play (no params) so PlayPage falls back to CHAPTER1_START_SCENE (ch1_s01_chapter_title)
       navigate("/play");
     }
-  };
-
-  const handleBoardClick = () => {
-    navigate("/journal");
   };
 
   const handleResearchClick = () => {
@@ -70,18 +39,6 @@ export default function DashboardPage() {
         </span>
         <nav className="flex gap-3 sm:gap-5">
           <button
-            onClick={() => navigate("/journal")}
-            className="text-yoake-text-secondary hover:text-yoake-ink text-xs transition-colors font-serif"
-          >
-            ジャーナル
-          </button>
-          <button
-            onClick={() => navigate("/profile")}
-            className="text-yoake-text-secondary hover:text-yoake-ink text-xs transition-colors font-serif"
-          >
-            プロフィール
-          </button>
-          <button
             onClick={() => navigate("/login")}
             className="text-yoake-text-muted hover:text-yoake-text-secondary text-xs transition-colors font-serif"
           >
@@ -96,7 +53,7 @@ export default function DashboardPage() {
         {/* 見出し（小さく） */}
         <div className="mb-4 animate-fade-in">
           <p className="text-yoake-text-muted text-xs tracking-widest font-serif">
-            {player?.display_name ? `${player.display_name}の事務所` : "ヨアケ探偵社"}
+            ヨアケ探偵社
           </p>
         </div>
 
@@ -122,7 +79,6 @@ export default function DashboardPage() {
                   alt="ヨアケ探偵社 事務所マップ"
                   className="absolute inset-0 w-full h-full object-cover"
                   onError={(e) => {
-                    // フォールバック: 画像がない場合はコルクボード風背景
                     (e.currentTarget as HTMLImageElement).style.display = "none";
                   }}
                 />
@@ -142,7 +98,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                {/* ── ホットスポット3つ ── */}
+                {/* ── ホットスポット2つ ── */}
                 {/* 入口: 左下 (12%, 78%) */}
                 <OfficeMapHotspot
                   left="12%"
@@ -150,14 +106,6 @@ export default function DashboardPage() {
                   label="入口"
                   ariaLabel="入口（プレイ開始）"
                   onClick={handleEntranceClick}
-                />
-                {/* 板（コルクボード）: 中央右 (68%, 55%) */}
-                <OfficeMapHotspot
-                  left="68%"
-                  top="55%"
-                  label="板"
-                  ariaLabel="コルクボード（ジャーナル）"
-                  onClick={handleBoardClick}
                 />
                 {/* 調査室: 右下 (80%, 80%) */}
                 <OfficeMapHotspot
@@ -218,7 +166,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* ── 右：ミニカード群（3カラム） ── */}
+          {/* ── 右：進捗ミニカード（3カラム） ── */}
           <div className="lg:col-span-3 flex flex-row lg:flex-col gap-4 animate-slide-up">
 
             {/* 進捗ミニカード */}
@@ -246,51 +194,6 @@ export default function DashboardPage() {
                 {progressPct}%
               </p>
             </div>
-
-            {/* 探究力ミニカード（横棒4本） */}
-            <div
-              className="flex-1 lg:flex-none bg-yoake-bg-card paper-texture p-3 sm:p-4"
-              style={{ border: "1px solid #C9B99A", borderRadius: 0 }}
-            >
-              <p className="font-ui text-yoake-text-muted text-xs tracking-widest mb-2">
-                探究力
-              </p>
-              <div className="space-y-1.5">
-                <SkillBar label="問い力" value={statusPoints?.question_power ?? 0} />
-                <SkillBar label="探索力" value={statusPoints?.explore_power ?? 0} />
-                <SkillBar label="繋ぐ力" value={statusPoints?.connect_power ?? 0} />
-                <SkillBar label="伝える力" value={statusPoints?.express_power ?? 0} />
-              </div>
-              <button
-                onClick={() => navigate("/profile")}
-                className="mt-2 text-yoake-text-muted hover:text-yoake-ink text-xs font-serif transition-colors"
-              >
-                もっと見る →
-              </button>
-            </div>
-
-            {/* 称号ミニカード（achievements が空なら非表示） */}
-            {achievements.length > 0 && (
-              <div
-                className="flex-1 lg:flex-none bg-yoake-bg-card paper-texture p-3 sm:p-4"
-                style={{ border: "1px solid #C9B99A", borderRadius: 0 }}
-              >
-                <p className="font-ui text-yoake-text-muted text-xs tracking-widest mb-2">
-                  称号
-                </p>
-                <div className="space-y-1.5">
-                  {achievements.map((a) => (
-                    <div
-                      key={a.achievement_id}
-                      className="text-yoake-accent text-xs px-2 py-1 font-serif"
-                      style={{ border: "1px solid rgba(201,128,94,0.4)" }}
-                    >
-                      {a.title_key}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </div>

@@ -3,7 +3,6 @@ import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGameStore } from "@/stores/gameStore";
 import { usePlayerStore } from "@/stores/playerStore";
-import { useJournalStore } from "@/stores/journalStore";
 import { useEvidenceStore } from "@/stores/evidenceStore";
 import { api } from "@/lib/api";
 import { CHAPTER1_SCENE_MAP as SCENE_MAP, CHAPTER1_START_SCENE } from "@/scenarios/ch1";
@@ -217,7 +216,6 @@ export default function PlayPage() {
   const location = useLocation();
   const { updateStatus } = usePlayerStore();
   const { saveScene, currentSceneKey, addCollectedEvidenceId } = useGameStore();
-  const { addEntry: addJournalEntry } = useJournalStore();
   const { addEvidence, collectedEvidences } = useEvidenceStore();
 
   // ── Audio ──────────────────────────────────────────────────────────────────
@@ -247,8 +245,6 @@ export default function PlayPage() {
 
   const [msgIndex, setMsgIndex] = useState(0);
   const [typewriterDone, setTypewriterDone] = useState(false);
-  const [journalText, setJournalText] = useState("");
-  const [journalSaved, setJournalSaved] = useState(false);
 
   // v2: evidence board open state
   const [evidenceBoardOpen, setEvidenceBoardOpen] = useState(false);
@@ -302,8 +298,6 @@ export default function PlayPage() {
 
   useEffect(() => {
     setTypewriterDone(false);
-    setJournalText("");
-    setJournalSaved(false);
   }, [sceneKey]);
 
   useEffect(() => {
@@ -421,8 +415,6 @@ export default function PlayPage() {
       setMsgIndex((i) => i + 1);
     } else if (
       scene.type !== "choice" &&
-      scene.type !== "journal" &&
-      scene.type !== "question_card" &&
       scene.type !== "cork_board"
     ) {
       navigateToNextScene(scene.next_scene);
@@ -470,60 +462,6 @@ export default function PlayPage() {
     navigateToNextScene(choice.next_scene);
   }
 
-  async function handleJournalSave() {
-    if (!journalText.trim()) return;
-
-    addJournalEntry({
-      entry_id: `local-${Date.now()}`,
-      player_id: "local",
-      scene_id: scene?.scene_id ?? "",
-      prompt_text: scene?.journal_prompt ?? "",
-      content: journalText,
-      word_count: journalText.length,
-      has_self_ref: false,
-      ai_response: null,
-      play_count: 1,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    });
-
-    api.post("/api/journals", {
-      scene_id: scene?.scene_id,
-      content: journalText,
-      prompt_text: scene?.journal_prompt ?? "",
-    }).catch(() => {});
-
-    setJournalSaved(true);
-  }
-
-  function handleOpenJournalChat() {
-    try {
-      navigate("/journal", {
-        state: {
-          initialMessage: journalText,
-          sceneId: scene?.scene_id ?? "",
-          chapterId: chapterId ?? "1",
-          journalPrompt: scene?.journal_prompt ?? "",
-          komaLabel,
-        },
-      });
-    } catch (err) {
-      console.error("[PlayPage] handleOpenJournalChat:", err);
-    }
-  }
-
-  function handleContinueFromJournal() {
-    navigateToNextScene(scene?.next_scene);
-    setJournalSaved(false);
-    setJournalText("");
-  }
-
-  function handleSkipJournal() {
-    setJournalSaved(false);
-    setJournalText("");
-    navigateToNextScene(scene?.next_scene);
-  }
-
   if (!scene) {
     return (
       <main className="min-h-screen bg-yoake-bg paper-texture flex items-center justify-center">
@@ -536,13 +474,7 @@ export default function PlayPage() {
 
   const isNarration = scene.type === "narration";
   const isChoice = scene.type === "choice";
-  const isJournal = scene.type === "journal";
-  const isQuestionCard = scene.type === "question_card";
   const isCorkBoard = scene.type === "cork_board";
-  const isInputScene = isJournal || isQuestionCard;
-
-  // v2: requires_journal defaults to true for backward compat
-  const requiresJournal = scene.requires_journal !== false;
 
   // Dynamic header: derive コマ number from sceneKey
   const komaLabel = (() => {
@@ -596,10 +528,10 @@ export default function PlayPage() {
       <div
         className="relative flex-1 flex flex-col overflow-hidden"
         onClick={() =>
-          !isChoice && !isInputScene && !isCorkBoard && !evidenceBoardOpen && advanceMessage()
+          !isChoice && !isCorkBoard && !evidenceBoardOpen && advanceMessage()
         }
         style={{
-          cursor: isChoice || isInputScene || isCorkBoard || evidenceBoardOpen ? "default" : "pointer",
+          cursor: isChoice || isCorkBoard || evidenceBoardOpen ? "default" : "pointer",
         }}
       >
         {/* ── v2.5: 背景レイヤー (z-0 ~ z-[1]) ── */}
@@ -693,8 +625,7 @@ export default function PlayPage() {
                 {isChoice &&
                   scene.messages &&
                   scene.messages.length > 0 &&
-                  currentMsg &&
-                  !isInputScene && (
+                  currentMsg && (
                     <>
                       {speakerName && (
                         <p
@@ -730,7 +661,6 @@ export default function PlayPage() {
 
                 {typewriterDone &&
                   !isChoice &&
-                  !isInputScene &&
                   !isCorkBoard && (
                     <div className="mt-3 flex justify-end">
                       <span
@@ -798,103 +728,6 @@ export default function PlayPage() {
                   </button>
                 );
               })}
-            </motion.div>
-          )}
-
-          {/* ── 内省ジャーナル / 問いカード ── */}
-          {isInputScene && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-yoake-bg-card paper-texture p-5 mt-1"
-              style={{ border: "2px solid #C9B99A", borderRadius: 0 }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              {scene.journal_prompt && (
-                <>
-                  <p className="text-yoake-text-muted text-xs mb-1 tracking-wide font-ui">
-                    {isQuestionCard ? "問いカード" : "内省ジャーナル"}
-                    {!requiresJournal && (
-                      <span className="ml-2 text-xs" style={{ color: "#8B9DAE" }}>
-                        （任意）
-                      </span>
-                    )}
-                  </p>
-                  {/* ── コマ見出し + プロンプト固定表示（文脈明確化）── */}
-                  <div
-                    className="mb-3 px-3 py-2"
-                    style={{
-                      background: "rgba(201,185,154,0.08)",
-                      border: "1px solid rgba(201,185,154,0.3)",
-                      borderRadius: 0,
-                    }}
-                  >
-                    <p className="text-yoake-text-muted text-xs mb-1 font-ui tracking-wider">
-                      {komaLabel} の問い
-                    </p>
-                    <p className="text-yoake-text-secondary text-sm leading-relaxed font-serif italic">
-                      {scene.journal_prompt}
-                    </p>
-                  </div>
-                </>
-              )}
-              <textarea
-                value={journalText}
-                onChange={(e) => setJournalText(e.target.value)}
-                rows={4}
-                placeholder={
-                  isQuestionCard
-                    ? "問いを書いてみよう"
-                    : "自分の考えを書いてみよう（何字でも大丈夫）"
-                }
-                className="w-full bg-yoake-bg border-b-2 border-yoake-border px-2 py-3 text-yoake-ink placeholder-yoake-text-muted focus:outline-none focus:border-yoake-accent resize-none text-sm transition-colors font-serif"
-                style={{ borderRadius: 0 }}
-              />
-              <div className="mt-3 flex items-center justify-between">
-                <span className="text-yoake-text-muted text-xs font-serif">
-                  {journalText.length}字
-                </span>
-                {!journalSaved ? (
-                  <div className="flex items-center gap-2">
-                    {/* v2: スキップボタン — requires_journal: false のシーンは常に表示 */}
-                    {(!requiresJournal || isJournal) && (
-                      <button
-                        onClick={handleSkipJournal}
-                        className="text-yoake-text-muted hover:text-yoake-text-secondary text-xs font-serif transition-colors"
-                        style={{ minHeight: "44px", padding: "0 8px" }}
-                      >
-                        スキップ
-                      </button>
-                    )}
-                    <button
-                      disabled={journalText.trim().length === 0}
-                      onClick={handleJournalSave}
-                      className="bg-yoake-accent hover:bg-yoake-accent-hover text-yoake-bg text-sm px-5 py-2 transition-colors disabled:opacity-40 font-ui tracking-widest"
-                      style={{ borderRadius: 0, minHeight: "44px" }}
-                    >
-                      {isQuestionCard ? "書く" : "記録する"}
-                    </button>
-                  </div>
-                ) : (
-                  <div className="flex flex-col gap-2 items-end">
-                    {isJournal && (
-                      <button
-                        onClick={handleOpenJournalChat}
-                        className="bg-sky-700 hover:bg-sky-600 text-white text-xs px-4 py-2 transition-colors font-ui tracking-widest"
-                        style={{ borderRadius: 0, minHeight: "44px" }}
-                      >
-                        灰島遊に話しかけてみる →
-                      </button>
-                    )}
-                    <button
-                      onClick={handleContinueFromJournal}
-                      className="text-yoake-text-muted hover:text-yoake-text-secondary text-xs font-serif transition-colors"
-                    >
-                      {isQuestionCard ? "次へ" : "そのまま続ける"}
-                    </button>
-                  </div>
-                )}
-              </div>
             </motion.div>
           )}
 

@@ -42,7 +42,6 @@ export function ChapterTitle({ title, onComplete }: ChapterTitleProps) {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.8, ease: "easeInOut" }}
           className="absolute inset-0 z-[50] flex flex-col items-center justify-center pointer-events-none"
-          style={{ background: "rgba(14,10,8,0.75)" }}
         >
           {/* Decorative line above */}
           <motion.div
