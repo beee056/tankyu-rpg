@@ -537,8 +537,8 @@ export default function PlayPage() {
         {/* ── v2.5: 背景レイヤー (z-0 ~ z-[1]) ── */}
         <SceneBackground src={currentBg} tint={bgTint} />
 
-        {/* ── v2.5: 立ち絵レイヤー (z-[5]) ── */}
-        <CharacterSprite sprites={sprites} />
+        {/* ── v2.5: 立ち絵レイヤー (z-[5]) — 話者1人モード: 最後に登場したキャラのみ ── */}
+        <CharacterSprite sprites={sprites.slice(-1)} />
 
         {/* ── v2.5: 章タイトルオーバーレイ (z-[50]) ── */}
         <ChapterTitle
