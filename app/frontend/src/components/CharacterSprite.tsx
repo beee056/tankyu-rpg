@@ -70,11 +70,23 @@ export function CharacterSprite({ sprites }: CharacterSpriteProps) {
   // Limit to max 2 sprites: if more than 2, keep the last 2 (oldest is evicted)
   const visibleSprites = sprites.length > 2 ? sprites.slice(-2) : sprites;
 
+  // Auto-split positions when 2 sprites share the same position (avoid overlap)
+  const arranged = (() => {
+    if (visibleSprites.length !== 2) return visibleSprites;
+    const [a, b] = visibleSprites;
+    if (a.position !== b.position) return visibleSprites;
+    // Both same position: spread to left and right
+    return [
+      { ...a, position: "left" as SpritePosition },
+      { ...b, position: "right" as SpritePosition },
+    ];
+  })();
+
   return (
     // Sprite layer: sits above background, below dialogue box
     <div className="absolute inset-0 z-[5] pointer-events-none overflow-hidden">
       <AnimatePresence>
-        {visibleSprites.map((sprite, idx) => {
+        {arranged.map((sprite, idx) => {
           const imgSrc = sprite.src ?? CHAR_IMAGE[sprite.actor];
           if (!imgSrc) return null;
           const action: SpriteAction = sprite.action ?? "fadeIn";
