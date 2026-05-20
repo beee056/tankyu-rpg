@@ -336,14 +336,28 @@ export default function PlayPage() {
       }
     }
 
-    // BGM
+    // BGM — parse directive: "start bgm_main ..." / "ramp ..." / "duck ..." / "fadeOut ..."
     if (currentMsg.bgm !== undefined) {
-      setBgm(currentMsg.bgm || null);
+      const bgmDir = currentMsg.bgm;
+      if (!bgmDir) {
+        setBgm(null);
+      } else {
+        // Extract track name if directive starts with "start "
+        const startMatch = bgmDir.match(/^start\s+(\S+)/);
+        if (startMatch) {
+          setBgm(`/assets/audio/${startMatch[1]}.mp3`);
+        } else if (/^fadeOut/i.test(bgmDir)) {
+          setBgm(null);
+        }
+        // "ramp" / "duck" directives are volume changes — ignore for now (no vol control API needed)
+      }
     }
 
-    // SE
+    // SE — resolve name to path
     if (currentMsg.se) {
-      playSe(currentMsg.se);
+      const seVal = currentMsg.se;
+      const sePath = seVal.startsWith("/") ? seVal : `/assets/audio/${seVal}.mp3`;
+      playSe(sePath);
     }
 
     // Character action
@@ -387,6 +401,9 @@ export default function PlayPage() {
     },
     [navigate]
   );
+
+  // ── v2.5: "To be continued" ダッシュボード戻るボタン表示判定 ─────────
+  const isToBeContinued = sceneKey === "ch1_s02_to_be_continued";
 
   const advanceMessage = useCallback(() => {
     if (!scene) return;
@@ -594,7 +611,15 @@ export default function PlayPage() {
         {/* ── v2.5: 章タイトルオーバーレイ (z-[50]) ── */}
         <ChapterTitle
           title={chapterTitleText}
-          onComplete={() => setChapterTitleText(null)}
+          onComplete={() => {
+            setChapterTitleText(null);
+            // 章タイトル表示後、自動で次へ進める
+            if (scene?.messages && msgIndex < scene.messages.length - 1) {
+              setMsgIndex((i) => i + 1);
+            } else if (scene?.next_scene) {
+              navigateToNextScene(scene.next_scene);
+            }
+          }}
         />
 
         {/* ── キャラクター & セリフエリア (z-10) ── */}
@@ -914,6 +939,31 @@ export default function PlayPage() {
             </motion.div>
           )}
         </div>
+
+        {/* ── v2.5: To be continued ダッシュボードに戻るボタン ── */}
+        {isToBeContinued && typewriterDone && (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8, duration: 0.6 }}
+            className="absolute bottom-10 left-0 right-0 flex justify-center z-[60] pointer-events-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => navigate("/dashboard")}
+              className="text-yoake-bg text-sm px-8 py-3 font-ui tracking-widest transition-all hover:opacity-90 active:scale-95"
+              style={{
+                background: "#C9805E",
+                border: "2px solid #C9B99A",
+                borderRadius: 0,
+                boxShadow: "2px 2px 0 #B56B49",
+                minHeight: "48px",
+              }}
+            >
+              ダッシュボードに戻る →
+            </button>
+          </motion.div>
+        )}
       </div>
 
       {/* ── v2.5: ボリュームコントロール（右下、小さめ）── */}

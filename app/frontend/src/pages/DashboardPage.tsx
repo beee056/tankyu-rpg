@@ -44,7 +44,8 @@ export default function DashboardPage() {
     if (hasSavedProgress) {
       navigate("/play", { state: { resume: true } });
     } else {
-      navigate("/play/chapter/1/scene/1");
+      // Navigate to /play (no params) so PlayPage falls back to CHAPTER1_START_SCENE (ch1_s01_chapter_title)
+      navigate("/play");
     }
   };
 
@@ -193,7 +194,7 @@ export default function DashboardPage() {
               </button>
               {hasSavedProgress && (
                 <button
-                  onClick={() => navigate("/play/chapter/1/scene/1")}
+                  onClick={() => navigate("/play")}
                   className="w-full text-yoake-text-secondary hover:text-yoake-ink text-xs px-4 py-2 transition-colors font-serif"
                   style={{ border: "1px solid rgba(201,185,154,0.4)", borderRadius: 0 }}
                 >
