@@ -104,9 +104,6 @@ export function CharacterSprite({ sprites }: CharacterSpriteProps) {
                 className="h-full w-auto object-contain object-bottom"
                 style={{
                   filter: "sepia(0.1) drop-shadow(0 4px 16px rgba(0,0,0,0.5))",
-                  // Remove white backgrounds from non-transparent PNGs
-                  mixBlendMode: "multiply",
-                  // Additional fallback: mask out pure white edges
                   maskImage: "linear-gradient(to bottom, black 85%, transparent 100%)",
                   WebkitMaskImage: "linear-gradient(to bottom, black 85%, transparent 100%)",
                 }}

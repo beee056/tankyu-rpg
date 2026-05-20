@@ -41,7 +41,7 @@ export function ChapterTitle({ title, onComplete }: ChapterTitleProps) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.8, ease: "easeInOut" }}
-          className="absolute inset-0 z-[50] flex flex-col items-center justify-center pointer-events-none"
+          className="absolute inset-0 z-[100] flex flex-col items-center justify-center pointer-events-none bg-transparent"
         >
           {/* Decorative line above */}
           <motion.div

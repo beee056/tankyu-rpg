@@ -555,7 +555,7 @@ export default function PlayPage() {
         />
 
         {/* ── キャラクター & セリフエリア (z-10) ── */}
-        <div className="relative z-10 flex flex-col flex-1 max-w-2xl mx-auto w-full px-3 sm:px-4 py-3 sm:py-4 overflow-y-auto">
+        <div className={`relative z-10 flex flex-col flex-1 max-w-2xl mx-auto w-full px-3 sm:px-4 py-3 sm:py-4 overflow-y-auto transition-opacity duration-300 ${chapterTitleText ? "opacity-0 pointer-events-none" : "opacity-100"}`}>
           {/* キャラクター立ち絵スペース（既存の上端空白を維持しつつ新レイヤーに委譲） */}
           <div className="flex justify-end mb-3 sm:mb-4 min-h-[100px] sm:min-h-[140px] md:min-h-[160px]" />
 
