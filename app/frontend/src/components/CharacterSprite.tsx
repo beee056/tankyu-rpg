@@ -17,7 +17,7 @@ import { AnimatePresence, motion } from "framer-motion";
 // Character image map (v2.5: yu uses bust-up version)
 // ──────────────────────────────────────────────────────────────────────────────
 export const CHAR_IMAGE: Record<string, string> = {
-  yu:      "/assets/characters/yu/yu_01_neutral_bust.png",
+  yu:      "/assets/characters/yu/yu_01_neutral.png",
   chifuka: "/assets/characters/chifuka/chifuka_01_neutral.png",
   akira:   "/assets/characters/midou/midou_01_neutral_front.png",
   minori:  "/assets/characters/minori/minori_01_neutral.png",
