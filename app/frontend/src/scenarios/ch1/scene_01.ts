@@ -1,10 +1,17 @@
 import type { SceneData } from "shared-types";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// コマ1「灯台に来た日」— v2.5演出版
-// 依拠: design/05-chapter1-script.md コマ1 全文
-// v2追加: highlights(ev_ch1_01, ev_ch1_02), requires_journal: false
-// v2.5追加: 背景・BGM・SE・立ち絵演出・テキストウェイト (B01〜B15)
+// コマ1「灯台に来た日」— v2.5 ゼロベース版（Bbルート）
+//
+// 設定: 主人公は依頼人として事務所を訪れる高校2年生。
+//       中学からの親友・佐倉透が3週間学校に来ない。家族は「体調を崩した」と言うが
+//       SNSアカウントは消え、共通の友人は誰も気にしていない。家を訪ねても玄関で
+//       追い返される。担任は「家庭の事情だろう」で終わり。一人だけが
+//       「何かが起きている」と感じている。行き場をなくしてヨアケ探偵社に駆け込む。
+//
+// 既存ノードキー(SCENE_MAP)を維持して PlayPage / index 側の変更を最小化。
+// 演出ディレクティブ(background/character_action/bgm/se/text_pace/highlights)は
+// 既存のキャラ画像・背景アセットを使う前提で再構成。
 // ─────────────────────────────────────────────────────────────────────────────
 
 // ── B01 章タイトル ─────────────────────────────────────────────────────────────
@@ -14,7 +21,6 @@ export const scene_01_chapter_title: SceneData = {
   requires_journal: false,
   messages: [
     {
-      // B01: 黒背景 + 章タイトルフェードイン + BGM start
       text: "",
       background: "#0E0A08",
       bgm: "start bgm_main 3000ms fadeIn vol=30",
@@ -25,101 +31,141 @@ export const scene_01_chapter_title: SceneData = {
   next_scene: "ch1_s01_narration",
 };
 
-// ── B02/B03 システムナレーション（背景描写） ────────────────────────────────────
-/** B02: 坂の中腹 / B03: ヨアケ外観 */
+// ── B02 主人公の独白（坂を上る） ──────────────────────────────────────────────
 export const scene_01_narration: SceneData = {
   scene_id: "ch1_s01_narration",
   type: "narration",
   requires_journal: false,
   messages: [
     {
-      // 導入①: 主人公の状況・動機を提示
-      text: "探偵事務所で見習いとして働く——そう決めてから、三日が経つ。\n人の話を聞いて、何かを解き明かす仕事。なぜ自分がそこに引き寄せられたのか、うまく言葉にはできない。",
+      text: "三週間、佐倉透は学校に来ていない。",
       background: "/assets/backgrounds/bg_slope_dusk.png",
-      text_pace: { punctuation_wait_ms: 140, line_pause_ms: 500 },
+      text_pace: { punctuation_wait_ms: 180, line_pause_ms: 600 },
     },
     {
-      // 導入②: 今日が初日であることを示す
-      text: "今日が初日だ。御堂から「昼過ぎに来い」と言われていた。それだけ。",
-      text_pace: { punctuation_wait_ms: 140, line_pause_ms: 500 },
+      text: "家族は「体調を崩した」と言う。\nでも先週、駅前で会ったときの透の母親は、私の顔を見て一瞬、目を逸らした。",
+      text_pace: { punctuation_wait_ms: 160, line_pause_ms: 600 },
     },
     {
-      // B02: bg_slope_dusk crossfade、地の文ボックス
-      text: "坂の中腹に、少し傾いた白い建物がある。\nかつては洋菓子屋だったらしく、\n入口のドアには古いガラスがはまっていて、\n光の角度によっては「ヨアケ」という文字が逆に透けて見える。",
-      text_pace: { punctuation_wait_ms: 140, line_pause_ms: 500 },
+      text: "SNSのアカウントは、消えていた。\n他の友達に聞いても、「別に気にしてないけど」と返ってくる。\n家を訪ねても、玄関で追い返された。",
+      text_pace: { punctuation_wait_ms: 160, line_pause_ms: 600 },
     },
     {
-      // B03: bg_yoake_exterior crossfade、ガラスフレア演出
-      text: "コーヒーの香りがした。",
-      background: "/assets/backgrounds/bg_yoake_exterior.png",
-      text_pace: { punctuation_wait_ms: 400, line_pause_ms: 500 },
+      text: "担任は「家庭の事情もあるからな」と言って、それ以上は何も言わなかった。",
+      text_pace: { punctuation_wait_ms: 160, line_pause_ms: 600 },
+    },
+    {
+      text: "誰も、おかしいと思っていない。\n——私だけが、何かが起きていると感じている。",
+      text_pace: { punctuation_wait_ms: 160, line_pause_ms: 700 },
+    },
+    {
+      text: "夜、検索の海をさまよっていて、一つだけ引っかかった名前があった。",
+      text_pace: { punctuation_wait_ms: 160, line_pause_ms: 600 },
+    },
+    {
+      text: "ヨアケ探偵社。\n「言葉にできない違和感」を扱う、と書いてあった。",
+      text_pace: { punctuation_wait_ms: 200, line_pause_ms: 700 },
     },
   ],
   next_scene: "ch1_s01_chifuka_welcome",
 };
 
-// ── B04 知深の挨拶 ─────────────────────────────────────────────────────────────
-/** B04: 事務所内 / 知深登場 */
+// ── B03 建物の前に立つ → 入る ────────────────────────────────────────────────
 export const scene_01_chifuka_welcome: SceneData = {
   scene_id: "ch1_s01_chifuka_welcome",
   type: "dialogue",
   requires_journal: false,
   messages: [
     {
-      // B04: bg_office_interior crossfade、知深 slideIn right
+      text: "坂の中腹に、少し傾いた白い建物があった。\n入口のドアには古いガラスがはまっていて、「ヨアケ」という文字が、光の角度で逆さに透けて見える。",
+      background: "/assets/backgrounds/bg_yoake_exterior.png",
+      text_pace: { punctuation_wait_ms: 160, line_pause_ms: 600 },
+    },
+    {
+      text: "ドアの前で、息を吸った。\nここまで来て、何を話せばいいのか、まだ自分でも分かっていない。",
+      text_pace: { punctuation_wait_ms: 180, line_pause_ms: 700 },
+    },
+    {
+      text: "それでも、ノブに手をかけた。",
+      text_pace: { punctuation_wait_ms: 220, line_pause_ms: 800 },
+    },
+    {
       character: "chifuka",
-      text: "……来ましたね。ここに来た理由を、少し聞いてもいいですか",
+      text: "……いらっしゃい。座って、いいですよ",
       pose: "calm",
       background: "/assets/backgrounds/bg_office_interior.png",
       character_action: {
         actor: "chifuka",
         action: "slideIn",
         expression: "calm",
-        position: "right",
+        position: "center",
       },
+      text_pace: { punctuation_wait_ms: 180, line_pause_ms: 500 },
+    },
+    {
+      character: "chifuka",
+      text: "ヨアケ探偵社の時坂です。受付と、まあ、お茶を出すのが仕事",
+      pose: "slight_smile",
+      text_pace: { punctuation_wait_ms: 160, line_pause_ms: 500 },
+    },
+    {
+      character: "chifuka",
+      text: "急がなくていいです。話せそうになったら、話してください",
+      pose: "calm",
+      highlights: [
+        {
+          word: "急がなくていい",
+          evidenceId: "ev_ch1_01",
+          tooltip: "知深の最初の言葉。覚えておく",
+        },
+      ],
+      text_pace: { punctuation_wait_ms: 200, line_pause_ms: 600 },
     },
   ],
   next_scene: "ch1_s01_motivation_choice",
 };
 
-// ── B05 来所動機選択 ──────────────────────────────────────────────────────────
-/** B05: 選択肢 stagger演出、tap時 se_click */
+// ── B04 何から話す? 選択肢（依頼の入口） ─────────────────────────────────────
 export const scene_01_motivation_choice: SceneData = {
   scene_id: "ch1_s01_motivation_choice",
   type: "choice",
   requires_journal: false,
-  messages: [],
+  messages: [
+    {
+      character: "chifuka",
+      text: "どこから話します？",
+      pose: "calm",
+    },
+  ],
   choices: [
     {
       key: "A",
-      label: "なんとなく、面白そうだったから",
-      flag_updates: [{ key: "JOIN_MOTIVATION_FUN", delta: 1 }],
+      label: "親友が、三週間学校に来ていないこと",
+      flag_updates: [{ key: "OPEN_FACT", delta: 1 }],
       next_scene: "ch1_s01_chifuka_react_a",
     },
     {
       key: "B",
-      label: "誰かの力になりたかったから",
-      flag_updates: [{ key: "JOIN_MOTIVATION_HELP", delta: 1 }],
+      label: "誰も、おかしいと思っていないこと",
+      flag_updates: [{ key: "OPEN_FEELING", delta: 1 }],
       next_scene: "ch1_s01_chifuka_react_b",
     },
     {
       key: "C",
-      label: "自分自身に、答えを出したい問いがあるから",
-      flag_updates: [{ key: "JOIN_MOTIVATION_QUESTION", delta: 1 }],
+      label: "自分が、ここに来た理由がうまく言えないこと",
+      flag_updates: [{ key: "OPEN_HONEST", delta: 1 }],
       next_scene: "ch1_s01_chifuka_react_c",
     },
     {
       key: "D",
-      label: "知り合いの先輩に、来てみたら？と誘われたから",
-      flag_updates: [{ key: "JOIN_MOTIVATION_INVITED", delta: 1 }],
+      label: "……すみません、少し、考えさせてください",
+      flag_updates: [{ key: "OPEN_PAUSE", delta: 1 }],
       next_scene: "ch1_s01_chifuka_react_d",
     },
   ],
 };
 
-// ── B06 知深の反応 A/B/C/D ───────────────────────────────────────────────────
-
-/** B06: 知深反応A */
+// ── B05 知深の反応 ────────────────────────────────────────────────────────────
 export const scene_01_chifuka_react_a: SceneData = {
   scene_id: "ch1_s01_chifuka_react_a",
   type: "dialogue",
@@ -127,20 +173,25 @@ export const scene_01_chifuka_react_a: SceneData = {
   messages: [
     {
       character: "chifuka",
-      text: "……面白そう、か。それは正直な動機ね",
-      pose: "slight_smile",
+      text: "三週間。……それは、長いですね",
+      pose: "serious",
       character_action: {
         actor: "chifuka",
         action: "none",
-        expression: "slight_smile",
-        position: "right",
+        expression: "serious",
+        position: "center",
       },
+      text_pace: { punctuation_wait_ms: 200, line_pause_ms: 600 },
+    },
+    {
+      character: "chifuka",
+      text: "事実から話してくれて、助かります。続きは所長を呼びますから",
+      pose: "calm",
     },
   ],
   next_scene: "ch1_s01_yu_enter",
 };
 
-/** B06: 知深反応B */
 export const scene_01_chifuka_react_b: SceneData = {
   scene_id: "ch1_s01_chifuka_react_b",
   type: "dialogue",
@@ -148,31 +199,26 @@ export const scene_01_chifuka_react_b: SceneData = {
   messages: [
     {
       character: "chifuka",
-      text: "人を助けたいという気持ちは、本物ですか？",
+      text: "……周りの誰も、ですか",
       pose: "pause",
       character_action: {
         actor: "chifuka",
         action: "none",
         expression: "pause",
-        position: "right",
+        position: "center",
       },
+      text_pace: { punctuation_wait_ms: 200, line_pause_ms: 600 },
     },
     {
       character: "chifuka",
-      text: "……答えは後でいいです。先に所長を呼んでくる",
+      text: "それを抱えて来たのは、たぶん、あなたが正しい",
       pose: "calm",
-      character_action: {
-        actor: "chifuka",
-        action: "none",
-        expression: "calm",
-        position: "right",
-      },
+      text_pace: { punctuation_wait_ms: 200, line_pause_ms: 700 },
     },
   ],
   next_scene: "ch1_s01_yu_enter",
 };
 
-/** B06: 知深反応C */
 export const scene_01_chifuka_react_c: SceneData = {
   scene_id: "ch1_s01_chifuka_react_c",
   type: "dialogue",
@@ -180,31 +226,25 @@ export const scene_01_chifuka_react_c: SceneData = {
   messages: [
     {
       character: "chifuka",
-      text: "自分の問い……",
-      pose: "surprised",
+      text: "理由が言えないのに、ここまで来た。十分です",
+      pose: "slight_smile",
       character_action: {
         actor: "chifuka",
         action: "none",
-        expression: "surprised",
-        position: "right",
+        expression: "slight_smile",
+        position: "center",
       },
+      text_pace: { punctuation_wait_ms: 200, line_pause_ms: 600 },
     },
     {
       character: "chifuka",
-      text: "それは、簡単には答えが出ませんよ。それでも？",
-      pose: "serious",
-      character_action: {
-        actor: "chifuka",
-        action: "none",
-        expression: "serious",
-        position: "right",
-      },
+      text: "言葉は、後からついてきます",
+      pose: "calm",
     },
   ],
   next_scene: "ch1_s01_yu_enter",
 };
 
-/** B06: 知深反応D */
 export const scene_01_chifuka_react_d: SceneData = {
   scene_id: "ch1_s01_chifuka_react_d",
   type: "dialogue",
@@ -212,60 +252,53 @@ export const scene_01_chifuka_react_d: SceneData = {
   messages: [
     {
       character: "chifuka",
-      text: "遊さんが。……あの人、また勝手なことを",
-      pose: "half_amused",
-      character_action: {
-        actor: "chifuka",
-        action: "none",
-        expression: "half_amused",
-        position: "right",
-      },
-    },
-    {
-      character: "chifuka",
-      text: "まあ、来てしまったなら仕方ない。座って",
+      text: "どうぞ",
       pose: "calm",
       character_action: {
         actor: "chifuka",
         action: "none",
         expression: "calm",
-        position: "right",
+        position: "center",
       },
+      text_pace: { punctuation_wait_ms: 240, line_pause_ms: 800 },
+    },
+    {
+      character: "chifuka",
+      text: "コーヒー、淹れますね",
+      pose: "slight_smile",
     },
   ],
   next_scene: "ch1_s01_yu_enter",
 };
 
-// ── B07 遊の登場 ──────────────────────────────────────────────────────────────
-/** B07: 遊 slideIn left + BGM vol ramp → 38% */
+// ── B06 灰島遊の登場 ──────────────────────────────────────────────────────────
 export const scene_01_yu_enter: SceneData = {
   scene_id: "ch1_s01_yu_enter",
   type: "dialogue",
   requires_journal: false,
   messages: [
     {
-      // B07: chifuka:calm:right 継続 + yu:casual:left slideIn
       character: "yu",
-      text: "あ、来た来た。えーっと、今日から見習いの子？",
+      text: "あ、新しい人？　知深さんがコーヒー淹れてる時点で、軽くない話だよね",
       pose: "casual",
       bgm: "ramp 38 1500ms",
       character_action: {
         actor: "yu",
         action: "slideIn",
         expression: "casual",
-        position: "left",
+        position: "center",
       },
       text_pace: { punctuation_wait_ms: 110, line_pause_ms: 380 },
     },
     {
       character: "yu",
-      text: "俺、灰島遊。先輩探偵ってことになってるけど、そんな大層なもんじゃないよ。基本、調べてばっかり",
+      text: "俺、灰島遊。先輩探偵ってことになってるけど、まあ、調べるのが仕事って感じ",
       pose: "casual",
       text_pace: { punctuation_wait_ms: 110, line_pause_ms: 380 },
     },
     {
       character: "yu",
-      text: "所長は……今2階で寝てるか本読んでるかどっちかだと思う。呼んでくる",
+      text: "所長呼んでくる。ちょっと待ってて",
       pose: "casual",
       text_pace: { punctuation_wait_ms: 110, line_pause_ms: 380 },
     },
@@ -273,8 +306,7 @@ export const scene_01_yu_enter: SceneData = {
   next_scene: "ch1_s01_coffee_choice",
 };
 
-// ── B08 コーヒー選択 ──────────────────────────────────────────────────────────
-/** B08: 選択肢 stagger演出 */
+// ── B07 コーヒー（待ち時間） ───────────────────────────────────────────────────
 export const scene_01_coffee_choice: SceneData = {
   scene_id: "ch1_s01_coffee_choice",
   type: "choice",
@@ -282,8 +314,14 @@ export const scene_01_coffee_choice: SceneData = {
   messages: [
     {
       character: "chifuka",
-      text: "コーヒー、飲みますか",
+      text: "コーヒー、ブラックでいいですか",
       pose: "calm",
+      character_action: {
+        actor: "chifuka",
+        action: "slideIn",
+        expression: "calm",
+        position: "center",
+      },
     },
   ],
   choices: [
@@ -294,13 +332,11 @@ export const scene_01_coffee_choice: SceneData = {
     },
     {
       key: "B",
-      label: "いや、大丈夫です",
+      label: "……すみません、今は飲める気がしなくて",
       next_scene: "ch1_s01_coffee_react_b",
     },
   ],
 };
-
-// ── B09 コーヒーの反応 ────────────────────────────────────────────────────────
 
 export const scene_01_coffee_react_a: SceneData = {
   scene_id: "ch1_s01_coffee_react_a",
@@ -309,7 +345,7 @@ export const scene_01_coffee_react_a: SceneData = {
   messages: [
     {
       character: "chifuka",
-      text: "……あなたが選んでも選ばなくても、置いておきますから",
+      text: "どうぞ。冷めても置いておくので、好きなときに",
       pose: "calm",
     },
   ],
@@ -323,261 +359,186 @@ export const scene_01_coffee_react_b: SceneData = {
   messages: [
     {
       character: "chifuka",
-      text: "遠慮しなくていいです。置いておくので",
+      text: "……分かりました。水を置いておきます",
       pose: "calm",
+    },
+    {
+      character: "chifuka",
+      text: "飲みたくないものを飲ませるのも、仕事じゃないので",
+      pose: "slight_smile",
+      text_pace: { punctuation_wait_ms: 160, line_pause_ms: 500 },
     },
   ],
   next_scene: "ch1_s01_akira_enter",
 };
 
-// ── B10 御堂の登場（雰囲気の転換） ───────────────────────────────────────────
-/** B10: yu slideOut left → akira slideIn left → yu:flustered:right 戻す
- *      BGM duck 18% 600ms → 1500ms後38% 復帰 / ビネット+10% */
+// ── B08 御堂の登場 ────────────────────────────────────────────────────────────
 export const scene_01_akira_enter: SceneData = {
   scene_id: "ch1_s01_akira_enter",
   type: "dialogue",
   requires_journal: false,
   messages: [
     {
-      // B10: 御堂登場 - yu退場してから akira slideIn
       character: "akira",
-      text: "……見習い",
+      text: "……所長の御堂だ",
       pose: "expressionless",
       bgm: "duck 18 600ms",
       character_action: {
         actor: "akira",
         action: "slideIn",
         expression: "expressionless",
-        position: "left",
+        position: "center",
       },
-      text_pace: { punctuation_wait_ms: 200, line_pause_ms: 600 },
+      text_pace: { punctuation_wait_ms: 220, line_pause_ms: 700 },
     },
     {
       character: "akira",
-      text: "見習いに仕事はない",
+      text: "知深から、おおまかには聞いた",
       pose: "expressionless",
       text_pace: { punctuation_wait_ms: 200, line_pause_ms: 600 },
     },
     {
-      character: "yu",
-      text: "いや、まあ、でも——",
-      pose: "flustered",
-      character_action: {
-        actor: "yu",
-        action: "slideIn",
-        expression: "flustered",
-        position: "right",
-      },
+      character: "akira",
+      text: "三週間、親友が学校に来ていない。家族は体調と言う。SNSは消えた。誰も騒がない。——そうだな？",
+      pose: "expressionless",
+      text_pace: { punctuation_wait_ms: 180, line_pause_ms: 600 },
     },
     {
       character: "akira",
-      text: "ここに来る人間の話を聞いていろ。それだけでいい",
+      text: "事実は、いい",
       pose: "expressionless",
       bgm: "ramp 38 1500ms",
-      text_pace: { punctuation_wait_ms: 200, line_pause_ms: 600 },
+      text_pace: { punctuation_wait_ms: 220, line_pause_ms: 700 },
     },
     {
       character: "akira",
-      text: "解決しようとするな。まず聞け",
+      text: "聞きたいのは、君が何を恐れてここに来たか、だ",
       pose: "expressionless",
-      text_pace: { punctuation_wait_ms: 200, line_pause_ms: 600 },
+      se: "se_evidence",
+      text_pace: { punctuation_wait_ms: 220, line_pause_ms: 800 },
+      highlights: [
+        {
+          word: "何を恐れてここに来たか",
+          evidenceId: "ev_ch1_02",
+          tooltip: "御堂の問い。これが依頼の核心になる",
+        },
+      ],
     },
   ],
   next_scene: "ch1_s01_inner_voice_1",
 };
 
-// ── B11 主人公内語1 ───────────────────────────────────────────────────────────
-/** B11: akira:expressionless:left のみ / 内語ボックス */
+// ── B09 主人公の内語 → 答える ───────────────────────────────────────────────
 export const scene_01_inner_voice_1: SceneData = {
   scene_id: "ch1_s01_inner_voice_1",
   type: "narration",
   requires_journal: false,
   messages: [
     {
-      text: "（この人が、御堂 煌。ヨアケ探偵社の所長。……解決しようとするな、まず聞け、か）",
-      text_pace: { punctuation_wait_ms: 140, line_pause_ms: 700 },
+      text: "（恐れ——）",
+      text_pace: { punctuation_wait_ms: 240, line_pause_ms: 900 },
+    },
+    {
+      text: "（透が、もう戻ってこないこと？\n　それとも、戻ってきたとき、私が知らない誰かになっていること？）",
+      text_pace: { punctuation_wait_ms: 180, line_pause_ms: 800 },
+    },
+    {
+      text: "（——違う。本当に怖いのは、たぶん）",
+      text_pace: { punctuation_wait_ms: 200, line_pause_ms: 800 },
+    },
+    {
+      text: "（誰も気づかないまま、いなくなることだ）",
+      text_pace: { punctuation_wait_ms: 240, line_pause_ms: 1000 },
     },
   ],
   next_scene: "ch1_s01_minori_enter",
 };
 
-// ── B12 みのり来訪 / ev_ch1_01 出現 ──────────────────────────────────────────
-/** B12: フェード → minori slideIn from-bottom:center + chifuka:gentle:right + yu:casual:left
- *      「ヨアケ探偵社」ハイライト = 下線+微発光 + se_evidence */
+// ── B10 御堂が依頼を受ける ─────────────────────────────────────────────────
+// (旧 minori_enter のキーをそのまま使い、内容差し替え。みのりは登場させない)
 export const scene_01_minori_enter: SceneData = {
   scene_id: "ch1_s01_minori_enter",
   type: "dialogue",
   requires_journal: false,
   messages: [
     {
-      // B12: みのり登場 - 全員フェードから再配置
-      character: "minori",
-      text: "……あの、ここ、ヨアケ探偵社、ですよね",
-      pose: "anxious",
-      se: "se_evidence",
+      character: "akira",
+      text: "答えなくていい。今は",
+      pose: "expressionless",
       character_action: {
-        actor: "minori",
+        actor: "akira",
         action: "slideIn",
-        expression: "anxious",
+        expression: "expressionless",
         position: "center",
       },
-      text_pace: { punctuation_wait_ms: 180, line_pause_ms: 500 },
-      highlights: [
-        {
-          word: "ヨアケ探偵社",
-          evidenceId: "ev_ch1_01",
-          tooltip: "依頼人のようすを記録する",
-        },
-      ],
+      text_pace: { punctuation_wait_ms: 220, line_pause_ms: 700 },
     },
     {
-      character: "chifuka",
-      text: "はい。どうぞ、座って",
-      pose: "gentle",
-      character_action: {
-        actor: "chifuka",
-        action: "none",
-        expression: "gentle",
-        position: "right",
-      },
+      character: "akira",
+      text: "依頼は、受ける",
+      pose: "expressionless",
+      se: "se_evidence",
+      text_pace: { punctuation_wait_ms: 240, line_pause_ms: 900 },
     },
     {
-      character: "minori",
-      text: "探偵事務所って……こんな感じなんですね",
-      pose: "looking_around",
-      text_pace: { punctuation_wait_ms: 180, line_pause_ms: 500 },
-    },
-    {
-      character: "yu",
-      text: "探偵事務所つっても、謎解きとかじゃないんだけどね。……相談なら、聞けると思うよ",
-      pose: "casual",
-      character_action: {
-        actor: "yu",
-        action: "none",
-        expression: "casual",
-        position: "left",
-      },
-      text_pace: { punctuation_wait_ms: 110, line_pause_ms: 380 },
-    },
-    {
-      character: "minori",
-      text: "……相談、なんですけど",
-      pose: "anxious",
-      text_pace: { punctuation_wait_ms: 180, line_pause_ms: 500 },
+      character: "akira",
+      text: "ヨアケ探偵社は、誰も騒がない違和感を扱う。君が来た理由は、十分すぎる",
+      pose: "expressionless",
+      text_pace: { punctuation_wait_ms: 200, line_pause_ms: 700 },
     },
   ],
   next_scene: "ch1_s01_akira_listen",
 };
 
-// ── B13 みのりの相談 / ev_ch1_02 出現 ────────────────────────────────────────
-/** B13: akira:quiet:left / minori:tense:center / yu:listening:right
- *      「変ですよね」直前 BGM duck 25% + pulse highlight + se_evidence */
+// ── B11 灰島の参加 ────────────────────────────────────────────────────────────
+// (旧 akira_listen のキーをそのまま使い、内容差し替え)
 export const scene_01_akira_listen: SceneData = {
   scene_id: "ch1_s01_akira_listen",
   type: "dialogue",
   requires_journal: false,
   messages: [
     {
-      character: "akira",
-      text: "話してみて",
-      pose: "quiet",
-      character_action: {
-        actor: "akira",
-        action: "none",
-        expression: "quiet",
-        position: "left",
-      },
-      text_pace: { punctuation_wait_ms: 200, line_pause_ms: 600 },
-    },
-    {
-      character: "minori",
-      text: "親友のSNS……に、なんか、自分のことみたいな文章が、あって",
-      pose: "tense",
-      character_action: {
-        actor: "minori",
-        action: "none",
-        expression: "tense",
-        position: "center",
-      },
-      text_pace: { punctuation_wait_ms: 180, line_pause_ms: 500 },
-    },
-    {
-      character: "minori",
-      text: "\"いつも自分のことしか考えてない人が、たまにいるよね\"って。そういう投稿で",
-      pose: "tense",
-      text_pace: { punctuation_wait_ms: 180, line_pause_ms: 500 },
-    },
-    {
       character: "yu",
-      text: "……最近？",
-      pose: "listening",
+      text: "じゃあ俺、調査担当ね。最初の三日でやることはだいたい決まってる",
+      pose: "casual",
       character_action: {
         actor: "yu",
-        action: "none",
-        expression: "listening",
-        position: "right",
+        action: "slideIn",
+        expression: "casual",
+        position: "center",
       },
       text_pace: { punctuation_wait_ms: 110, line_pause_ms: 380 },
     },
     {
-      character: "minori",
-      text: "3日前。直接聞こうとしたけど、なんか……怖くて",
-      pose: "self_deprecating",
-      text_pace: { punctuation_wait_ms: 180, line_pause_ms: 500 },
+      character: "yu",
+      text: "①誰がいつから「来てない」って認識してるか確認。②消えたSNSの周辺ログを当たる。③直近で透くんと会った人をリストアップする",
+      pose: "thinking",
+      text_pace: { punctuation_wait_ms: 110, line_pause_ms: 500 },
     },
     {
-      // B13: 「変ですよね」直前 BGM duck / ev_ch1_02 ハイライト pulse
-      character: "minori",
-      text: "変ですよね。確認すればいいだけなのに",
-      pose: "self_deprecating",
-      bgm: "duck 25 400ms",
-      se: "se_evidence",
-      text_pace: { punctuation_wait_ms: 180, line_pause_ms: 500 },
-      highlights: [
-        {
-          word: "変ですよね",
-          evidenceId: "ev_ch1_02",
-          tooltip: "この言葉に何かある",
-        },
-      ],
+      character: "yu",
+      text: "君にも一個だけ頼みたいんだけど。最後に透くんと話した日、できるだけ細かく思い出してきて",
+      pose: "casual",
+      text_pace: { punctuation_wait_ms: 130, line_pause_ms: 500 },
     },
     {
-      character: "akira",
-      text: "変じゃない",
-      pose: "quiet",
-      bgm: "ramp 38 600ms",
-      text_pace: { punctuation_wait_ms: 200, line_pause_ms: 600 },
-    },
-    {
-      character: "akira",
-      text: "で、本当の問いは何？",
-      pose: "quiet",
-      text_pace: { punctuation_wait_ms: 200, line_pause_ms: 600 },
-    },
-    {
-      character: "minori",
-      text: "……え？",
-      pose: "confused",
-      text_pace: { punctuation_wait_ms: 180, line_pause_ms: 500 },
-    },
-    {
-      character: "chifuka",
-      text: "今日はまず、話を聞かせてください。答えを急ぐ必要はない",
-      pose: "gentle",
+      character: "yu",
+      text: "言葉そのものより、雰囲気とか、違和感のほうが大事",
+      pose: "casual",
+      text_pace: { punctuation_wait_ms: 130, line_pause_ms: 500 },
     },
   ],
   next_scene: "ch1_s01_inner_voice_2",
 };
 
-// ── B14 内語2 / 章のテーマ提示 ───────────────────────────────────────────────
-/** B14: 全員 fadeOut / bg brightness(0.88) / BGM 30% / 内語ボックス */
+// ── B12 主人公の内語2（救われた感覚） ───────────────────────────────────────
 export const scene_01_inner_voice_2: SceneData = {
   scene_id: "ch1_s01_inner_voice_2",
   type: "narration",
   requires_journal: false,
   messages: [
     {
-      text: "（御堂は……みのりの話を聞いて、「本当の問いは何？」と言った。みのりが持ち込んだのは、友達への疑いのはずなのに）",
+      text: "（——信じてくれる人がいる）",
       bgm: "ramp 30 1000ms",
       character_action: {
         actor: "all",
@@ -585,37 +546,49 @@ export const scene_01_inner_voice_2: SceneData = {
         expression: undefined,
         position: undefined,
       },
-      text_pace: { punctuation_wait_ms: 140, line_pause_ms: 700 },
+      text_pace: { punctuation_wait_ms: 220, line_pause_ms: 900 },
     },
     {
-      text: "（なんか、違う気がする。でも何が違うのかは、わからない）",
-      text_pace: { punctuation_wait_ms: 140, line_pause_ms: 700 },
+      text: "（それだけのことが、こんなに重い）",
+      text_pace: { punctuation_wait_ms: 180, line_pause_ms: 800 },
     },
   ],
   next_scene: "ch1_s01_journal",
 };
 
-// ── B15 コマ1 終了（通常遷移） ────────────────────────────────────────────────
-/** B15: bg_office_interior 明るさ復帰 / chifuka slideIn right */
+// ── B13 知深の見送り（コマ1終端） ────────────────────────────────────────────
 export const scene_01_journal: SceneData = {
   scene_id: "ch1_s01_journal",
   type: "dialogue",
+  requires_journal: false,
   messages: [
     {
       character: "chifuka",
-      text: "……今日はここまで。続きは次のコマで",
-      pose: "gentle",
+      text: "明日からよろしくお願いします、依頼人さん",
+      pose: "slight_smile",
       background: "/assets/backgrounds/bg_office_interior.png",
       character_action: {
         actor: "chifuka",
         action: "slideIn",
-        expression: "gentle",
-        position: "right",
+        expression: "slight_smile",
+        position: "center",
       },
+      text_pace: { punctuation_wait_ms: 160, line_pause_ms: 500 },
+    },
+    {
+      character: "chifuka",
+      text: "あ、それと——遊さんが言いそびれてた一言、伝えておきます",
+      pose: "calm",
+      text_pace: { punctuation_wait_ms: 140, line_pause_ms: 500 },
+    },
+    {
+      character: "chifuka",
+      text: "「気づいてくれて、ありがとう」って",
+      pose: "slight_smile",
+      text_pace: { punctuation_wait_ms: 200, line_pause_ms: 800 },
     },
   ],
-  requires_journal: false,
-  next_scene: "ch1_s02_narration",
+  next_scene: "ch1_s02_koma_title",
 };
 
 // ── エクスポート: コマ1の全シーンを順序で並べたマップ ──────────────────────────
