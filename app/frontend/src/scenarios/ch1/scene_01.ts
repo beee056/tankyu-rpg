@@ -33,9 +33,19 @@ export const scene_01_narration: SceneData = {
   requires_journal: false,
   messages: [
     {
+      // 導入①: 主人公の状況・動機を提示
+      text: "探偵事務所で見習いとして働く——そう決めてから、三日が経つ。\n人の話を聞いて、何かを解き明かす仕事。なぜ自分がそこに引き寄せられたのか、うまく言葉にはできない。",
+      background: "/assets/backgrounds/bg_slope_dusk.png",
+      text_pace: { punctuation_wait_ms: 140, line_pause_ms: 500 },
+    },
+    {
+      // 導入②: 今日が初日であることを示す
+      text: "今日が初日だ。御堂から「昼過ぎに来い」と言われていた。それだけ。",
+      text_pace: { punctuation_wait_ms: 140, line_pause_ms: 500 },
+    },
+    {
       // B02: bg_slope_dusk crossfade、地の文ボックス
       text: "坂の中腹に、少し傾いた白い建物がある。\nかつては洋菓子屋だったらしく、\n入口のドアには古いガラスがはまっていて、\n光の角度によっては「ヨアケ」という文字が逆に透けて見える。",
-      background: "/assets/backgrounds/bg_slope_dusk.png",
       text_pace: { punctuation_wait_ms: 140, line_pause_ms: 500 },
     },
     {
@@ -58,7 +68,7 @@ export const scene_01_chifuka_welcome: SceneData = {
     {
       // B04: bg_office_interior crossfade、知深 slideIn right
       character: "chifuka",
-      text: "いらっしゃい。ヨアケ探偵社です。……ここに来た理由を、少し聞いてもいいですか",
+      text: "……来ましたね。ここに来た理由を、少し聞いてもいいですか",
       pose: "calm",
       background: "/assets/backgrounds/bg_office_interior.png",
       character_action: {
@@ -368,7 +378,7 @@ export const scene_01_akira_enter: SceneData = {
     },
     {
       character: "akira",
-      text: "聞くことが仕事の第一歩だ。何かを解決しようとするな。まず聞け",
+      text: "解決しようとするな。まず聞け",
       pose: "expressionless",
       text_pace: { punctuation_wait_ms: 200, line_pause_ms: 600 },
     },
@@ -384,7 +394,7 @@ export const scene_01_inner_voice_1: SceneData = {
   requires_journal: false,
   messages: [
     {
-      text: "（この人が、御堂 煌。ヨアケ探偵社の所長。……聞くことが仕事の第一歩、か）",
+      text: "（この人が、御堂 煌。ヨアケ探偵社の所長。……解決しようとするな、まず聞け、か）",
       text_pace: { punctuation_wait_ms: 140, line_pause_ms: 700 },
     },
   ],

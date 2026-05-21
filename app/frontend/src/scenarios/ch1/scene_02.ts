@@ -40,14 +40,10 @@ export const scene_02_narration: SceneData = {
   messages: [
     {
       // B17: bg_office_research (bg_office_interior + tint) / BGM 38% 復帰
-      text: "調査室のコルクボードは大きくて、今は何もない。\n遊が手帳サイズのカードを一枚、主人公に渡した。",
+      text: "調査室のコルクボードは大きくて、今は何もない。\n遊が手帳サイズのカードを一枚、手渡してきた。\n「情報カード。気になったことを書いといて。何でもいい、感覚でも」",
       background: "/assets/backgrounds/bg_office_interior.png",
       bgm: "ramp 38 1000ms",
       text_pace: { punctuation_wait_ms: 130, line_pause_ms: 480 },
-    },
-    {
-      text: "「情報カード。気になったことを書いといて。\n何でもいいよ。感覚でも」",
-      text_pace: { punctuation_wait_ms: 110, line_pause_ms: 380 },
     },
   ],
   next_scene: "ch1_s02_yu_intro",
@@ -80,7 +76,7 @@ export const scene_02_yu_intro: SceneData = {
     },
     {
       character: "yu",
-      text: "授業内ってことで今は2つしか選べない。どうする？",
+      text: "どれから行く？",
       pose: "listening",
       character_action: {
         actor: "yu",
