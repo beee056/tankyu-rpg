@@ -436,12 +436,6 @@ export const scene_01_inner_voice_1: SceneData = {
   messages: [
     {
       text: "（恐れ——）",
-      character_action: {
-        actor: "all",
-        action: "fadeOut",
-        expression: undefined,
-        position: undefined,
-      },
       text_pace: { punctuation_wait_ms: 240, line_pause_ms: 900 },
     },
     {
