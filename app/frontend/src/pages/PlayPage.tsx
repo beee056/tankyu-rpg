@@ -359,7 +359,8 @@ export default function PlayPage() {
       const ca = currentMsg.character_action;
       setSprites((prev) => {
         if (ca.action === "fadeOut") {
-          // Remove the actor from sprites
+          // actor === "all" → clear all sprites; otherwise remove just the named actor
+          if (ca.actor === "all") return [];
           return prev.filter((s) => s.actor !== ca.actor);
         }
         // Remove existing entry for this actor, then add new one

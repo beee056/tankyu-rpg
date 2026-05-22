@@ -85,7 +85,7 @@ export const useGameStore = create<GameState>()(
         }),
     }),
     {
-      name: "yoake-game-progress",
+      name: "yoake-game-progress-v2.5",
     }
   )
 );

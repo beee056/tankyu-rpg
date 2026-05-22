@@ -199,9 +199,7 @@ export default function DashboardPage() {
       </div>
 
       {/* 証拠ボードモーダル */}
-      {evidenceOpen && (
-        <EvidenceBoardModal onClose={() => setEvidenceOpen(false)} />
-      )}
+      <EvidenceBoardModal isOpen={evidenceOpen} onClose={() => setEvidenceOpen(false)} />
     </main>
   );
 }
