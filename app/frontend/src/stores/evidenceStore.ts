@@ -118,6 +118,52 @@ export const useEvidenceStore = create<EvidenceState>()(
             hypothesisId: "hyp_ch1_D",
             message: "桐嶋の家庭事情と謝罪が繋がった。真相仮説Dが解放された。",
           },
+          // Cルート SNS投稿タップ仮説（sns_* タグ）
+          {
+            requiredTags: ["sns_school", "sns_place"],
+            hypothesisId: "hyp_ch1_sns_A",
+            message: "仮説：学校に居場所がない。物理的でなく、心理的な『どこか』を探していた",
+          },
+          {
+            requiredTags: ["sns_school", "sns_isolation"],
+            hypothesisId: "hyp_ch1_sns_B",
+            message: "仮説：学校で透を孤立させた何か（誰か）がいる。透はそれを知っている",
+          },
+          {
+            requiredTags: ["sns_place", "sns_isolation"],
+            hypothesisId: "hyp_ch1_sns_C",
+            message: "仮説：誰かに伝わるのを恐れていた。これは助けの呼び方だが、宛先は誰でもよくない",
+          },
+          {
+            requiredTags: ["sns_late", "sns_isolation"],
+            hypothesisId: "hyp_ch1_sns_D",
+            message: "仮説：23時47分。眠れない夜に書いて、朝までに非公開化した。\n　書いてしまった自分を、すぐに恥じた。あるいは、誰かに見つけられるのが怖くなった",
+          },
+          // v2.5: クロスルート仮説（ルートA/B/C 横断）
+          {
+            requiredTags: ["home_lie", "school_nurse", "sns_isolation"],
+            hypothesisId: "hyp_ch1_I",
+            message:
+              "仮説I：透は何かを抱え、学校でも家でも本当のことを話せていない。保健室の先生だけが気づいていたかもしれない",
+          },
+          {
+            requiredTags: ["home_car", "school_meeting", "sns_late"],
+            hypothesisId: "hyp_ch1_II",
+            message:
+              "仮説II：夜中の車、放課後の約束、深夜投稿。透は何度か『どこかへ行こうとしていた』",
+          },
+          {
+            requiredTags: ["home_sound", "school_teacher", "sns_place"],
+            hypothesisId: "hyp_ch1_III",
+            message:
+              "仮説III：家族と学校が共謀して透を隠している。透は『見つからない場所』にすでに居る",
+          },
+          {
+            requiredTags: ["home_car", "school_nurse", "sns_school"],
+            hypothesisId: "hyp_ch1_IV",
+            message:
+              "仮説IV：透は学校に来るつもりだったはずなのに、誰かに止められた。その誰かは家の中にいる",
+          },
         ];
 
         for (const def of ASSOC_DEFS) {

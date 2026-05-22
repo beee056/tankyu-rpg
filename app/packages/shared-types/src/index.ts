@@ -255,6 +255,16 @@ export interface TextPace {
   line_pause_ms?: number;
 }
 
+// ============================================================
+// v2.5: SNS風カード表示データ
+// ============================================================
+export interface SnsPostData {
+  username: string;
+  timestamp: string;
+  body: string;
+  highlights?: HighlightDef[];
+}
+
 export interface SceneMessage {
   character?: CharacterId;
   text: string;
@@ -272,6 +282,10 @@ export interface SceneMessage {
   text_pace?: TextPace;
   /** v2.5: 章タイトル・コマタイトル等の特殊演出テキスト */
   chapter_title?: string;
+  /** v2.5: SNS風カード。あれば通常ダイアログの代わりにSnsPostCardを表示 */
+  sns_post?: SnsPostData;
+  /** v2.5: trueの時、highlightsを全てタップするまで次へ進行不可 */
+  force_highlight_tap?: boolean;
 }
 
 export interface SceneChoice {
@@ -283,6 +297,8 @@ export interface SceneChoice {
   evidence_grants?: string[];
   requiredEvidence?: string[];
   hint?: string;
+  /** v2.5: 完了済みルートキー。PlayPageがcompletedRoutesに含まれる選択肢を非表示化 */
+  completed_route_key?: string;
 }
 
 export interface SceneData {

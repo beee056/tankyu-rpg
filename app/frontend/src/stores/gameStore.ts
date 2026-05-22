@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { useEvidenceStore } from "./evidenceStore";
 
 interface GameState {
   currentPart: number;
@@ -19,6 +20,9 @@ interface GameState {
   /** v2: 収集済み証拠IDリスト（シーン遷移ロジック用） */
   collectedEvidenceIds: string[];
 
+  /** v2.5: 完了済み調査ルートキーリスト（例: ["route_a", "route_b"]） */
+  completedRoutes: string[];
+
   // Actions
   advanceScene: () => void;
   setPart: (part: number) => void;
@@ -28,6 +32,7 @@ interface GameState {
   saveScene: (sceneKey: string) => void;
   resetProgress: () => void;
   addCollectedEvidenceId: (id: string) => void;
+  addCompletedRoute: (routeId: string) => void;
 }
 
 const initialState = {
@@ -41,7 +46,8 @@ const initialState = {
   questionFlagDeepTalk: false,
   currentSceneKey: "",
   lastUpdatedAt: "",
-  collectedEvidenceIds: [],
+  collectedEvidenceIds: [] as string[],
+  completedRoutes: [] as string[],
 };
 
 export const useGameStore = create<GameState>()(
@@ -76,12 +82,21 @@ export const useGameStore = create<GameState>()(
           };
         }),
 
-      resetProgress: () => set(initialState),
+      resetProgress: () => {
+        set(initialState);
+        useEvidenceStore.getState().clearAll();
+      },
 
       addCollectedEvidenceId: (id: string) =>
         set((state) => {
           if (state.collectedEvidenceIds.includes(id)) return state;
           return { collectedEvidenceIds: [...state.collectedEvidenceIds, id] };
+        }),
+
+      addCompletedRoute: (routeId: string) =>
+        set((state) => {
+          if (state.completedRoutes.includes(routeId)) return state;
+          return { completedRoutes: [...state.completedRoutes, routeId] };
         }),
     }),
     {

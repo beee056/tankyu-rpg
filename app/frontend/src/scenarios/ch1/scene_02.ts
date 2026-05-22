@@ -1,20 +1,20 @@
 import type { SceneData } from "shared-types";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// コマ2「調査開始」— v2.5 書き直し版（Reviewer 指摘4点反映済み）
+// コマ2「調査開始」— v2.5 真の調査ループ構造
 //
-// コマ1の翌日(放課後)。灰島が一晩で掴んだ事実2件を事務所でブリーフィング。
-// 御堂の一言で「本格始動」を宣言し、主人公が最初の一手を選ぶ選択肢へ。
-// 選択肢ごとに決意の内語を挟んでから「明日、私は——」でTBC。
-// 既存ノードキーは維持。PlayPage のシーン遷移時 sprite 全クリア仕様に対応し、
-// 各シーン冒頭で character_action を明示再指定。
+// フロー:
+//   yu_intro → route_hub (3択)
+//     A: route_a (透の家) → route_a_return → hub
+//     B: route_b (学校)   → route_b_return → hub
+//     C: route_c (SNS)    → route_c_return → hub
+//   全3ルート完了 → final_deduction → to_be_continued
 // ─────────────────────────────────────────────────────────────────────────────
 
-// ── B14 コマタイトル ───────────────────────────────────────────────────────────
+// ── コマタイトル ──────────────────────────────────────────────────────────────
 export const scene_02_koma_title: SceneData = {
   scene_id: "ch1_s02_koma_title",
   type: "narration",
-  requires_journal: false,
   messages: [
     {
       text: "",
@@ -27,22 +27,16 @@ export const scene_02_koma_title: SceneData = {
   next_scene: "ch1_s02_narration",
 };
 
-// ── B15 放課後・坂を上る独白 ──────────────────────────────────────────────────
+// ── 放課後・坂を上る独白 ───────────────────────────────────────────────────────
 export const scene_02_narration: SceneData = {
   scene_id: "ch1_s02_narration",
   type: "narration",
-  requires_journal: false,
   messages: [
     {
       text: "放課後、いつもの坂を上りながら、ずっと昨夜のことを考えていた。",
       background: "/assets/backgrounds/bg_slope_dusk.png",
       bgm: "ramp 38 1000ms",
-      character_action: {
-        actor: "all",
-        action: "fadeOut",
-        expression: undefined,
-        position: undefined,
-      },
+      character_action: { actor: "all", action: "fadeOut" },
       text_pace: { punctuation_wait_ms: 180, line_pause_ms: 600 },
     },
     {
@@ -65,11 +59,10 @@ export const scene_02_narration: SceneData = {
   next_scene: "ch1_s02_yu_intro",
 };
 
-// ── B16 事務所・灰島のブリーフィング ──────────────────────────────────────────
+// ── 事務所・灰島のブリーフィング ──────────────────────────────────────────────
 export const scene_02_yu_intro: SceneData = {
   scene_id: "ch1_s02_yu_intro",
   type: "dialogue",
-  requires_journal: false,
   messages: [
     {
       text: "事務所に着くと、灰島さんがノートパソコンを広げて待っていた。",
@@ -104,87 +97,20 @@ export const scene_02_yu_intro: SceneData = {
     },
     {
       character: "yu",
-      text: "最後の投稿がさ……10月14日の23:47。こんなの書いてある",
+      text: "最後の投稿がさ……10月14日の23:47。\n最初の欠席届が出たのはそれから8日後——",
       pose: "thinking",
       text_pace: { punctuation_wait_ms: 160, line_pause_ms: 700 },
     },
     {
       character: "yu",
-      text: "「誰にも見つからない場所がほしい」",
-      pose: "serious",
-      se: "se_evidence",
-      highlights: [
-        {
-          word: "誰にも見つからない場所がほしい",
-          evidenceId: "ev_ch1_03",
-          tooltip: "透の最後のSNS投稿。10月14日 23:47。",
-        },
-      ],
-      text_pace: { punctuation_wait_ms: 220, line_pause_ms: 1000 },
-    },
-    {
-      character: "yu",
-      text: "返信もなし。その次の日から来なくなってる——かも",
-      pose: "thinking",
-      text_pace: { punctuation_wait_ms: 160, line_pause_ms: 600 },
-    },
-    {
-      character: "yu",
-      text: "もう一個あってさ。俺、今日、透くんの叔父さんのフリして学校に電話してみたんだよね",
-      pose: "casual",
-      text_pace: { punctuation_wait_ms: 130, line_pause_ms: 500 },
-    },
-    {
-      character: "yu",
-      text: "そしたら——最初の7日間、「無断欠席」扱いだったみたいで。\n欠席届が出たのは8日目から、だね",
-      pose: "thinking",
-      se: "se_evidence",
-      highlights: [
-        {
-          word: "最初の7日間は「無断欠席」扱い",
-          evidenceId: "ev_ch1_04",
-          tooltip: "学校への確認で判明。欠席届は失踪8日目から。誰かが後から辻褄を合わせた可能性。",
-        },
-      ],
-      text_pace: { punctuation_wait_ms: 160, line_pause_ms: 700 },
-    },
-    {
-      character: "yu",
-      text: "「家庭の事情」って担任が言った理由——誰かが後から話を作ったかもしれない、と思う",
+      text: "つまり最初の7日間は「無断欠席」扱いだったんだよね。\nちょっとこれ、変だと思う——かも",
       pose: "serious",
       text_pace: { punctuation_wait_ms: 160, line_pause_ms: 700 },
     },
     {
       text: "（10月14日の夜——透が投稿した日。\n　あの日の帰り道、透は笑っていた。「またね」と言った。\n　あの笑顔が、最後だったのか）",
-      character_action: {
-        actor: "yu",
-        action: "fadeOut",
-        expression: undefined,
-        position: undefined,
-      },
+      character_action: { actor: "yu", action: "fadeOut" },
       text_pace: { punctuation_wait_ms: 180, line_pause_ms: 900 },
-    },
-    {
-      character: "yu",
-      text: "ちなみに聞いていい？\n透くんが最後に「いつもと違う」って感じた瞬間、あった？",
-      pose: "casual",
-      character_action: {
-        actor: "yu",
-        action: "slideIn",
-        expression: "casual",
-        position: "center",
-      },
-      text_pace: { punctuation_wait_ms: 130, line_pause_ms: 600 },
-    },
-    {
-      text: "（——あった。\n　あの日の「またね」は、少しだけ長かった気がする。\n　気のせいだと思っていた）",
-      character_action: {
-        actor: "yu",
-        action: "fadeOut",
-        expression: undefined,
-        position: undefined,
-      },
-      text_pace: { punctuation_wait_ms: 200, line_pause_ms: 900 },
     },
     {
       character: "akira",
@@ -214,18 +140,13 @@ export const scene_02_yu_intro: SceneData = {
     },
     {
       text: "御堂さんは、それだけ言って奥に戻った。",
-      character_action: {
-        actor: "akira",
-        action: "fadeOut",
-        expression: undefined,
-        position: undefined,
-      },
+      character_action: { actor: "akira", action: "fadeOut" },
       bgm: "ramp 40 1200ms",
       text_pace: { punctuation_wait_ms: 180, line_pause_ms: 700 },
     },
     {
       character: "yu",
-      text: "……ってわけで、だよ。\nどこから動く——って話なんだよね、次は",
+      text: "……ってわけで、だよ。\nどこから動く？",
       pose: "casual",
       character_action: {
         actor: "yu",
@@ -236,70 +157,412 @@ export const scene_02_yu_intro: SceneData = {
       text_pace: { punctuation_wait_ms: 130, line_pause_ms: 600 },
     },
   ],
-  next_scene: "ch1_s02_collect_choice",
+  next_scene: "ch1_s02_route_hub",
 };
 
-// ── B17 最初の一手・選択肢 ────────────────────────────────────────────────────
-export const scene_02_collect_choice: SceneData = {
-  scene_id: "ch1_s02_collect_choice",
+// ── 調査ハブ（3択 → 全完了でdeductionへ自動遷移）─────────────────────────────
+export const scene_02_route_hub: SceneData = {
+  scene_id: "ch1_s02_route_hub",
   type: "choice",
-  requires_journal: false,
   messages: [
     {
-      text: "（動く、と御堂さんが言った。\n　SNSは消えていなかった。非公開だった。\n　無断欠席は7日間。届が出たのは8日目——\n　10月14日の夜の投稿が、全部の始まりかもしれない。\n　明日——どこから始める？）",
+      character: "yu",
+      text: "どこから当たる？",
       character_action: {
         actor: "yu",
-        action: "fadeOut",
-        expression: undefined,
-        position: undefined,
+        action: "slideIn",
+        expression: "casual",
+        position: "center",
       },
-      text_pace: { punctuation_wait_ms: 200, line_pause_ms: 900 },
+      background: "/assets/backgrounds/bg_office_interior.png",
+      text_pace: { punctuation_wait_ms: 130, line_pause_ms: 500 },
     },
   ],
   choices: [
     {
       key: "A",
-      label: "透の家を、もう一度訪ねる——今度は、引き下がらない",
-      flag_updates: [{ key: "ROUTE_HOME", delta: 1 }],
-      next_scene: "ch1_s02a_minori_start",
+      label: "透の家を再訪する——今度は引き下がらない",
+      completed_route_key: "route_a",
+      next_scene: "ch1_s02_route_a",
     },
     {
       key: "B",
-      label: "学校で、透と最後に一緒にいた人を探す",
-      flag_updates: [{ key: "ROUTE_SCHOOL", delta: 1 }],
-      next_scene: "ch1_s02c_friend_start",
+      label: "学校で、最後の目撃者を探す",
+      completed_route_key: "route_b",
+      next_scene: "ch1_s02_route_b",
     },
     {
       key: "C",
-      label: "SNSの最後の投稿——「見つからない場所」の意味を考える",
-      flag_updates: [{ key: "ROUTE_SNS", delta: 1 }],
-      next_scene: "ch1_s02b_sns_start",
+      label: "SNSの最後の投稿を、もう一度読み解く",
+      completed_route_key: "route_c",
+      next_scene: "ch1_s02_route_c",
     },
   ],
 };
 
-// ── B18 決意の余韻 → To be continued ─────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════
+// ルートA — 透の家を再訪
+// ═══════════════════════════════════════════════════════════════════════
+export const scene_02_route_a: SceneData = {
+  scene_id: "ch1_s02_route_a",
+  type: "dialogue",
+  messages: [
+    {
+      text: "夕方、透の家の前に来た。\nチャイムを押すと、透の母親が出てきた。",
+      background: "/assets/backgrounds/bg_slope_dusk.png",
+      character_action: { actor: "all", action: "fadeOut" },
+      text_pace: { punctuation_wait_ms: 180, line_pause_ms: 700 },
+    },
+    {
+      text: "母親は少し間を置いてから、笑顔を作った。\n「透は今、塾に行ってるのよ」\n目が逸れた。ドアの奥で、床がきしんだ。",
+      highlights: [
+        {
+          word: "塾に行ってる",
+          evidenceId: "ev_ch1_s2_home_lie",
+          tooltip: "夕方5時過ぎ。透の塾は木・土だ",
+        },
+        {
+          word: "床がきしんだ",
+          evidenceId: "ev_ch1_s2_home_sound",
+          tooltip: "ドアの向こうで誰かが動いた",
+        },
+      ],
+      force_highlight_tap: true,
+      se: "se_evidence",
+      text_pace: { punctuation_wait_ms: 200, line_pause_ms: 900 },
+    },
+    {
+      text: "帰り際、路地で隣人の老婦人に声をかけられた。\n「最近ね、夜中に車が出入りしてるのよ。\n　2、3回は見た」",
+      highlights: [
+        {
+          word: "夜中に車が出入りしてる",
+          evidenceId: "ev_ch1_s2_home_car",
+          tooltip: "深夜1〜2時。見慣れない車",
+        },
+      ],
+      force_highlight_tap: true,
+      se: "se_evidence",
+      text_pace: { punctuation_wait_ms: 200, line_pause_ms: 900 },
+    },
+    {
+      character: "yu",
+      text: "お疲れ。何か拾えた——かも？",
+      character_action: {
+        actor: "yu",
+        action: "slideIn",
+        expression: "casual",
+        position: "center",
+      },
+      text_pace: { punctuation_wait_ms: 130, line_pause_ms: 500 },
+    },
+  ],
+  next_scene: "ch1_s02_route_a_return",
+};
+
+export const scene_02_route_a_return: SceneData = {
+  scene_id: "ch1_s02_route_a_return",
+  type: "choice",
+  messages: [
+    {
+      character: "yu",
+      text: "「塾」が嘘だとしたら——誰かが透を家に隠してる？\nまだ2ルートある。先に進もう",
+      character_action: {
+        actor: "yu",
+        action: "none",
+        expression: "thinking",
+        position: "center",
+      },
+      text_pace: { punctuation_wait_ms: 160, line_pause_ms: 600 },
+    },
+  ],
+  choices: [
+    {
+      key: "A",
+      label: "次の場所を調べる",
+      flag_updates: [{ key: "COMPLETE_ROUTE_A", delta: 1 }],
+      next_scene: "ch1_s02_route_hub",
+    },
+  ],
+};
+
+// ═══════════════════════════════════════════════════════════════════════
+// ルートB — 学校で最後の目撃者を探す
+// ═══════════════════════════════════════════════════════════════════════
+export const scene_02_route_b: SceneData = {
+  scene_id: "ch1_s02_route_b",
+  type: "dialogue",
+  messages: [
+    {
+      text: "放課後の校舎。人が少なくなった廊下を歩く。\n透のクラスメイトを捕まえた。",
+      background: "/assets/backgrounds/bg_slope_dusk.png",
+      character_action: { actor: "all", action: "fadeOut" },
+      text_pace: { punctuation_wait_ms: 180, line_pause_ms: 700 },
+    },
+    {
+      text: "「あの日、透は——放課後に誰かと会う約束をしてたって言ってた。\n　誰かは、知らない」\n彼女は目を伏せて、そう言った。",
+      highlights: [
+        {
+          word: "放課後に誰かと会う約束",
+          evidenceId: "ev_ch1_s2_school_meeting",
+          tooltip: "失踪した日の放課後。相手は不明",
+        },
+      ],
+      force_highlight_tap: true,
+      se: "se_evidence",
+      text_pace: { punctuation_wait_ms: 200, line_pause_ms: 900 },
+    },
+    {
+      text: "職員室の前を通った。\n担任と目が合った——一瞬だけ。\n視線が逸れた。声はかけてこなかった。\n\n廊下の角で、部活帰りの先輩が声をかけてきた。\n「透って、最近よく保健室の先生に呼ばれてたよ。\n　本人は何でもないって言ってたけど」",
+      highlights: [
+        {
+          word: "視線が逸れた",
+          evidenceId: "ev_ch1_s2_school_teacher",
+          tooltip: "担任は何かを知っている",
+        },
+        {
+          word: "保健室の先生に呼ばれてた",
+          evidenceId: "ev_ch1_s2_school_nurse",
+          tooltip: "保健室の先生が何度も呼び出していた",
+        },
+      ],
+      force_highlight_tap: true,
+      se: "se_evidence",
+      text_pace: { punctuation_wait_ms: 200, line_pause_ms: 900 },
+    },
+    {
+      character: "yu",
+      text: "担任、目が合った？\n……それ、知ってて黙ってる顔だよ、たぶん",
+      character_action: {
+        actor: "yu",
+        action: "slideIn",
+        expression: "serious",
+        position: "center",
+      },
+      text_pace: { punctuation_wait_ms: 160, line_pause_ms: 600 },
+    },
+  ],
+  next_scene: "ch1_s02_route_b_return",
+};
+
+export const scene_02_route_b_return: SceneData = {
+  scene_id: "ch1_s02_route_b_return",
+  type: "choice",
+  messages: [
+    {
+      character: "yu",
+      text: "保健室の先生、あとで当たれるかもしれない。\nまずは残りを片付けよう",
+      character_action: {
+        actor: "yu",
+        action: "none",
+        expression: "casual",
+        position: "center",
+      },
+      text_pace: { punctuation_wait_ms: 160, line_pause_ms: 600 },
+    },
+  ],
+  choices: [
+    {
+      key: "A",
+      label: "次の場所を調べる",
+      flag_updates: [{ key: "COMPLETE_ROUTE_B", delta: 1 }],
+      next_scene: "ch1_s02_route_hub",
+    },
+  ],
+};
+
+// ═══════════════════════════════════════════════════════════════════════
+// ルートC — SNS投稿を読み解く（SnsPostCard表示）
+// ═══════════════════════════════════════════════════════════════════════
+export const scene_02_route_c: SceneData = {
+  scene_id: "ch1_s02_route_c",
+  type: "dialogue",
+  messages: [
+    {
+      character: "yu",
+      text: "スマホに保存してある。もう一回、ちゃんと読んでみて",
+      character_action: {
+        actor: "yu",
+        action: "slideIn",
+        expression: "thinking",
+        position: "center",
+      },
+      background: "/assets/backgrounds/bg_office_interior.png",
+      text_pace: { punctuation_wait_ms: 130, line_pause_ms: 500 },
+    },
+    {
+      // SnsPostCard として表示
+      text: "",
+      character_action: { actor: "yu", action: "fadeOut" },
+      sns_post: {
+        username: "とおる",
+        timestamp: "2025/10/14 23:47",
+        body: "明日も学校がある。そんなことよりも、誰にも見つからない場所がほしい。\nたぶん、わたし以外には伝わらないけれど",
+        highlights: [
+          {
+            word: "明日も学校がある",
+            evidenceId: "ev_ch1_s2_post_school",
+            tooltip: "透にとって学校はまだ「ある」前提だった",
+          },
+          {
+            word: "誰にも見つからない場所",
+            evidenceId: "ev_ch1_s2_post_place",
+            tooltip: "場所への希求——物理的か、心理的か",
+          },
+          {
+            word: "わたし以外には伝わらないけれど",
+            evidenceId: "ev_ch1_s2_post_isolation",
+            tooltip: "伝わることを諦めながら、投稿した",
+          },
+          {
+            word: "23:47",
+            evidenceId: "ev_ch1_s2_post_late",
+            tooltip: "誰も起きていない時間の投稿",
+          },
+        ],
+      },
+      force_highlight_tap: true,
+      se: "se_evidence",
+      text_pace: { punctuation_wait_ms: 0, line_pause_ms: 0 },
+    },
+    {
+      character: "yu",
+      text: "23時47分か。\n眠れなかったか、それとも——誰かのそばにいた、か",
+      character_action: {
+        actor: "yu",
+        action: "slideIn",
+        expression: "thinking",
+        position: "center",
+      },
+      text_pace: { punctuation_wait_ms: 160, line_pause_ms: 700 },
+    },
+  ],
+  next_scene: "ch1_s02_route_c_return",
+};
+
+export const scene_02_route_c_return: SceneData = {
+  scene_id: "ch1_s02_route_c_return",
+  type: "choice",
+  messages: [
+    {
+      character: "yu",
+      text: "「学校がある」って書き方——まだ行くつもりだった、よな。\nそれが次の日から来なくなった",
+      character_action: {
+        actor: "yu",
+        action: "none",
+        expression: "serious",
+        position: "center",
+      },
+      text_pace: { punctuation_wait_ms: 160, line_pause_ms: 600 },
+    },
+  ],
+  choices: [
+    {
+      key: "A",
+      label: "残りを調べる",
+      flag_updates: [{ key: "COMPLETE_ROUTE_C", delta: 1 }],
+      next_scene: "ch1_s02_route_hub",
+    },
+  ],
+};
+
+// ═══════════════════════════════════════════════════════════════════════
+// 仮説選択（全3ルート完了後）
+// ═══════════════════════════════════════════════════════════════════════
+export const scene_02_final_deduction: SceneData = {
+  scene_id: "ch1_s02_final_deduction",
+  type: "choice",
+  messages: [
+    {
+      character: "yu",
+      text: "3か所、お疲れ。\n集まった情報から——今の時点で、一番しっくりくる仮説はどれ？",
+      character_action: {
+        actor: "yu",
+        action: "slideIn",
+        expression: "serious",
+        position: "center",
+      },
+      background: "/assets/backgrounds/bg_office_interior.png",
+      text_pace: { punctuation_wait_ms: 160, line_pause_ms: 600 },
+    },
+    {
+      text: "（証拠が9つ、手元にある。\n　「塾という嘘」「ドアの向こうの足音」「夜中の車」——\n　「放課後の約束」「担任の視線」「保健室の呼び出し」——\n　「学校がある」「見つからない場所」「深夜の投稿」。\n　どれが、透の今につながる？）",
+      character_action: { actor: "yu", action: "fadeOut" },
+      text_pace: { punctuation_wait_ms: 200, line_pause_ms: 1000 },
+    },
+  ],
+  choices: [
+    {
+      key: "A",
+      label: "透は何かを抱え、家でも学校でも話せていない。保健室の先生だけが気づいていたかも",
+      next_scene: "ch1_s02_deduction_reaction",
+    },
+    {
+      key: "B",
+      label: "夜中の車、放課後の約束、深夜の投稿。透は何度か「どこかへ行こうとしていた」",
+      next_scene: "ch1_s02_deduction_reaction",
+    },
+    {
+      key: "C",
+      label: "家族と学校が透の情報を隠している。透は「見つからない場所」にすでに居る",
+      next_scene: "ch1_s02_deduction_reaction",
+    },
+    {
+      key: "D",
+      label: "透は学校に来るつもりだったのに、誰かに止められた。その誰かは家の中にいる",
+      next_scene: "ch1_s02_deduction_reaction",
+    },
+  ],
+};
+
+// 仮説選択後の灰島反応
+export const scene_02_deduction_reaction: SceneData = {
+  scene_id: "ch1_s02_deduction_reaction",
+  type: "dialogue",
+  messages: [
+    {
+      character: "yu",
+      text: "……そっか。\nそれ、俺も考えてた——かも",
+      character_action: {
+        actor: "yu",
+        action: "slideIn",
+        expression: "thinking",
+        position: "center",
+      },
+      background: "/assets/backgrounds/bg_office_interior.png",
+      text_pace: { punctuation_wait_ms: 160, line_pause_ms: 700 },
+    },
+    {
+      character: "yu",
+      text: "明日、この仮説を持って動こう。\n……崩れるかもしれないけど",
+      pose: "serious",
+      text_pace: { punctuation_wait_ms: 160, line_pause_ms: 700 },
+    },
+    {
+      text: "（崩れてもいい。動かなければ、何も見つからない）",
+      character_action: { actor: "yu", action: "fadeOut" },
+      background: "#0E0A08",
+      bgm: "fadeOut 2500ms",
+      text_pace: { punctuation_wait_ms: 200, line_pause_ms: 1000 },
+    },
+  ],
+  next_scene: "ch1_s02_to_be_continued",
+};
+
+// ── To be continued ───────────────────────────────────────────────────────────
 export const scene_02_to_be_continued: SceneData = {
   scene_id: "ch1_s02_to_be_continued",
   type: "narration",
-  requires_journal: false,
   messages: [
     {
       text: "明日、私は——",
       background: "#0E0A08",
-      bgm: "fadeOut 2500ms",
-      character_action: {
-        actor: "all",
-        action: "fadeOut",
-        expression: undefined,
-        position: undefined,
-      },
+      character_action: { actor: "all", action: "fadeOut" },
       text_pace: { punctuation_wait_ms: 300, line_pause_ms: 1200 },
     },
     {
       text: "",
       chapter_title:
-        "To be continued —\nこのデモはここまで。\n本編では、選んだ手がかりから透の足跡を辿っていきます。",
+        "To be continued —\nこのデモはここまで。\n本編では、選んだ仮説を手に透の足跡を辿っていきます。",
       text_pace: { punctuation_wait_ms: 0, line_pause_ms: 0 },
     },
   ],
@@ -307,174 +570,63 @@ export const scene_02_to_be_continued: SceneData = {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// ルート分岐・決意ビート（選択肢 A / B / C それぞれの内語→TBC）
+// 旧ノード — 互換性のためスタブとして残置
 // ─────────────────────────────────────────────────────────────────────────────
-
-// ── ルート A: 透の家を再訪 ────────────────────────────────────────────────────
-export const scene_02a_minori_start: SceneData = {
-  scene_id: "ch1_s02a_minori_start",
+const _stub = (id: string): SceneData => ({
+  scene_id: id,
   type: "narration",
-  requires_journal: false,
-  messages: [
-    {
-      text: "（透の家——もう一度、あのドアの前に立とう。\n　今度は、引き下がらない）",
-      background: "#0E0A08",
-      character_action: {
-        actor: "all",
-        action: "fadeOut",
-        expression: undefined,
-        position: undefined,
-      },
-      text_pace: { punctuation_wait_ms: 200, line_pause_ms: 1000 },
-    },
-  ],
+  messages: [{ text: "（このノードは v2.5 で統合されました）" }],
   next_scene: "ch1_s02_to_be_continued",
-};
+});
 
-// ── ルート B: 学校で目撃者を探す ──────────────────────────────────────────────
-export const scene_02c_friend_start: SceneData = {
-  scene_id: "ch1_s02c_friend_start",
-  type: "narration",
-  requires_journal: false,
-  messages: [
-    {
-      text: "（あの日、教室の隅で透と一緒にいた誰かを、私は知っている。\n　その人は、何かを見ていたはずだ）",
-      background: "#0E0A08",
-      character_action: {
-        actor: "all",
-        action: "fadeOut",
-        expression: undefined,
-        position: undefined,
-      },
-      text_pace: { punctuation_wait_ms: 200, line_pause_ms: 1000 },
-    },
-  ],
-  next_scene: "ch1_s02_to_be_continued",
-};
-
-// ── ルート C: SNS 投稿を読み解く ──────────────────────────────────────────────
-export const scene_02b_sns_start: SceneData = {
-  scene_id: "ch1_s02b_sns_start",
-  type: "narration",
-  requires_journal: false,
-  messages: [
-    {
-      text: "（あの投稿の時刻——23:47。眠れない夜に書いたか、誰かのそばで書いたか。\n　明日、その答えを、私が拾いに行く）",
-      background: "#0E0A08",
-      character_action: {
-        actor: "all",
-        action: "fadeOut",
-        expression: undefined,
-        position: undefined,
-      },
-      text_pace: { punctuation_wait_ms: 200, line_pause_ms: 1000 },
-    },
-  ],
-  next_scene: "ch1_s02_to_be_continued",
-};
-
-// ─────────────────────────────────────────────────────────────────────────────
-// 以下のノードは v2.5 デモでは未使用。index.ts / SCENE_MAP 互換のため残置。
-// ─────────────────────────────────────────────────────────────────────────────
-
-export const scene_02a_question_choice: SceneData = {
-  scene_id: "ch1_s02a_question_choice",
-  type: "narration",
-  requires_journal: false,
-  messages: [{ text: "（v2.5 デモでは未使用）" }],
-  next_scene: "ch1_s02_to_be_continued",
-};
-
-export const scene_02a_react_a1: SceneData = {
-  scene_id: "ch1_s02a_react_a1",
-  type: "narration",
-  requires_journal: false,
-  messages: [{ text: "（v2.5 デモでは未使用）" }],
-  next_scene: "ch1_s02_to_be_continued",
-};
-
-export const scene_02a_react_a2: SceneData = {
-  scene_id: "ch1_s02a_react_a2",
-  type: "narration",
-  requires_journal: false,
-  messages: [{ text: "（v2.5 デモでは未使用）" }],
-  next_scene: "ch1_s02_to_be_continued",
-};
-
-export const scene_02a_minori_more: SceneData = {
-  scene_id: "ch1_s02a_minori_more",
-  type: "narration",
-  requires_journal: false,
-  messages: [{ text: "（v2.5 デモでは未使用）" }],
-  next_scene: "ch1_s02_to_be_continued",
-};
-
-export const scene_02b_post_display: SceneData = {
-  scene_id: "ch1_s02b_post_display",
-  type: "narration",
-  requires_journal: false,
-  messages: [{ text: "（v2.5 デモでは未使用）" }],
-  next_scene: "ch1_s02_to_be_continued",
-};
-
-export const scene_02b_yu_analysis: SceneData = {
-  scene_id: "ch1_s02b_yu_analysis",
-  type: "narration",
-  requires_journal: false,
-  messages: [{ text: "（v2.5 デモでは未使用）" }],
-  next_scene: "ch1_s02_to_be_continued",
-};
-
-export const scene_02c_yu_returns: SceneData = {
-  scene_id: "ch1_s02c_yu_returns",
-  type: "narration",
-  requires_journal: false,
-  messages: [{ text: "（v2.5 デモでは未使用）" }],
-  next_scene: "ch1_s02_to_be_continued",
-};
-
-export const scene_02_end_common: SceneData = {
-  scene_id: "ch1_s02_end_common",
-  type: "narration",
-  requires_journal: false,
-  messages: [{ text: "（v2.5 デモでは未使用）" }],
-  next_scene: "ch1_s02_to_be_continued",
-};
-
-export const scene_02_inner_voice: SceneData = {
-  scene_id: "ch1_s02_inner_voice",
-  type: "narration",
-  requires_journal: false,
-  messages: [{ text: "（v2.5 デモでは未使用）" }],
-  next_scene: "ch1_s02_to_be_continued",
-};
-
-export const scene_02_journal: SceneData = {
-  scene_id: "ch1_s02_journal",
-  type: "narration",
-  requires_journal: false,
-  messages: [{ text: "（v2.5 デモでは未使用）" }],
-  next_scene: "ch1_s02_to_be_continued",
-};
+export const scene_02_collect_choice      = _stub("ch1_s02_collect_choice");
+export const scene_02a_minori_start       = _stub("ch1_s02a_minori_start");
+export const scene_02a_question_choice    = _stub("ch1_s02a_question_choice");
+export const scene_02a_react_a1           = _stub("ch1_s02a_react_a1");
+export const scene_02a_react_a2           = _stub("ch1_s02a_react_a2");
+export const scene_02a_minori_more        = _stub("ch1_s02a_minori_more");
+export const scene_02b_sns_start          = _stub("ch1_s02b_sns_start");
+export const scene_02b_post_display       = _stub("ch1_s02b_post_display");
+export const scene_02c_investigation      = _stub("ch1_s02c_investigation");
+export const scene_02c_inv_board          = _stub("ch1_s02c_inv_board");
+export const scene_02c_inv_reaction       = _stub("ch1_s02c_inv_reaction");
+export const scene_02c_friend_start       = _stub("ch1_s02c_friend_start");
+export const scene_02c_yu_returns         = _stub("ch1_s02c_yu_returns");
+export const scene_02_end_common          = _stub("ch1_s02_end_common");
+export const scene_02_inner_voice         = _stub("ch1_s02_inner_voice");
+export const scene_02_journal             = _stub("ch1_s02_journal");
 
 // ── シーンマップ ──────────────────────────────────────────────────────────────
 export const SCENE_MAP_02: Record<string, SceneData> = {
-  ch1_s02_koma_title: scene_02_koma_title,
-  ch1_s02_narration: scene_02_narration,
-  ch1_s02_yu_intro: scene_02_yu_intro,
-  ch1_s02_collect_choice: scene_02_collect_choice,
-  ch1_s02_to_be_continued: scene_02_to_be_continued,
-  ch1_s02a_minori_start: scene_02a_minori_start,
-  ch1_s02a_question_choice: scene_02a_question_choice,
-  ch1_s02a_react_a1: scene_02a_react_a1,
-  ch1_s02a_react_a2: scene_02a_react_a2,
-  ch1_s02a_minori_more: scene_02a_minori_more,
-  ch1_s02b_sns_start: scene_02b_sns_start,
-  ch1_s02b_post_display: scene_02b_post_display,
-  ch1_s02b_yu_analysis: scene_02b_yu_analysis,
-  ch1_s02c_friend_start: scene_02c_friend_start,
-  ch1_s02c_yu_returns: scene_02c_yu_returns,
-  ch1_s02_end_common: scene_02_end_common,
-  ch1_s02_inner_voice: scene_02_inner_voice,
-  ch1_s02_journal: scene_02_journal,
+  // 新規ループ構造ノード
+  ch1_s02_koma_title:         scene_02_koma_title,
+  ch1_s02_narration:          scene_02_narration,
+  ch1_s02_yu_intro:           scene_02_yu_intro,
+  ch1_s02_route_hub:          scene_02_route_hub,
+  ch1_s02_route_a:            scene_02_route_a,
+  ch1_s02_route_a_return:     scene_02_route_a_return,
+  ch1_s02_route_b:            scene_02_route_b,
+  ch1_s02_route_b_return:     scene_02_route_b_return,
+  ch1_s02_route_c:            scene_02_route_c,
+  ch1_s02_route_c_return:     scene_02_route_c_return,
+  ch1_s02_final_deduction:    scene_02_final_deduction,
+  ch1_s02_deduction_reaction: scene_02_deduction_reaction,
+  ch1_s02_to_be_continued:    scene_02_to_be_continued,
+  // 旧ノード（互換スタブ）
+  ch1_s02_collect_choice:     scene_02_collect_choice,
+  ch1_s02a_minori_start:      scene_02a_minori_start,
+  ch1_s02a_question_choice:   scene_02a_question_choice,
+  ch1_s02a_react_a1:          scene_02a_react_a1,
+  ch1_s02a_react_a2:          scene_02a_react_a2,
+  ch1_s02a_minori_more:       scene_02a_minori_more,
+  ch1_s02b_sns_start:         scene_02b_sns_start,
+  ch1_s02b_post_display:      scene_02b_post_display,
+  ch1_s02c_investigation:     scene_02c_investigation,
+  ch1_s02c_inv_board:         scene_02c_inv_board,
+  ch1_s02c_inv_reaction:      scene_02c_inv_reaction,
+  ch1_s02c_friend_start:      scene_02c_friend_start,
+  ch1_s02c_yu_returns:        scene_02c_yu_returns,
+  ch1_s02_end_common:         scene_02_end_common,
+  ch1_s02_inner_voice:        scene_02_inner_voice,
+  ch1_s02_journal:            scene_02_journal,
 };

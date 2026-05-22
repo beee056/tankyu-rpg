@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGameStore } from "@/stores/gameStore";
@@ -15,6 +15,7 @@ import { CharacterSprite } from "@/components/CharacterSprite";
 import type { SpriteEntry } from "@/components/CharacterSprite";
 import { ChapterTitle } from "@/components/ChapterTitle";
 import { useAudio } from "@/hooks/useAudio";
+import { SnsPostCard } from "@/components/SnsPostCard";
 
 // ── キャラクター表示名 ──────────────────────────────────────────────────────
 const CHAR_NAMES: Record<CharacterId, string> = {
@@ -215,7 +216,7 @@ export default function PlayPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { updateStatus } = usePlayerStore();
-  const { saveScene, currentSceneKey, addCollectedEvidenceId } = useGameStore();
+  const { saveScene, currentSceneKey, addCollectedEvidenceId, completedRoutes, addCompletedRoute } = useGameStore();
   const { addEvidence, collectedEvidences } = useEvidenceStore();
 
   // ── Audio ──────────────────────────────────────────────────────────────────
@@ -248,6 +249,8 @@ export default function PlayPage() {
 
   // v2: evidence board open state
   const [evidenceBoardOpen, setEvidenceBoardOpen] = useState(false);
+  // v2.5: シーン側から ACTION_OPEN_BOARD でボードを開いた後、閉じると自動遷移する先
+  const [pendingAfterBoardClose, setPendingAfterBoardClose] = useState<string | null>(null);
 
   // v2: toast for newly collected evidence
   const [toastTitle, setToastTitle] = useState<string | null>(null);
@@ -261,6 +264,12 @@ export default function PlayPage() {
   const [chapterTitleText, setChapterTitleText] = useState<string | null>(null);
 
   const currentMsg: SceneMessage | undefined = scene?.messages?.[msgIndex];
+
+  // v2.5: highlights の統合参照（sns_post.highlights にもフォールバック）
+  const effectiveHighlights = useMemo(
+    () => currentMsg?.highlights ?? currentMsg?.sns_post?.highlights ?? [],
+    [currentMsg]
+  );
 
   // ── シーンキーをストアに保存（進捗永続化）──────────────────────────────
   useEffect(() => {
@@ -320,7 +329,9 @@ export default function PlayPage() {
     }
   }, [scene]);
 
-  // ── v2.5: fire direction effects on message change ────────────────────
+  // v2.5: hub自動遷移 — 全3ルート完了したらdeductionへ
+  // ※ navigateToNextScene の宣言後に移動（宣言前の参照エラー回避）
+  
   useEffect(() => {
     if (!currentMsg) return;
 
@@ -394,6 +405,11 @@ export default function PlayPage() {
         navigate("/dashboard");
       } else if (nextScene === "deduction_ch1") {
         navigate("/deduction/ch1");
+      } else if (nextScene.startsWith("ACTION_OPEN_BOARD")) {
+        // "ACTION_OPEN_BOARD::next_scene_id" 形式にも対応（将来拡張用）
+        const parts = nextScene.split("::");
+        if (parts[1]) setPendingAfterBoardClose(parts[1]);
+        setEvidenceBoardOpen(true);
       } else if (SCENE_MAP[nextScene]) {
         setSceneKey(nextScene);
         setMsgIndex(0);
@@ -401,6 +417,19 @@ export default function PlayPage() {
     },
     [navigate]
   );
+
+  // v2.5: hub自動遷移 — 全3ルート完了したらdeductionへ
+  const hubAutoAdvancedRef = useRef(false);
+  useEffect(() => {
+    if (sceneKey === "ch1_s02_route_hub" && completedRoutes.length >= 3 && !hubAutoAdvancedRef.current) {
+      hubAutoAdvancedRef.current = true;
+      navigateToNextScene("ch1_s02_final_deduction");
+    }
+    if (sceneKey !== "ch1_s02_route_hub") {
+      hubAutoAdvancedRef.current = false;
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- navigateToNextScene は useCallback で安定参照、依存に含めると無駄な再評価が発生
+  }, [sceneKey, completedRoutes]);
 
   // ── v2.5: "To be continued" ダッシュボード戻るボタン表示判定 ─────────
   const isToBeContinued = sceneKey === "ch1_s02_to_be_continued";
@@ -411,6 +440,14 @@ export default function PlayPage() {
     if (!typewriterDone) {
       setTypewriterDone(true);
       return;
+    }
+
+    // v2.5: force_highlight_tap — 全highlightsを収集するまで進行不可
+    if (currentMsg?.force_highlight_tap && effectiveHighlights.length > 0) {
+      const allCollected = effectiveHighlights.every(
+        (h) => collectedEvidences.some((e) => e.id === h.evidenceId)
+      );
+      if (!allCollected) return;
     }
 
     // SE on advance (click sound)
@@ -425,7 +462,7 @@ export default function PlayPage() {
     ) {
       navigateToNextScene(scene.next_scene);
     }
-  }, [scene, msgIndex, typewriterDone, navigateToNextScene, playSe]);
+  }, [scene, msgIndex, typewriterDone, navigateToNextScene, playSe, collectedEvidences, currentMsg, effectiveHighlights]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -445,8 +482,14 @@ export default function PlayPage() {
     }
     if (choice.flag_updates) {
       for (const fu of choice.flag_updates) {
-        if (fu.key.includes("QUESTION")) updateStatus({ question_power: fu.delta });
-        else if (fu.key.includes("EXPLORE")) updateStatus({ explore_power: fu.delta });
+        if (fu.key.startsWith("COMPLETE_ROUTE_")) {
+          // v2.5: ルート完了フラグ → completedRoutes に追加
+          addCompletedRoute(fu.key.replace("COMPLETE_ROUTE_", "").toLowerCase());
+        } else if (fu.key.includes("QUESTION")) {
+          updateStatus({ question_power: fu.delta });
+        } else if (fu.key.includes("EXPLORE")) {
+          updateStatus({ explore_power: fu.delta });
+        }
       }
     }
 
@@ -560,6 +603,11 @@ export default function PlayPage() {
           }}
         />
 
+        {/* ── v2.5: SNS風カードオーバーレイ ── */}
+        {currentMsg?.sns_post && (
+          <SnsPostCard data={currentMsg.sns_post} />
+        )}
+
         {/* ── キャラクター & セリフエリア (z-10) ── */}
         <div className={`relative z-10 flex flex-col flex-1 max-w-2xl mx-auto w-full px-3 sm:px-4 py-3 sm:py-4 overflow-y-auto transition-opacity duration-300 ${chapterTitleText ? "opacity-0 pointer-events-none" : "opacity-100"}`}>
           {/* キャラクター立ち絵スペース（既存の上端空白を維持しつつ新レイヤーに委譲） */}
@@ -669,13 +717,33 @@ export default function PlayPage() {
                   !isChoice &&
                   !isCorkBoard && (
                     <div className="mt-3 flex justify-end">
-                      <span
-                        className="text-yoake-warm text-xs animate-pulse-soft"
-                        style={{ fontFamily: "'DotGothic16', monospace" }}
-                      >
-                        <span className="sm:hidden">タップ で次へ ▶</span>
-                        <span className="hidden sm:inline">クリック / Enter で次へ ▶</span>
-                      </span>
+                      {/* v2.5: force_highlight_tap が有効で未収集がある場合、ヒントを表示 */}
+                      {(() => {
+                        if (currentMsg?.force_highlight_tap && effectiveHighlights.length > 0) {
+                          const untapped = effectiveHighlights.filter(
+                            (h) => !collectedEvidences.some((e) => e.id === h.evidenceId)
+                          ).length;
+                          if (untapped > 0) {
+                            return (
+                              <span
+                                className="text-xs animate-pulse-soft"
+                                style={{ fontFamily: "'DotGothic16', monospace", color: "#C9805E" }}
+                              >
+                                気になる言葉をタップしよう（あと{untapped}か所）
+                              </span>
+                            );
+                          }
+                        }
+                        return (
+                          <span
+                            className="text-yoake-warm text-xs animate-pulse-soft"
+                            style={{ fontFamily: "'DotGothic16', monospace" }}
+                          >
+                            <span className="sm:hidden">タップ で次へ ▶</span>
+                            <span className="hidden sm:inline">クリック / Enter で次へ ▶</span>
+                          </span>
+                        );
+                      })()}
                     </div>
                   )}
               </motion.div>
@@ -689,7 +757,14 @@ export default function PlayPage() {
               animate={{ opacity: 1, y: 0 }}
               className="space-y-2 mt-1"
             >
-              {scene.choices?.map((choice) => {
+              {scene.choices
+                // v2.5: completed_route_key — 完了済みルートの選択肢を非表示
+                ?.filter(
+                  (choice) =>
+                    !choice.completed_route_key ||
+                    !completedRoutes.includes(choice.completed_route_key)
+                )
+                .map((choice) => {
                 // v2: requiredEvidence check — disable button if evidence is missing
                 const missingRequired =
                   choice.requiredEvidence && choice.requiredEvidence.length > 0
@@ -816,7 +891,14 @@ export default function PlayPage() {
       {/* ── v2: 証拠ボードモーダル ── */}
       <EvidenceBoardModal
         isOpen={evidenceBoardOpen}
-        onClose={() => setEvidenceBoardOpen(false)}
+        onClose={() => {
+          setEvidenceBoardOpen(false);
+          if (pendingAfterBoardClose) {
+            const dest = pendingAfterBoardClose;
+            setPendingAfterBoardClose(null);
+            navigateToNextScene(dest);
+          }
+        }}
       />
     </main>
   );
