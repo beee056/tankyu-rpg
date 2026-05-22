@@ -29,6 +29,14 @@ export default function DashboardPage() {
   return (
     <main className="min-h-screen bg-yoake-bg paper-texture">
 
+      {/* ── デモモードバナー ── */}
+      <div
+        className="w-full text-center text-xs font-serif py-1.5 px-3"
+        style={{ background: "#C9805E", color: "#F5EDE0", letterSpacing: "0.05em" }}
+      >
+        デモ版 — 進捗は保存されません（Demo mode · no save）
+      </div>
+
       {/* ── ヘッダー ── */}
       <header
         className="border-b border-yoake-border px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between bg-yoake-bg-card"
@@ -39,10 +47,10 @@ export default function DashboardPage() {
         </span>
         <nav className="flex gap-3 sm:gap-5">
           <button
-            onClick={() => navigate("/login")}
+            onClick={() => navigate("/dashboard")}
             className="text-yoake-text-muted hover:text-yoake-text-secondary text-xs transition-colors font-serif"
           >
-            ログアウト
+            トップ
           </button>
         </nav>
       </header>
