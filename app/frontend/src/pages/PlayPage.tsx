@@ -300,6 +300,11 @@ export default function PlayPage() {
     setTypewriterDone(false);
   }, [sceneKey]);
 
+  // ── v2.5: シーン遷移時は立ち絵を全クリア（前シーンのキャラ残留防止） ─────
+  useEffect(() => {
+    setSprites([]);
+  }, [sceneKey]);
+
   useEffect(() => {
     setTypewriterDone(false);
   }, [msgIndex]);
