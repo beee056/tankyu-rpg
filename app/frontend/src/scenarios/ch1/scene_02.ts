@@ -19,12 +19,6 @@ export const scene_02_koma_title: SceneData = {
       background: "#0E0A08",
       bgm: "duck 15 400ms",
       chapter_title: "コマ 2 — 最初の一日",
-      character_action: {
-        actor: "all",
-        action: "fadeOut",
-        expression: undefined,
-        position: undefined,
-      },
       text_pace: { punctuation_wait_ms: 0, line_pause_ms: 0 },
     },
   ],
@@ -41,12 +35,6 @@ export const scene_02_narration: SceneData = {
       text: "翌朝、いつもの通学路で、自分の足が一瞬止まった。",
       background: "/assets/backgrounds/bg_slope_dusk.png",
       bgm: "ramp 38 1000ms",
-      character_action: {
-        actor: "all",
-        action: "fadeOut",
-        expression: undefined,
-        position: undefined,
-      },
       text_pace: { punctuation_wait_ms: 180, line_pause_ms: 600 },
     },
     {
@@ -70,12 +58,6 @@ export const scene_02_yu_intro: SceneData = {
     {
       text: "ポケットの中で、スマホが震えた。\n灰島さんからのメッセージだった。",
       background: "/assets/backgrounds/bg_office_interior.png",
-      character_action: {
-        actor: "all",
-        action: "fadeOut",
-        expression: undefined,
-        position: undefined,
-      },
       text_pace: { punctuation_wait_ms: 160, line_pause_ms: 600 },
     },
     {
