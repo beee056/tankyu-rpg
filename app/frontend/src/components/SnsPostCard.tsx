@@ -21,10 +21,16 @@ export function SnsPostCard({ data }: SnsPostCardProps) {
 
   return (
     // 半透明暗色オーバーレイで本編と区別
+    // 全highlights収集後はクリックを親(advanceMessage)へ伝搬させて「次へ」進めるようにする
     <div
       className="fixed inset-0 z-30 flex items-center justify-center"
-      style={{ background: "rgba(8, 8, 20, 0.72)" }}
-      onClick={(e) => e.stopPropagation()}
+      style={{ background: "rgba(8, 8, 20, 0.72)", cursor: remaining === 0 ? "pointer" : "default" }}
+      onClick={(e) => {
+        if (remaining > 0) {
+          e.stopPropagation();
+        }
+        // remaining === 0 のときは伝搬を許可してadvanceMessageに進ませる
+      }}
     >
       {/* カード本体 */}
       <div
