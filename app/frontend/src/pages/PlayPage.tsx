@@ -5,6 +5,7 @@ import { useGameStore } from "@/stores/gameStore";
 import { usePlayerStore } from "@/stores/playerStore";
 import { useEvidenceStore } from "@/stores/evidenceStore";
 import { api } from "@/lib/api";
+import { resolveAsset } from "@/lib/assets";
 import { CHAPTER1_SCENE_MAP as SCENE_MAP, CHAPTER1_START_SCENE } from "@/scenarios/ch1";
 import type { SceneData, SceneMessage, CharacterId } from "shared-types";
 import { EvidenceBadge } from "@/components/EvidenceBadge";
@@ -299,7 +300,7 @@ export default function PlayPage() {
         setToastTitle(newest.title);
         toastTimerRef.current = setTimeout(() => setToastTitle(null), 2500);
         // Play SE on evidence collect
-        playSe("/assets/audio/se_evidence.mp3");
+        playSe(resolveAsset("/assets/audio/se_evidence.mp3"));
       }
     }
     prevEvidenceCountRef.current = current;
@@ -355,7 +356,7 @@ export default function PlayPage() {
         // Extract track name if directive starts with "start "
         const startMatch = bgmDir.match(/^start\s+(\S+)/);
         if (startMatch) {
-          setBgm(`/assets/audio/${startMatch[1]}.mp3`);
+          setBgm(resolveAsset(`/assets/audio/${startMatch[1]}.mp3`));
         } else if (/^fadeOut/i.test(bgmDir)) {
           setBgm(null);
         }
@@ -366,7 +367,7 @@ export default function PlayPage() {
     // SE — resolve name to path
     if (currentMsg.se) {
       const seVal = currentMsg.se;
-      const sePath = seVal.startsWith("/") ? seVal : `/assets/audio/${seVal}.mp3`;
+      const sePath = resolveAsset(seVal.startsWith("/") ? seVal : `/assets/audio/${seVal}.mp3`);
       playSe(sePath);
     }
 
@@ -451,7 +452,7 @@ export default function PlayPage() {
     }
 
     // SE on advance (click sound)
-    playSe("/assets/audio/se_click.mp3");
+    playSe(resolveAsset("/assets/audio/se_click.mp3"));
 
     const msgs = scene.messages ?? [];
     if (msgIndex < msgs.length - 1) {
@@ -501,7 +502,7 @@ export default function PlayPage() {
       }
     }
 
-    playSe("/assets/audio/se_click.mp3");
+    playSe(resolveAsset("/assets/audio/se_click.mp3"));
 
     api.post("/api/choices", {
       scene_id: scene?.scene_id,
@@ -584,7 +585,7 @@ export default function PlayPage() {
         }}
       >
         {/* ── v2.5: 背景レイヤー (z-0 ~ z-[1]) ── */}
-        <SceneBackground src={currentBg} tint={bgTint} />
+        <SceneBackground src={currentBg ? resolveAsset(currentBg) : null} tint={bgTint} />
 
         {/* ── v2.5: 立ち絵レイヤー (z-[5]) — 話者1人モード: 最後に登場したキャラのみ ── */}
         <CharacterSprite sprites={sprites.slice(-1)} />

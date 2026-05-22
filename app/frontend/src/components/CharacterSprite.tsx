@@ -12,16 +12,17 @@
  *   none     → instant appear
  */
 import { AnimatePresence, motion } from "framer-motion";
+import { resolveAsset } from "@/lib/assets";
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Character image map (v2.5: yu uses bust-up version)
 // ──────────────────────────────────────────────────────────────────────────────
 export const CHAR_IMAGE: Record<string, string> = {
-  yu:      "/assets/characters/yu/yu_01_neutral.png",
-  chifuka: "/assets/characters/chifuka/chifuka_01_neutral.png",
-  akira:   "/assets/characters/midou/midou_01_neutral_front.png",
-  minori:  "/assets/characters/minori/minori_01_neutral.png",
-  ren:     "/assets/characters/ren/ren_01_neutral.png",
+  yu:      resolveAsset("/assets/characters/yu/yu_01_neutral.png"),
+  chifuka: resolveAsset("/assets/characters/chifuka/chifuka_01_neutral.png"),
+  akira:   resolveAsset("/assets/characters/midou/midou_01_neutral_front.png"),
+  minori:  resolveAsset("/assets/characters/minori/minori_01_neutral.png"),
+  ren:     resolveAsset("/assets/characters/ren/ren_01_neutral.png"),
 };
 
 export type SpritePosition = "left" | "center" | "right";
@@ -87,7 +88,10 @@ export function CharacterSprite({ sprites }: CharacterSpriteProps) {
     <div className="absolute inset-0 z-[5] pointer-events-none overflow-hidden">
       <AnimatePresence>
         {arranged.map((sprite, idx) => {
-          const imgSrc = sprite.src ?? CHAR_IMAGE[sprite.actor];
+          // sprite.src overrides come from scenario data as raw "/assets/..." paths → resolve them;
+          // CHAR_IMAGE values are already resolved via resolveAsset at module init.
+          const resolvedSrc = sprite.src ? resolveAsset(sprite.src) : CHAR_IMAGE[sprite.actor];
+          const imgSrc = resolvedSrc;
           if (!imgSrc) return null;
           const action: SpriteAction = sprite.action ?? "fadeIn";
           const posStyle = POSITION_STYLE[sprite.position];

@@ -9,8 +9,9 @@ import DeductionPage from "@/pages/DeductionPage";
 import EndingPage from "@/pages/EndingPage";
 
 export default function App() {
+  const basename = import.meta.env.BASE_URL.replace(/\/$/, "") || "";
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={basename}>
       <Routes>
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route path="/login" element={<LoginPage />} />

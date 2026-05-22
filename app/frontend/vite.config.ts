@@ -3,7 +3,11 @@ import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 import path from "path";
 
+const isGitHubPages = process.env.GITHUB_PAGES === "true";
+const base = isGitHubPages ? "/tankyu-rpg/" : "/";
+
 export default defineConfig({
+  base,
   plugins: [
     react(),
     VitePWA({
@@ -16,7 +20,7 @@ export default defineConfig({
         theme_color: "#F5EDE0",
         background_color: "#F5EDE0",
         display: "standalone",
-        start_url: "/play",
+        start_url: `${base}play`,
         icons: [
           {
             src: "/icons/pwa-192x192.png",

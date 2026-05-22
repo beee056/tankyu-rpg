@@ -3,6 +3,7 @@ import { useGameStore } from "@/stores/gameStore";
 import { useState } from "react";
 import OfficeMapHotspot from "@/components/OfficeMapHotspot";
 import EvidenceBoardModal from "@/components/EvidenceBoardModal";
+import { resolveAsset } from "@/lib/assets";
 
 const TOTAL_SCENES = 8;
 
@@ -83,7 +84,7 @@ export default function DashboardPage() {
               <div className="relative w-full" style={{ aspectRatio: "16/9" }}>
                 {/* 背景画像 */}
                 <img
-                  src="/assets/dashboard/bg_office_map.png"
+                  src={resolveAsset("/assets/dashboard/bg_office_map.png")}
                   alt="ヨアケ探偵社 事務所マップ"
                   className="absolute inset-0 w-full h-full object-cover"
                   onError={(e) => {
