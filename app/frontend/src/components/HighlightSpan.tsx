@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useEvidenceStore } from "@/stores/evidenceStore";
 import { useGameStore } from "@/stores/gameStore";
 import type { HighlightDef } from "shared-types";
@@ -11,7 +10,6 @@ interface HighlightSpanProps {
 export function HighlightSpan({ highlightDef, word }: HighlightSpanProps) {
   const { collectedEvidences, addEvidence } = useEvidenceStore();
   const { addCollectedEvidenceId } = useGameStore();
-  const [justCollected, setJustCollected] = useState(false);
 
   const isCollected = collectedEvidences.some((e) => e.id === highlightDef.evidenceId);
 
@@ -20,19 +18,16 @@ export function HighlightSpan({ highlightDef, word }: HighlightSpanProps) {
     if (isCollected) return;
     addEvidence(highlightDef.evidenceId);
     addCollectedEvidenceId(highlightDef.evidenceId);
-    setJustCollected(true);
-    setTimeout(() => setJustCollected(false), 2000);
   }
 
   if (isCollected) {
+    // 取得済み: 色を薄めるのみ。追加要素なし → レイアウト変動ゼロ
     return (
       <span
-        className="transition-all duration-300"
-        style={{ color: "#8B9DAE", opacity: 0.85 }}
+        style={{ color: "#7a8fa6", opacity: 0.7 }}
         title={highlightDef.tooltip ?? "取得済み"}
       >
         {word}
-        <span className="text-xs ml-0.5" style={{ color: "#6B7C5A" }}>✓</span>
       </span>
     );
   }
@@ -44,13 +39,10 @@ export function HighlightSpan({ highlightDef, word }: HighlightSpanProps) {
       onClick={handleClick}
       onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && handleClick(e as unknown as React.MouseEvent)}
       title={highlightDef.tooltip}
-      className="cursor-pointer transition-all duration-300 hover:opacity-80 active:scale-95 inline-block"
+      className="highlight-tap"
       style={{
         borderBottom: "2px solid #C9805E",
-        color: justCollected ? "#C9805E" : "#E8B4A0",
         paddingBottom: "1px",
-        opacity: justCollected ? 0.7 : 1,
-        transition: "color 0.3s ease, opacity 0.3s ease",
       }}
     >
       {word}

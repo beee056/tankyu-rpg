@@ -1,3 +1,4 @@
+import { useEvidenceStore } from "@/stores/evidenceStore";
 import type { SnsPostData } from "shared-types";
 import { renderWithHighlights } from "@/components/HighlightSpan";
 
@@ -7,9 +8,16 @@ interface SnsPostCardProps {
 
 export function SnsPostCard({ data }: SnsPostCardProps) {
   const { username, timestamp, body, highlights } = data;
+  const { collectedEvidences } = useEvidenceStore();
 
   // SNS投稿は全文即時表示（タイプライター不要）
   const nodes = renderWithHighlights(body, highlights, body.length);
+
+  const totalHighlights = highlights?.length ?? 0;
+  const collectedCount = highlights?.filter((h) =>
+    collectedEvidences.some((e) => e.id === h.evidenceId)
+  ).length ?? 0;
+  const remaining = totalHighlights - collectedCount;
 
   return (
     // 半透明暗色オーバーレイで本編と区別
@@ -109,12 +117,33 @@ export function SnsPostCard({ data }: SnsPostCardProps) {
           </div>
 
           {/* ハイライト収集ヒント */}
-          {highlights && highlights.length > 0 && (
-            <div
-              className="mt-3 text-xs text-center"
-              style={{ color: "#C9805E", opacity: 0.8 }}
-            >
-              気になる言葉をタップしよう
+          {totalHighlights > 0 && (
+            <div className="mt-3 flex items-center justify-center gap-2">
+              {remaining > 0 ? (
+                <>
+                  {/* パルスインジケーター */}
+                  <span
+                    className="inline-block w-2 h-2 rounded-full shrink-0"
+                    style={{
+                      background: "#C9805E",
+                      animation: "highlight-pulse 1.4s ease-in-out infinite",
+                    }}
+                  />
+                  <span
+                    className="text-xs"
+                    style={{ color: "#C9805E" }}
+                  >
+                    気になる言葉をタップしよう（あと{remaining}か所）
+                  </span>
+                </>
+              ) : (
+                <span
+                  className="text-xs"
+                  style={{ color: "#6B9F6A", opacity: 0.9 }}
+                >
+                  すべての手がかりを取得した
+                </span>
+              )}
             </div>
           )}
         </div>

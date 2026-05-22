@@ -63,6 +63,29 @@
   }
 }
 
+/* ── SnsPostCard: ハイライトパルスアニメーション ───────────────────────────── */
+@keyframes highlight-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.4; transform: scale(1.4); }
+}
+
+/* ── HighlightSpan: タップ可能な手がかりワード ────────────────────────────── */
+.highlight-tap {
+  display: inline;
+  background-color: rgba(201, 128, 94, 0.12);
+  border-radius: 2px;
+  color: #E8B4A0;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.highlight-tap:hover {
+  background-color: rgba(201, 128, 94, 0.28);
+  color: #f0c4ae;
+}
+.highlight-tap:active {
+  background-color: rgba(201, 128, 94, 0.45);
+}
+
 /* テキストエンジン用スタイル */
 .text-cursor::after {
   content: "▋";
