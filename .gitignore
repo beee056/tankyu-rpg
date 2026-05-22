@@ -1,0 +1,34 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build artifacts
+dist/
+build/
+.cache/
+*.tsbuildinfo
+
+# Lockfiles in root (workspace uses app/ pnpm-lock.yaml)
+/package-lock.json
+/package.json
+
+# Dev test scripts (created ad-hoc by workers)
+/test_play.js
+/test_*.js
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env
+.env
+.env.local
+.dev.vars
+
+# Playwright (installed in worker sessions, not part of project)
+playwright-report/
+test-results/
