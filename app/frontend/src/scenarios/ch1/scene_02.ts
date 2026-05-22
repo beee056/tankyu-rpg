@@ -496,24 +496,192 @@ export const scene_02_final_deduction: SceneData = {
     {
       key: "A",
       label: "透は何かを抱え、家でも学校でも話せていない。保健室の先生だけが気づいていたかも",
-      next_scene: "ch1_s02_deduction_reaction",
+      next_scene: "ch1_s02_react_I",
     },
     {
       key: "B",
       label: "夜中の車、放課後の約束、深夜の投稿。透は何度か「どこかへ行こうとしていた」",
-      next_scene: "ch1_s02_deduction_reaction",
+      next_scene: "ch1_s02_react_II",
     },
     {
       key: "C",
       label: "家族と学校が透の情報を隠している。透は「見つからない場所」にすでに居る",
-      next_scene: "ch1_s02_deduction_reaction",
+      next_scene: "ch1_s02_react_III",
     },
     {
       key: "D",
       label: "透は学校に来るつもりだったのに、誰かに止められた。その誰かは家の中にいる",
-      next_scene: "ch1_s02_deduction_reaction",
+      next_scene: "ch1_s02_react_IV",
     },
   ],
+};
+
+// ═══════════════════════════════════════════════════════════════════════
+// 仮説別反応ノード
+// ═══════════════════════════════════════════════════════════════════════
+
+// 仮説I: 保健室の先生が逃げ場だった
+export const scene_02_react_I: SceneData = {
+  scene_id: "ch1_s02_react_I",
+  type: "dialogue",
+  messages: [
+    {
+      character: "yu",
+      text: "保健室の先生か。透の唯一の逃げ場だったのかも",
+      character_action: {
+        actor: "yu",
+        action: "slideIn",
+        position: "center",
+      },
+      background: "/assets/backgrounds/bg_office_interior.png",
+      text_pace: { punctuation_wait_ms: 160, line_pause_ms: 700 },
+    },
+    {
+      character: "akira",
+      text: "明日、保健室から当たれ。守ってきた人間にしか出せない情報がある",
+      character_action: {
+        actor: "akira",
+        action: "slideIn",
+        position: "center",
+      },
+      text_pace: { punctuation_wait_ms: 220, line_pause_ms: 800 },
+    },
+    {
+      text: "（透は誰にも見つかりたくなかった。でも保健室にだけは行っていた）",
+      character_action: { actor: "all", action: "fadeOut" },
+      text_pace: { punctuation_wait_ms: 200, line_pause_ms: 900 },
+    },
+    {
+      text: "（明日、私はこの仮説を持って動く）",
+      background: "#0E0A08",
+      bgm: "fadeOut 2500ms",
+      text_pace: { punctuation_wait_ms: 200, line_pause_ms: 1000 },
+    },
+  ],
+  next_scene: "ch1_s02_to_be_continued",
+};
+
+// 仮説II: 何度か「どこかへ行こうとしていた」
+export const scene_02_react_II: SceneData = {
+  scene_id: "ch1_s02_react_II",
+  type: "dialogue",
+  messages: [
+    {
+      character: "yu",
+      text: "何度か行こうとしてた、ってことだよね。それを誰かに止められた",
+      character_action: {
+        actor: "yu",
+        action: "slideIn",
+        position: "center",
+      },
+      background: "/assets/backgrounds/bg_office_interior.png",
+      text_pace: { punctuation_wait_ms: 160, line_pause_ms: 700 },
+    },
+    {
+      character: "akira",
+      text: "透は逃げる側じゃない。連れて行かれる側でもない。どこかへ行きたかった",
+      character_action: {
+        actor: "akira",
+        action: "slideIn",
+        position: "center",
+      },
+      text_pace: { punctuation_wait_ms: 220, line_pause_ms: 800 },
+    },
+    {
+      text: "（透は、私には言わずに、どこかへ行こうとしていた）",
+      character_action: { actor: "all", action: "fadeOut" },
+      text_pace: { punctuation_wait_ms: 200, line_pause_ms: 900 },
+    },
+    {
+      text: "（明日、私はこの仮説を持って動く）",
+      background: "#0E0A08",
+      bgm: "fadeOut 2500ms",
+      text_pace: { punctuation_wait_ms: 200, line_pause_ms: 1000 },
+    },
+  ],
+  next_scene: "ch1_s02_to_be_continued",
+};
+
+// 仮説III: 家族と学校が隠している・場所はすでにある
+export const scene_02_react_III: SceneData = {
+  scene_id: "ch1_s02_react_III",
+  type: "dialogue",
+  messages: [
+    {
+      character: "yu",
+      text: "家族と学校が口を揃えてる。これ、たまたまじゃない",
+      character_action: {
+        actor: "yu",
+        action: "slideIn",
+        position: "center",
+      },
+      background: "/assets/backgrounds/bg_office_interior.png",
+      text_pace: { punctuation_wait_ms: 160, line_pause_ms: 700 },
+    },
+    {
+      character: "akira",
+      text: "大人の沈黙は、子供の悲鳴より重い。透はもう、場所を見つけたかもしれん",
+      character_action: {
+        actor: "akira",
+        action: "slideIn",
+        position: "center",
+      },
+      text_pace: { punctuation_wait_ms: 220, line_pause_ms: 800 },
+    },
+    {
+      text: "（透はもう、私の手の届かない場所にいる。それでも、追わないと）",
+      character_action: { actor: "all", action: "fadeOut" },
+      text_pace: { punctuation_wait_ms: 200, line_pause_ms: 900 },
+    },
+    {
+      text: "（明日、私はこの仮説を持って動く）",
+      background: "#0E0A08",
+      bgm: "fadeOut 2500ms",
+      text_pace: { punctuation_wait_ms: 200, line_pause_ms: 1000 },
+    },
+  ],
+  next_scene: "ch1_s02_to_be_continued",
+};
+
+// 仮説IV: 学校に来るつもりだったのに、家の中で止められた
+export const scene_02_react_IV: SceneData = {
+  scene_id: "ch1_s02_react_IV",
+  type: "dialogue",
+  messages: [
+    {
+      character: "yu",
+      text: "学校に来るつもりだった。でも家から出られなかった",
+      character_action: {
+        actor: "yu",
+        action: "slideIn",
+        position: "center",
+      },
+      background: "/assets/backgrounds/bg_office_interior.png",
+      text_pace: { punctuation_wait_ms: 160, line_pause_ms: 700 },
+    },
+    {
+      character: "akira",
+      text: "保健室の先生は知ってる。透が、行きたいと思っていたことを",
+      character_action: {
+        actor: "akira",
+        action: "slideIn",
+        position: "center",
+      },
+      text_pace: { punctuation_wait_ms: 220, line_pause_ms: 800 },
+    },
+    {
+      text: "（透は逃げたんじゃない。連れて行かれたんでもない。止められたんだ、家の中で）",
+      character_action: { actor: "all", action: "fadeOut" },
+      text_pace: { punctuation_wait_ms: 200, line_pause_ms: 900 },
+    },
+    {
+      text: "（明日、私はこの仮説を持って動く）",
+      background: "#0E0A08",
+      bgm: "fadeOut 2500ms",
+      text_pace: { punctuation_wait_ms: 200, line_pause_ms: 1000 },
+    },
+  ],
+  next_scene: "ch1_s02_to_be_continued",
 };
 
 // 仮説選択後の灰島反応
@@ -612,6 +780,10 @@ export const SCENE_MAP_02: Record<string, SceneData> = {
   ch1_s02_route_c:            scene_02_route_c,
   ch1_s02_route_c_return:     scene_02_route_c_return,
   ch1_s02_final_deduction:    scene_02_final_deduction,
+  ch1_s02_react_I:            scene_02_react_I,
+  ch1_s02_react_II:           scene_02_react_II,
+  ch1_s02_react_III:          scene_02_react_III,
+  ch1_s02_react_IV:           scene_02_react_IV,
   ch1_s02_deduction_reaction: scene_02_deduction_reaction,
   ch1_s02_to_be_continued:    scene_02_to_be_continued,
   // 旧ノード（互換スタブ）
