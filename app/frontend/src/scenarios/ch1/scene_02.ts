@@ -396,7 +396,9 @@ export const scene_02_route_c: SceneData = {
       sns_post: {
         username: "とおる",
         timestamp: "2025/10/14 23:47",
-        body: "明日も学校がある。そんなことよりも、誰にも見つからない場所がほしい。\nたぶん、わたし以外には伝わらないけれど",
+        // NOTE: "23:47" を body 末尾に含めることで renderWithHighlights の indexOf マッチを成立させている。
+        // 将来課題: (1) highlights 配列は body 内の出現順を守る運用で順序依存を管理。(2) renderWithHighlights の body外 word 対応は別タスクで汎用化検討。
+        body: "明日も学校がある。そんなことよりも、誰にも見つからない場所がほしい。\nたぶん、わたし以外には伝わらないけれど — 23:47",
         highlights: [
           {
             word: "明日も学校がある",
