@@ -116,7 +116,7 @@ export const scene_02_yu_intro: SceneData = {
       character: "akira",
       text: "——十分だ",
       pose: "expressionless",
-      bgm: "duck 20 800ms",
+      bgm: "start bgm_tension",
       character_action: {
         actor: "akira",
         action: "slideIn",
@@ -141,7 +141,7 @@ export const scene_02_yu_intro: SceneData = {
     {
       text: "御堂さんは、それだけ言って奥に戻った。",
       character_action: { actor: "akira", action: "fadeOut" },
-      bgm: "ramp 40 1200ms",
+      bgm: "start bgm_main",
       text_pace: { punctuation_wait_ms: 180, line_pause_ms: 700 },
     },
     {
@@ -544,6 +544,7 @@ export const scene_02_react_I: SceneData = {
         action: "slideIn",
         position: "center",
       },
+      bgm: "start bgm_tension",
       text_pace: { punctuation_wait_ms: 220, line_pause_ms: 800 },
     },
     {
@@ -585,6 +586,7 @@ export const scene_02_react_II: SceneData = {
         action: "slideIn",
         position: "center",
       },
+      bgm: "start bgm_tension",
       text_pace: { punctuation_wait_ms: 220, line_pause_ms: 800 },
     },
     {
@@ -626,6 +628,7 @@ export const scene_02_react_III: SceneData = {
         action: "slideIn",
         position: "center",
       },
+      bgm: "start bgm_tension",
       text_pace: { punctuation_wait_ms: 220, line_pause_ms: 800 },
     },
     {
@@ -667,6 +670,7 @@ export const scene_02_react_IV: SceneData = {
         action: "slideIn",
         position: "center",
       },
+      bgm: "start bgm_tension",
       text_pace: { punctuation_wait_ms: 220, line_pause_ms: 800 },
     },
     {
