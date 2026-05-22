@@ -1,0 +1,1 @@
+if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/tankyu-rpg/sw.js', { scope: '/tankyu-rpg/' })})}
